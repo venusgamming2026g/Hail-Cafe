@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="night">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#090B0E">
+<meta name="description" content="المنيو الرسمي لهيل كافيه — إربد سيتي سنتر. اطلب من طاولتك مباشرة.">
+<title>هيل كافيه — المنيو</title>
+<link rel="icon" href="assets/img/favicon.svg">
+<link rel="stylesheet" href="assets/css/theme.css">
+<link rel="stylesheet" href="assets/css/app.css">
+<style>
+  /* ── واجهة الزبون: لمسات خاصة ── */
+  .hero {
+    position: relative; padding: var(--s6) var(--s4) var(--s8); overflow: hidden;
+    border-radius: 0 0 var(--r-2xl) var(--r-2xl); margin-bottom: var(--s4);
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0; z-index: -1;
+    background:
+      radial-gradient(120% 90% at 78% 0%, rgba(210,169,97,.22), transparent 62%),
+      radial-gradient(90% 80% at 12% 8%, rgba(227,59,36,.16), transparent 60%),
+      var(--grad-ink);
+    border-radius: inherit; border: 1px solid var(--hairline); border-top: 0;
+  }
+  .hatch {
+    width: 132px; height: 132px; border-radius: 50%; overflow: hidden; flex: none;
+    border: 2px solid rgba(210,169,97,.4); box-shadow: 0 18px 44px rgba(0,0,0,.5), inset 0 0 0 6px rgba(255,255,255,.05);
+    position: relative;
+  }
+  .hatch img { width: 100%; height: 100%; object-fit: cover; }
+  .hatch::after {
+    content: ''; position: absolute; inset: 0; border-radius: 50%;
+    background: linear-gradient(200deg, rgba(255,255,255,.22), transparent 46%);
+  }
+  .seam { display: flex; align-items: center; gap: 8px; }
+  .seam i { width: 9px; height: 9px; background: var(--gold-500); transform: rotate(45deg); border-radius: 2px; }
+  .seam span { height: 1px; flex: 1; background: linear-gradient(90deg, transparent, var(--gold-600), transparent); }
+
+  .searchbox { position: relative; }
+  .searchbox svg { position: absolute; inset-inline-start: 14px; inset-block-start: 50%; transform: translateY(-50%);
+    width: 18px; height: 18px; color: var(--fg-faint); pointer-events: none; }
+  .searchbox .field { padding-inline-start: 44px; }
+
+  .catrail-wrap { position: sticky; top: var(--header-h); z-index: 50;
+    background: color-mix(in srgb, var(--bg) 84%, transparent);
+    backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    border-bottom: 1px solid var(--hairline); }
+
+  .feat { display: flex; gap: var(--s3); overflow-x: auto; padding: 2px var(--s4) var(--s4); scrollbar-width: none;
+    scroll-snap-type: x mandatory; }
+  .feat::-webkit-scrollbar { display: none; }
+  .feat > * { flex: none; width: 264px; scroll-snap-align: start; }
+
+  .sec-head { display: flex; align-items: center; gap: var(--s3); padding: var(--s6) var(--s4) var(--s3); }
+  .sec-head h2 { font-size: 1.25rem; }
+  .sec-head .line { flex: 1; height: 1px; background: linear-gradient(90deg, var(--hairline-2), transparent); }
+
+  .detail-shot { aspect-ratio: 16/10; overflow: hidden; position: relative; }
+  .detail-shot img { width: 100%; height: 100%; object-fit: cover; }
+  .detail-shot::after { content: ''; position: absolute; inset: 0;
+    background: linear-gradient(180deg, transparent 46%, var(--ink-900)); }
+
+  .opt { display: flex; align-items: center; gap: 10px; padding: 11px var(--s3); border-radius: var(--r-md);
+    border: 1px solid var(--hairline); cursor: pointer; transition: all var(--t-base) var(--e-out); }
+  .opt:hover { border-color: var(--hairline-2); background: rgba(255,255,255,.04); }
+  .opt[aria-checked='true'] { border-color: var(--gold-500); background: rgba(210,169,97,.1); }
+  .opt .tick { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--hairline-2); flex: none;
+    display: grid; place-items: center; transition: all var(--t-base) var(--e-spring); }
+  .opt[aria-checked='true'] .tick { border-color: var(--gold-500); background: var(--gold-500); color: #14100A; }
+  .opt .tick svg { width: 12px; height: 12px; opacity: 0; transition: opacity var(--t-fast); }
+  .opt[aria-checked='true'] .tick svg { opacity: 1; }
+
+  .svc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s2); }
+  .svc {
+    display: flex; flex-direction: column; align-items: center; gap: 7px; padding: var(--s4) var(--s2);
+    border-radius: var(--r-md); border: 1px solid var(--hairline); background: var(--surface);
+    font-size: .74rem; font-weight: 600; text-align: center; transition: all var(--t-base) var(--e-spring);
+  }
+  .svc:hover { transform: translateY(-2px); border-color: rgba(210,169,97,.4); }
+  .svc:active { transform: scale(.95); }
+  .svc svg { width: 21px; height: 21px; color: var(--gold-400); }
+  .svc[data-sent='1'] { border-color: rgba(46,158,126,.5); background: rgba(46,158,126,.1); }
+  .svc[data-sent='1'] svg { color: var(--ok-400); }
+
+  @media (max-width: 560px) { .hatch { width: 96px; height: 96px; } }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div id="bar"></div>
+
+  <main class="page" id="app">
+    <div class="empty"><div class="ic"></div><h3>جارٍ تحضير المنيو…</h3></div>
+  </main>
+
+  <div id="cartbar"></div>
+</div>
+
+<script type="module" src="assets/js/app/customer.js"></script>
+<noscript>
+  <div style="padding:24px;text-align:center">
+    هذا المنيو يحتاج تفعيل JavaScript في المتصفح.
+    للاطلاع على المنيو الرسمي كملف، افتح <a href="../public/hail-cafe-menu-official.pdf">ملف المنيو</a>.
+  </div>
+</noscript>
+</body>
+</html>
