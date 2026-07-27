@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="night">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#090B0E">
+<meta name="description" content="HAIL OS — النظام الداخلي المتكامل لمطعم وكافيه هيل: منيو QR، مطبخ، صالة، كاشير، وإدارة.">
+<title>HAIL OS — نظام هيل كافيه</title>
+<link rel="icon" href="assets/img/favicon.svg">
+<link rel="stylesheet" href="assets/css/theme.css">
+<link rel="stylesheet" href="assets/css/app.css">
+<style>
+  .cover { position: relative; padding: var(--s12) var(--s5) var(--s10); text-align: center; overflow: hidden; }
+  .cover .crest {
+    width: 96px; height: 96px; border-radius: 30px; margin: 0 auto var(--s5); display: grid; place-items: center;
+    background: var(--grad-gold); color: #14100A; font-family: var(--font-display); font-weight: 800; font-size: 1.7rem;
+    box-shadow: 0 22px 60px rgba(210,169,97,.34), inset 0 -3px 10px rgba(0,0,0,.16);
+  }
+  .cover h1 { font-size: clamp(2rem, 6vw, 3.4rem); line-height: 1.12; margin-bottom: var(--s3); }
+  .cover p.lead { max-width: 58ch; margin: 0 auto var(--s6); color: var(--fg-soft); font-size: 1rem; line-height: 1.75; }
+  .statline { display: flex; justify-content: center; gap: var(--s6); flex-wrap: wrap; }
+  .statline div { text-align: center; }
+  .statline b { display: block; font-family: var(--font-num); font-size: 1.6rem; font-weight: 700; }
+  .statline span { font-size: .72rem; color: var(--fg-mute); }
+
+  .qrsheet { display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: var(--s4); }
+  .netbox { font-family: var(--font-num); direction: ltr; text-align: left; }
+
+  @media print {
+    body > .shell > *:not(#printzone) { display: none !important; }
+    #printzone { display: block !important; }
+    #printzone .noprint { display: none !important; }
+    .qrsheet { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .qrcard { border: 1px solid #ddd; page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div id="bar"></div>
+  <main class="page" id="app"></main>
+  <div id="printzone"></div>
+</div>
+<script type="module" src="assets/js/app/launcher.js"></script>
+</body>
+</html>
