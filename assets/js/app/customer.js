@@ -14,6 +14,7 @@ import { categories, BRANCH, MENU_STATS } from '../data/menu.js';
 const q = params();
 const tableNumber = q.t || q.table ? clamp(Number(q.t || q.table), 1, 99) : null;
 const CART_KEY = `hailos:cart:${tableNumber || 'go'}`;
+const PAYER_KEY = `restaurantos:payer:${tableNumber || 'go'}`;
 
 let cart = LS.get(CART_KEY, []);
 let tab = 'menu';
@@ -22,9 +23,10 @@ let search = '';
 let session = null;
 let orderType = tableNumber ? 'dine-in' : 'takeaway';
 let customer = LS.get('hailos:customer', { name: '', phone: '', address: '' });
+let payerName = tableNumber ? LS.get(PAYER_KEY, '') : '';
 
 /* ── الإقلاع ─────────────────────────────────────────────────────────── */
-boot({ title: tableNumber ? `هيل كافيه — طاولة ${tableNumber}` : 'هيل كافيه — المنيو' });
+boot({ title: tableNumber ? `مقهى ومطعم النخبة — طاولة ${tableNumber}` : 'مقهى ومطعم النخبة — المنيو' });
 
 if (tableNumber) {
   session = store.openSessionForTable(tableNumber)
@@ -32,8 +34,8 @@ if (tableNumber) {
 }
 
 document.getElementById('bar').replaceWith(topbar({
-  title: 'هيل كافيه',
-  subtitle: tableNumber ? `طاولة رقم ${tableNumber} · إربد سيتي سنتر` : 'إربد سيتي سنتر',
+  title: 'مقهى ومطعم النخبة',
+  subtitle: tableNumber ? `طاولة رقم ${tableNumber} · الفرع الرئيسي` : 'الفرع الرئيسي',
   live: false,
   actions: [(() => {
     const b = document.createElement('button');
@@ -177,10 +179,10 @@ const views = {
     return `
       <section class="hero">
         <div class="row wrap-x" style="gap:var(--s5);align-items:center">
-          <div class="hatch"><img src="assets/menu/combo-platter.webp" alt="من أطباق هيل كافيه" loading="eager"></div>
+          <div class="hatch"><img src="assets/menu/combo-platter.webp" alt="من أطباق المطعم" loading="eager"></div>
           <div class="grow" style="min-width:200px">
-            <p class="eyebrow mb2">منيو رسمي · إربد سيتي سنتر</p>
-            <h1 class="mb2">أهلاً بك في <span class="gold-text">هيل كافيه</span></h1>
+            <p class="eyebrow mb2">منيو رقمي · الفرع الرئيسي</p>
+            <h1 class="mb2">أهلاً بك في <span class="gold-text">مقهى ومطعم النخبة</span></h1>
             <p class="soft t-sm" style="max-width:46ch">
               ${tableNumber
                 ? `أنت على <b>الطاولة رقم ${tableNumber}</b>. اختر ما يحلو لك وأرسل الطلب مباشرة إلى المطبخ.`
@@ -205,7 +207,7 @@ const views = {
       </div>
 
       ${!search && activeCat === 'all' && featured.length ? `
-        <div class="sec-head"><h2>${icon('sparkle')} مختارات هيل</h2><span class="line"></span></div>
+        <div class="sec-head"><h2>${icon('sparkle')} مختارات الشيف</h2><span class="line"></span></div>
         <div class="feat">${featured.map((it) => card(it, true)).join('')}</div>` : ''}
 
       <div class="catrail-wrap">
@@ -306,12 +308,31 @@ const views = {
   bill() {
     if (!session) return `<div class="empty"><div class="ic">${icon('wallet')}</div><h3>الفاتورة متاحة داخل الفرع</h3></div>`;
     const b = store.sessionBill(session.id);
+    const payerBills = store.sessionPayerBills(session.id);
     if (!b.orders.length) {
       return `<div class="empty"><div class="ic">${icon('wallet')}</div>
         <h3>الفاتورة فارغة</h3><p class="t-sm">لم تُسجَّل أي طلبات على هذه الجلسة بعد.</p></div>`;
     }
     const asked = store.get().services.some((s) => s.sessionId === session.id && s.type === 'bill' && s.status !== 'done');
     return `<div class="page-pad col" style="gap:var(--s4)">
+      ${payerBills.length ? `
+        <div class="glass pad">
+          <div class="between mb2">
+            <b class="t-sm">${icon('users')} تقسيم الفاتورة بالأسماء</b>
+            <span class="chip">${payerBills.length} حساب</span>
+          </div>
+          <p class="mute t-xs mb4">كل شخص يدفع حسابه منفصلاً عند الكاشير.</p>
+          <div class="col" style="gap:8px">
+            ${payerBills.map((payer) => `
+              <div class="between dashed" style="padding:10px 12px">
+                <span>
+                  <b class="t-sm">${esc(payer.name)}</b>
+                  <small class="mute" style="display:block">${payer.orders.length} طلب · ${sum(payer.lines, (line) => line.qty)} صنف</small>
+                </span>
+                <span class="num ${payer.due > 0 ? 'txt-gold' : 'txt-ok'}">${payer.due > 0 ? money(payer.due) : 'مدفوع'}</span>
+              </div>`).join('')}
+          </div>
+        </div>` : ''}
       <div class="glass edge-gold pad">
         <div class="between mb4">
           <div>
@@ -353,7 +374,9 @@ function card(it, wide = false) {
   it.tags.slice(0, 1).forEach((t) => marks.push(`<span class="chip">${esc(t)}</span>`));
 
   return `
-    <article class="card mcard card-interactive ${it.available ? '' : 'out'} reveal" data-item="${it.id}" ${wide ? 'data-tilt' : ''}>
+    <article class="card mcard card-interactive ${it.available ? '' : 'out'} reveal" data-item="${it.id}"
+      role="button" tabindex="0" aria-label="${esc(it.available ? `فتح ${it.ar}` : `${it.ar} غير متوفر`)}"
+      aria-disabled="${it.available ? 'false' : 'true'}" ${wide ? 'data-tilt' : ''}>
       <div class="shot">
         <img src="${it.image}" alt="${esc(it.ar)}" loading="lazy" decoding="async">
         <div class="marks">${marks.join('')}</div>
@@ -397,6 +420,7 @@ function orderCard(o) {
         <div>
           <span class="eyebrow">الجولة ${o.round} · ${clockTime(o.placedAt)}</span>
           <b class="num" style="font-size:1.1rem">${o.code}</b>
+          ${o.customer?.name ? `<span class="chip chip-gold mt2">${icon('user')} ${esc(o.customer.name)}</span>` : ''}
         </div>
         <span class="chip chip-${cancelled ? 'bad' : store.ORDER_STATUS[o.status]?.color}">
           ${cancelled ? '' : '<i class="dot dot-live"></i>'}${store.ORDER_STATUS[o.status]?.ar}
@@ -451,12 +475,20 @@ const wire = {
       render();
       document.querySelector('.catrail-wrap')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }));
-    root.querySelectorAll('[data-item]').forEach((c) => c.addEventListener('click', () => {
-      const it = store.menuItem(c.dataset.item);
-      if (!it) return;
-      if (!it.available) { notify.toast('هذا الصنف غير متوفر حالياً', { tone: 'warn', sound: 'error' }); return; }
-      openItem(it, c);
-    }));
+    root.querySelectorAll('[data-item]').forEach((c) => {
+      const open = () => {
+        const it = store.menuItem(c.dataset.item);
+        if (!it) return;
+        if (!it.available) { notify.toast('هذا الصنف غير متوفر حالياً', { tone: 'warn', sound: 'error' }); return; }
+        openItem(it, c);
+      };
+      c.addEventListener('click', open);
+      c.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault();
+        open();
+      });
+    });
   },
 
   orders(root) {
@@ -632,7 +664,13 @@ function openCart() {
             <input class="field" id="cphone" placeholder="رقم الهاتف" inputmode="tel" value="${esc(customer.phone)}">
             ${orderType === 'delivery' ? `<textarea class="field" id="caddr" rows="2" placeholder="العنوان بالتفصيل">${esc(customer.address)}</textarea>` : ''}
           </div>` : `
-          <div class="chip chip-ok mb4">${icon('table')} الطاولة رقم ${tableNumber}${session ? ` · جولة ${session.round + 1}` : ''}</div>`}
+          <div class="chip chip-ok mb2">${icon('table')} الطاولة رقم ${tableNumber}${session ? ` · جولة ${session.round + 1}` : ''}</div>
+          <div class="glass pad mb4" style="padding:12px">
+            <label class="label" for="payername">${icon('user')} اسم صاحب الطلب</label>
+            <input class="field" id="payername" maxlength="60" autocomplete="name"
+              placeholder="مثال: أحمد — اختياري" value="${esc(payerName)}">
+            <p class="mute t-xs mt2">اكتب الاسم ليظهر حسابه منفصلاً عند الكاشير. اتركه فارغاً لإضافته إلى حساب الطاولة.</p>
+          </div>`}
 
         ${lines.length ? `
           <div class="col" style="gap:10px">
@@ -716,6 +754,9 @@ function placeOrder(sheet, close) {
       return;
     }
     LS.set('hailos:customer', customer);
+  } else {
+    payerName = clean(sheet.querySelector('#payername')?.value, 60);
+    LS.set(PAYER_KEY, payerName);
   }
 
   const note = clean(sheet.querySelector('#onote')?.value, 200);
@@ -727,10 +768,12 @@ function placeOrder(sheet, close) {
     type: orderType,
     tableNumber,
     sessionId: session?.id || null,
-    customer,
+    customer: tableNumber
+      ? { name: payerName, phone: '', address: '' }
+      : customer,
     note,
     source: 'qr',
-    actor: 'الزبون',
+    actor: payerName || 'الزبون',
   });
 
   cart = []; saveCart();

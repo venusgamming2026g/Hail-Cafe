@@ -179,7 +179,12 @@ let pendingCount = 0;
 export function setBadge(n) {
   pendingCount = n;
   document.title = n > 0 ? `(${n}) ${baseTitle}` : baseTitle;
-  if (navigator.setAppBadge) { try { n > 0 ? navigator.setAppBadge(n) : navigator.clearAppBadge(); } catch { /* تجاهل */ } }
+  if (navigator.setAppBadge) {
+    try {
+      if (n > 0) navigator.setAppBadge(n);
+      else navigator.clearAppBadge();
+    } catch { /* تجاهل */ }
+  }
 }
 export function setBaseTitle(t) { baseTitle = t; setBadge(pendingCount); }
 

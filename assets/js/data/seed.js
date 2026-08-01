@@ -4,7 +4,7 @@
    ومبيعات موزّعة على ساعات اليوم حتى تظهر التحليلات بأرقام حقيقية.
    ========================================================================== */
 
-import { items as MENU, byId } from './menu.js';
+import { items as MENU } from './menu.js';
 import * as store from '../core/store.js';
 import { uid, orderCode } from '../core/util.js';
 
@@ -181,6 +181,10 @@ export function seed({ force = false } = {}) {
 
   /* ②  اللحظة الحالية — طاولات مفتوحة وطلبات حيّة في المطبخ */
   const liveTables = [3, 7, 12, 19, 23];
+  const payerNamesByTable = {
+    3: ['ليان', 'محمود'],
+    7: ['سارة', 'أحمد'],
+  };
   liveTables.forEach((num, i) => {
     const ses = {
       id: uid('ses'), code: String(rand(1000, 9999)), tableNumber: num,
@@ -223,7 +227,7 @@ export function seed({ force = false } = {}) {
       orders.push({
         id: uid('ord'), seq, code: orderCode(seq), type: 'dine-in', source: 'qr',
         tableNumber: num, sessionId: ses.id, round: r,
-        customer: { name: '', phone: '', address: '' }, note: r === 1 && i === 1 ? 'بدون بصل من فضلكم' : '',
+        customer: { name: payerNamesByTable[num]?.[r - 1] || '', phone: '', address: '' }, note: r === 1 && i === 1 ? 'بدون بصل من فضلكم' : '',
         lines: lines.map((l) => ({ ...l, status: lineStatus })),
         ...tt, status: stage, placedAt, acceptedAt, readyAt, servedAt, timeline, paid: false,
       });

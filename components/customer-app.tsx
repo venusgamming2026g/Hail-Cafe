@@ -652,8 +652,8 @@ export function CustomerApp() {
       </a>
 
       <header className="site-header">
-        <a href="#" className="brand-link" aria-label="Hail Cafe">
-          <img src="/hail-logo.png" width="70" height="70" alt="شعار هيل كافيه" />
+        <a href="#" className="brand-link" aria-label={officialBranch.nameEn}>
+          <img src="/hail-logo.png" width="70" height="70" alt={officialBranch.nameAr} />
         </a>
         <nav className="desktop-nav" aria-label={locale === "ar" ? "التنقل الرئيسي" : "Primary navigation"}>
           <button type="button" onClick={scrollToMenu}>
@@ -705,8 +705,8 @@ export function CustomerApp() {
             <p className="eyebrow">
               <span className="diamond" aria-hidden="true" />
               {locale === "ar"
-                ? "مطعم وكافيه هيل · إربد"
-                : "Hail Restaurant & Cafe · Irbid"}
+                ? `${officialBranch.nameAr}`
+                : `${officialBranch.nameEn}`}
             </p>
             <h1>
               {locale === "ar" ? (
@@ -763,7 +763,7 @@ export function CustomerApp() {
             </div>
           </div>
 
-          <div className="hero-hatch" aria-label={locale === "ar" ? "أطباق حقيقية من منيو هيل" : "Real dishes from Hail's menu"}>
+          <div className="hero-hatch" aria-label={locale === "ar" ? "أطباق حقيقية من المنيو" : "Real dishes from the menu"}>
             <div className="hatch-arch" aria-hidden="true">
               <img
                 className="hero-dish hero-dish-main"
@@ -1057,8 +1057,8 @@ export function CustomerApp() {
       <footer className="site-footer">
         <img src="/hail-logo.png" width="86" height="86" alt="" />
         <div>
-          <strong>{locale === "ar" ? "مطعم وكافيه هيل" : "Hail Restaurant & Cafe"}</strong>
-          <p>{locale === "ar" ? "إربد سيتي سنتر · الأردن" : "Irbid City Center · Jordan"}</p>
+          <strong>{locale === "ar" ? officialBranch.nameAr : officialBranch.nameEn}</strong>
+          <p>{locale === "ar" ? officialBranch.addressAr : officialBranch.addressEn}</p>
         </div>
         <div className="social-links">
           <a href={officialSocial.instagram} target="_blank" rel="noreferrer" aria-label="Instagram">

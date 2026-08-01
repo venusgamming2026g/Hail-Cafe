@@ -10,7 +10,7 @@ import * as notify from '../core/notify.js';
 import { boot, topbar, openSheet, watchNotifications, watchServiceSla, pinLogin } from '../core/shell.js';
 import { TABLE_ZONES } from '../data/seed.js';
 
-boot({ title: 'الصالة — هيل كافيه' });
+boot({ title: 'إدارة الصالة والطاولات — Restaurant OS' });
 
 /* ── الشريط العلوي ───────────────────────────────────────────────────── */
 const whoBtn = document.createElement('button');

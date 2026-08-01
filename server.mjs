@@ -112,7 +112,7 @@ server.on('listening', () => {
   const ips = lanAddresses();
   const line = '─'.repeat(56);
   console.log(`\n\x1b[33m${line}\x1b[0m`);
-  console.log('  \x1b[1mHAIL OS\x1b[0m — نظام هيل كافيه الداخلي يعمل الآن');
+  console.log('  \x1b[1mRestaurant OS\x1b[0m — المنظومة الرقمية للمطاعم والمقاهي');
   console.log(`\x1b[33m${line}\x1b[0m`);
   const home = `http://localhost:${port}`;
   console.log(`  على هذا الجهاز :  \x1b[36m${home}\x1b[0m`);

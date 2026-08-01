@@ -89,7 +89,7 @@ export const menuItems: MenuItem[] = [
   }),
   item("breakfast-fried-eggs", "breakfast", "بيض عيون", 2000),
   item("breakfast-falafel-taco", "breakfast", "تاكو فلافل", 2750),
-  item("breakfast-shakshuka", "breakfast", "شكشوكة على طريقة هيل", 2250),
+  item("breakfast-shakshuka", "breakfast", "شكشوكة خاصة", 2250),
   item("breakfast-potatoes", "breakfast", "بطاطا", 2000),
   item("breakfast-turkey-quiche", "breakfast", "كيش تيركي", 3000),
   item("breakfast-sausage-eggs", "breakfast", "صوصج مع البيض", 3100),
@@ -103,11 +103,11 @@ export const menuItems: MenuItem[] = [
   item("breakfast-oil-zaatar", "breakfast", "زيت وزعتر", 2000),
   item("breakfast-lotus-nutella", "breakfast", "لوتس ونوتيلا", 3250),
 
-  item("salad-fattoush-hail", "salads", "فتوش وخلطة على طريقة هيل", 4000),
-  item("salad-tabbouleh", "salads", "تبولة هيل", 4500),
+  item("salad-fattoush-hail", "salads", "فتوش بخلطة الشيف", 4000),
+  item("salad-tabbouleh", "salads", "تبولة فاخرة", 4500),
   item("salad-greek", "salads", "يونانية سلط", 3950),
-  item("salad-hail", "salads", "هيل سلط", 4750, {
-    nameEn: "Hail salad",
+  item("salad-hail", "salads", "سلطة الشيف الخاصة", 4750, {
+    nameEn: "Special Chef Salad",
     image: "/menu/hail-salad.webp",
     featured: true,
   }),
@@ -121,7 +121,7 @@ export const menuItems: MenuItem[] = [
   item("cold-shanklish", "cold-appetizers", "شنكليش", 2750),
   item("cold-muhammara", "cold-appetizers", "محمرة", 2250),
   item("cold-labneh-crisps", "cold-appetizers", "لبنة فراقيش", 2500),
-  item("cold-hail-hummus", "cold-appetizers", "هيل حمص", 2750),
+  item("cold-hail-hummus", "cold-appetizers", "حمص بالخلطة الخاصة", 2750),
 
   item("hot-musakhan-cups", "hot-appetizers", "مسخن كب", 3750),
   item("hot-meat-crepe", "hot-appetizers", "كريب لحم", 4950),
@@ -154,7 +154,7 @@ export const menuItems: MenuItem[] = [
   item("pasta-bolognese", "pasta", "بولونيز", 4500),
   item("pasta-arrabbiata", "pasta", "بينا أرابياتا", 4500),
   item("pasta-fettuccine-alfredo", "pasta", "فوتوتشيني ألفريدو", 4500),
-  item("pasta-hail-special", "pasta", "هيل فوتوتشيني سبيشل", 7150, {
+  item("pasta-hail-special", "pasta", "فوتوتشيني سبيشل", 7150, {
     image: "/menu/pasta-special.webp",
   }),
   item("addon-chicken", "pasta-addons", "إضافة دجاج", 1500, {
@@ -166,8 +166,8 @@ export const menuItems: MenuItem[] = [
     noteEn: "Pasta add-on",
   }),
 
-  item("pizza-hail", "pizza", "بيتزا هيل", 5250, {
-    nameEn: "Hail pizza",
+  item("pizza-hail", "pizza", "بيتزا الشيف الخاصة", 5250, {
+    nameEn: "Special Chef Pizza",
     image: "/menu/hail-pizza.webp",
     featured: true,
   }),
@@ -276,7 +276,7 @@ export const menuItems: MenuItem[] = [
   item("milkshake-vanilla", "milkshakes", "ميلك شيك فانيلا", 3250, { nameEn: "Vanilla milkshake" }),
   item("milkshake-cheesecake", "milkshakes", "ميلك شيك تشيز كيك", 3250, { nameEn: "Cheesecake milkshake" }),
   item("milkshake-pinacolada", "milkshakes", "ميلك شيك بيناكولادا", 3250, { nameEn: "Piña colada milkshake" }),
-  item("milkshake-hail", "milkshakes", "ميلك شيك هيل", 3250, { nameEn: "Hail milkshake" }),
+  item("milkshake-hail", "milkshakes", "ميلك شيك سبيشل", 3250, { nameEn: "Special milkshake" }),
   item("milkshake-oreo", "milkshakes", "ميلك شيك أوريو", 3250, { nameEn: "Oreo milkshake" }),
   item("milkshake-snickers", "milkshakes", "ميلك شيك سنكرز", 3250, { nameEn: "Snickers milkshake" }),
   item("milkshake-crocant", "milkshakes", "ميلك شيك كروكان", 3250, { nameEn: "Crocant milkshake" }),
@@ -286,7 +286,7 @@ export const menuItems: MenuItem[] = [
 
   item("mojito-candy", "mojito", "موهيتو كاندي", 3250, { nameEn: "Candy mojito", image: "/menu/mojito.webp" }),
   item("mojito-pineapple-lychee", "mojito", "موهيتو ليتشي أناناس", 3250, { nameEn: "Pineapple lychee mojito" }),
-  item("mojito-hail", "mojito", "موهيتو هيل", 3750, { nameEn: "Hail mojito" }),
+  item("mojito-hail", "mojito", "موهيتو سبيشل منعش", 3750, { nameEn: "Special mojito" }),
   item("mojito-cucumber-basil", "mojito", "موهيتو خيار وريحان", 3250, { nameEn: "Cucumber and basil mojito" }),
   item("mojito-blue-passion", "mojito", "موهيتو بلو باشن", 4250, { nameEn: "Blue passion mojito" }),
   item("mojito-mango-peach", "mojito", "موهيتو مانجا بيتش", 3250, { nameEn: "Mango peach mojito" }),
@@ -315,7 +315,7 @@ export const menuItems: MenuItem[] = [
   item("cocktail-banana-milk", "cocktails", "موز وحليب", 3500, { nameEn: "Banana and milk" }),
   item("cocktail-strawberry-banana", "cocktails", "فراولة وموز", 3500, { nameEn: "Strawberry and banana" }),
   item("cocktail-berry-banana", "cocktails", "بنانا بيري", 4000, { nameEn: "Berry and banana" }),
-  item("cocktail-hail", "cocktails", "هيل كوكتيل", 4000, { nameEn: "Hail cocktail", image: "/menu/hail-cocktail.webp" }),
+  item("cocktail-hail", "cocktails", "كوكتيل النخبة", 4000, { nameEn: "Gourmet cocktail", image: "/menu/hail-cocktail.webp" }),
   item("cocktail-avocado", "cocktails", "أفوكادو", 4000, { nameEn: "Avocado juice" }),
   item("cocktail-peach-colada", "cocktails", "بيتش كولادا", 3750, { nameEn: "Peach colada" }),
   item("cocktail-guava-apple", "cocktails", "جوافة غرين أبل", 3500, { nameEn: "Guava and green apple" }),
@@ -335,7 +335,7 @@ export const menuItems: MenuItem[] = [
   item("hot-double-espresso", "hot-drinks", "دبل إسبريسو", 2750, { nameEn: "Double espresso" }),
   item("hot-single-espresso", "hot-drinks", "سنجل إسبريسو", 2250, { nameEn: "Single espresso" }),
   item("hot-chocolate", "hot-drinks", "هوت شوكلت", 3250, { nameEn: "Hot chocolate", image: "/menu/hot-chocolate.webp" }),
-  item("hot-hail-chocolate", "hot-drinks", "هيل هوت شوكلت", 3250, { nameEn: "Hail hot chocolate" }),
+  item("hot-hail-chocolate", "hot-drinks", "هوت شوكلت فاخر", 3250, { nameEn: "Deluxe hot chocolate" }),
   item("hot-turkish-single", "hot-drinks", "قهوة تركية سنجل", 2250, { nameEn: "Turkish single" }),
   item("hot-turkish-double", "hot-drinks", "قهوة تركية دبل", 2750, { nameEn: "Turkish double" }),
   item("hot-macchiato", "hot-drinks", "مكياتو", 2750, { nameEn: "Macchiato" }),
@@ -375,7 +375,7 @@ export const menuItems: MenuItem[] = [
   item("hookah-gum-mint", "hookah", "علكة ونعنع", 4200),
   item("hookah-apple-mint", "hookah", "تفاح ونعنع", 4200),
   item("hookah-candy-drops", "hookah", "كاندي دروبس", 4200),
-  item("hookah-hail-mix", "hookah", "خلطة هيل", 4200),
+  item("hookah-hail-mix", "hookah", "خلطة المعسل الخاصة", 4200),
   item("hookah-lovely", "hookah", "لفلي", 4200),
   item("hookah-ice-sweet", "hookah", "آيس سويت", 4200),
   item("hookah-orange-mint", "hookah", "برتقال ونعنع", 4200),

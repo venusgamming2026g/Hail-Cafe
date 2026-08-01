@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { formatJod } from "../lib/menu-data";
+import { officialBranch } from "../lib/restaurant";
 
 type OpsOrder = {
   id: string;
@@ -296,10 +297,10 @@ export function OpsApp({ initialMode }: { initialMode: "ops" | "kds" }) {
     <div className="ops-shell" dir="rtl">
       <aside className={`ops-sidebar ${menuOpen ? "open" : ""}`}>
         <div className="ops-brand">
-          <img src="/hail-logo.png" width="56" height="56" alt="هيل كافيه" />
+          <img src="/hail-logo.png" width="56" height="56" alt={officialBranch.nameAr} />
           <div>
-            <strong>هيل عمليات</strong>
-            <span>من المطبخ للصالة</span>
+            <strong>لوحة العمليات</strong>
+            <span>إدارة المطعم والمقهى</span>
           </div>
           <button
             type="button"
@@ -373,7 +374,7 @@ export function OpsApp({ initialMode }: { initialMode: "ops" | "kds" }) {
               <Menu size={22} aria-hidden="true" />
             </button>
             <div>
-              <p>هيل كافيه · إربد سيتي سنتر</p>
+              <p>{officialBranch.nameAr}</p>
               <h1>
                 {visibleNav.find((entry) => entry.id === view)?.label ??
                   "لوحة التشغيل"}

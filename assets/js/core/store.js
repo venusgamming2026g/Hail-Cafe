@@ -7,13 +7,13 @@
 import { uid, orderCode, sum, LS } from './util.js';
 import { items as MENU_ITEMS, categories as MENU_CATS, byId as MENU_BY_ID, TAX_RATE } from '../data/menu.js';
 
-const KEY = 'hailos:state:v1';
-const CHANNEL = 'hailos:sync';
+const KEY = 'restaurantos:state:v1';
+const CHANNEL = 'restaurantos:sync';
 
 /* ── الإعدادات الافتراضية ────────────────────────────────────────────── */
 export const DEFAULT_SETTINGS = {
-  brandAr: 'هيل كافيه',
-  brandEn: 'Hail Cafe',
+  brandAr: 'مقهى ومطعم النخبة',
+  brandEn: 'Gourmet Cafe & Restaurant',
   taxRate: TAX_RATE,          // ضريبة المبيعات 7% كما في المنيو الرسمي
   serviceRate: 0.10,          // خدمة اختيارية على الصالة
   serviceEnabled: true,
@@ -271,6 +271,58 @@ export function sessionBill(sessionId) {
   };
 }
 
+export function sessionPayerBills(sessionId) {
+  const orders = sessionOrders(sessionId);
+  const payments = state.payments.filter((p) => p.sessionId === sessionId);
+  const groups = new Map();
+
+  for (const order of orders) {
+    const payerName = String(order.customer?.name || '').trim() || 'حساب الطاولة';
+    if (!groups.has(payerName)) groups.set(payerName, []);
+    groups.get(payerName).push(order);
+  }
+
+  const payerBills = [...groups.entries()].map(([name, payerOrders]) => {
+    const orderIds = payerOrders.map((order) => order.id);
+    const lines = payerOrders.flatMap((order) => order.lines);
+    const totals = totalsFor(lines, { type: 'dine-in' });
+    const payerPayments = payments.filter((payment) => {
+      if (payment.payerName) return payment.payerName === name;
+      const paidOrders = payment.orderIds || [];
+      return paidOrders.length > 0 && paidOrders.every((id) => orderIds.includes(id));
+    });
+    const paidAmount = sum(payerPayments, (payment) => payment.amount);
+    const discounted = sum(payerPayments, (payment) => payment.discount || 0);
+    const settled = paidAmount + discounted;
+    return {
+      name,
+      orders: payerOrders,
+      orderIds,
+      lines,
+      paid: payerPayments,
+      paidAmount,
+      discounted,
+      settled,
+      ...totals,
+      due: Math.max(0, totals.total - settled),
+    };
+  });
+
+  const assignedPaymentIds = new Set(payerBills.flatMap((bill) => bill.paid.map((payment) => payment.id)));
+  let generalSettled = sum(
+    payments.filter((payment) => !assignedPaymentIds.has(payment.id)),
+    (payment) => payment.amount + (payment.discount || 0),
+  );
+  for (const bill of payerBills) {
+    if (generalSettled <= 0) break;
+    const applied = Math.min(bill.due, generalSettled);
+    bill.settled += applied;
+    bill.due -= applied;
+    generalSettled -= applied;
+  }
+  return payerBills;
+}
+
 /* ── الطلبات ─────────────────────────────────────────────────────────── */
 export function placeOrder({ lines, type = 'dine-in', tableNumber = null, sessionId = null,
                              customer = {}, note = '', actor, source = 'qr' }) {
@@ -413,12 +465,12 @@ export const openServices = () => state.services.filter((x) => x.status !== 'don
 
 /* ── الدفع ───────────────────────────────────────────────────────────── */
 export function pay({ sessionId = null, orderIds = [], method = 'cash', amount, tip = 0,
-                      discount = 0, actor, splitOf = null }) {
+                      discount = 0, actor, splitOf = null, payerName = '' }) {
   let created;
   commit('payment.take', (s) => {
     created = {
       id: uid('pay'), sessionId, orderIds, method, amount, tip, discount,
-      at: Date.now(), by: actor || currentActor(), splitOf,
+      at: Date.now(), by: actor || currentActor(), splitOf, payerName,
     };
     s.payments.unshift(created);
     orderIds.forEach((oid) => { const o = s.orders.find((x) => x.id === oid); if (o) o.paid = true; });

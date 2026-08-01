@@ -12,10 +12,10 @@ import { toSvg } from '../core/qr.js';
 import { MENU_STATS, BRANCH } from '../data/menu.js';
 import { startSimulator, stopSimulator, simulatorRunning, seed } from '../data/seed.js';
 
-boot({ title: 'HAIL OS — نظام هيل كافيه' });
+boot({ title: 'Restaurant OS — المنظومة التفاعلية' });
 
 document.getElementById('bar').replaceWith(topbar({
-  title: 'HAIL OS',
+  title: 'Restaurant OS',
   subtitle: 'النظام الداخلي المتكامل',
   live: true,
 }));
@@ -89,9 +89,9 @@ function render() {
 
   document.getElementById('app').innerHTML = `
     <section class="cover">
-      <div class="crest float">هيل</div>
+      <div class="crest float">OS</div>
       <p class="eyebrow" style="justify-content:center">نظام مطعم داخلي متكامل</p>
-      <h1><span class="gold-text">HAIL OS</span><br>كل ما يحتاجه المطعم في نظام واحد</h1>
+      <h1><span class="gold-text">Restaurant OS</span><br>كل ما يحتاجه المطعم في نظام واحد</h1>
       <p class="lead">
         من مسح رمز QR على الطاولة، إلى المطبخ والصالة والكاشير، وصولاً إلى تقارير المدير —
         كل الشاشات تتزامن لحظياً بلا خادم ولا إعدادات.
@@ -266,7 +266,7 @@ function openQr() {
       <div class="qrsheet">
         ${tables.map((t) => `
           <div class="qrcard">
-            <div class="brand">هيل كافيه</div>
+            <div class="brand">مقهى ومطعم النخبة</div>
             <div class="qr">${toSvg(urlFor(t.number), {
               size: 190, ecl: 'Q', margin: 2, radius: 0.9,
               dark: '#12161A', light: '#FFFFFF', gradient: ['#1A2026', '#4A3A1C'],

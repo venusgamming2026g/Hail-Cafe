@@ -31,19 +31,19 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: new URL(origin),
     title: {
-      default: "هيل كافيه | المنيو والطلب وخدمة الطاولة",
-      template: "%s | هيل كافيه",
+      default: "نظام إدارة المطاعم والمقاهي | المنيو والطلب الرقمي",
+      template: "%s | Restaurant OS",
     },
     description:
-      "المنيو الرسمي لمطعم وكافيه هيل في إربد سيتي سنتر، مع طلب سفري، طلب من الطاولة، متابعة التحضير، وخدمة طاولة مباشرة.",
-    applicationName: "Hail Cafe",
+      "المنظومة الرقمية الشاملة لإدارة المطاعم والمقاهي: منيو QR ذكي، طلب طاولة، كاشير، شاشة مطبخ (KDS)، وإدارة الصالة.",
+    applicationName: "Restaurant OS",
     keywords: [
-      "هيل كافيه",
-      "Hail Cafe",
-      "مطعم إربد",
-      "كافيه إربد",
-      "إربد سيتي سنتر",
-      "منيو هيل",
+      "نظام مطاعم",
+      "Restaurant OS",
+      "منيو رقمي",
+      "كاشير مطاعم",
+      "نظام كافيهات",
+      "طلب طاولة",
     ],
     alternates: { canonical: `${origin}/` },
     icons: {
@@ -56,16 +56,16 @@ export async function generateMetadata(): Promise<Metadata> {
       url: origin,
       locale: "ar_JO",
       alternateLocale: "en_US",
-      title: "هيل كافيه | من المطبخ للطاولة",
+      title: "نظام إدارة المطاعم والمقاهي | المنظومة الذكية",
       description:
-        "منيو رسمي وطلب سفري وطلب طاولة وخدمة مباشرة في إربد سيتي سنتر.",
-      siteName: "Hail Cafe",
-      images: [{ url: socialImage, width: 1732, height: 909, alt: "Hail Cafe" }],
+        "منيو رقمي وطلب سفري وطلب طاولة وخدمة كاشير ومطبخ متكاملة.",
+      siteName: "Restaurant OS",
+      images: [{ url: socialImage, width: 1732, height: 909, alt: "Restaurant OS" }],
     },
     twitter: {
       card: "summary_large_image",
-      title: "هيل كافيه | من المطبخ للطاولة",
-      description: "المنيو الرسمي وطلبات الطاولة والسفري.",
+      title: "نظام إدارة المطاعم والمقاهي | المنظومة الذكية",
+      description: "المنيو الرسمي وطلبات الطاولة والسفري والعمليات.",
       images: [socialImage],
     },
   };

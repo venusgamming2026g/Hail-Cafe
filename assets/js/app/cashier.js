@@ -17,7 +17,7 @@ let posCat = 'breakfast';
 let posType = 'takeaway';
 let posTable = null;
 
-boot({ title: 'الكاشير — هيل كافيه' });
+boot({ title: 'نقطة البيع والكاشير — Restaurant OS' });
 
 /* ── الشريط العلوي ───────────────────────────────────────────────────── */
 const whoBtn = document.createElement('button');
@@ -109,7 +109,10 @@ const views = {
         ${tile('متوسط الفاتورة', open.length ? money(Math.round(totalDue / open.length), false) : '—', 'trend', '')}
       </div>
 
-      ${open.length ? `<div class="grid auto-320">${open.map(({ ses, bill }) => `
+      ${open.length ? `<div class="grid auto-320">${open.map(({ ses, bill }) => {
+        const payerBills = store.sessionPayerBills(ses.id);
+        const hasNamedPayers = payerBills.some((payer) => payer.name !== 'حساب الطاولة');
+        return `
         <div class="card pad reveal">
           <div class="between mb4">
             <div>
@@ -118,12 +121,22 @@ const views = {
             </div>
             <span class="chip chip-gold num">${money(bill.due)}</span>
           </div>
-          <p class="mute t-xs mb4">${bill.orders.length} طلب · ${sum(bill.lines, (l) => l.qty)} صنف</p>
+          <p class="mute t-xs mb4">${bill.orders.length} طلب · ${sum(bill.lines, (l) => l.qty)} صنف${hasNamedPayers ? ` · ${payerBills.length} حسابات بالأسماء` : ''}</p>
+          ${hasNamedPayers ? `
+            <div class="col mb4" style="gap:7px">
+              ${payerBills.map((payer) => `
+                <button class="btn btn-ghost between" style="width:100%;padding-inline:12px"
+                  data-pay-person="${ses.id}" data-payer="${esc(payer.name)}" ${payer.due <= 0 ? 'disabled' : ''}>
+                  <span>${icon(payer.due > 0 ? 'user' : 'check')} ${esc(payer.name)}</span>
+                  <b class="num ${payer.due > 0 ? 'txt-gold' : 'txt-ok'}">${payer.due > 0 ? money(payer.due) : 'مدفوع'}</b>
+                </button>`).join('')}
+            </div>` : ''}
           <div class="row" style="gap:8px">
-            <button class="btn btn-gold grow" data-pay="${ses.id}">${icon('cash')} تحصيل</button>
+            <button class="btn btn-gold grow" data-pay="${ses.id}">${icon('cash')} ${hasNamedPayers ? 'تحصيل كامل الطاولة' : 'تحصيل'}</button>
             <button class="btn btn-ghost" data-view="${ses.id}" aria-label="تفاصيل">${icon('eye')}</button>
           </div>
-        </div>`).join('')}</div>` : `
+        </div>`;
+      }).join('')}</div>` : `
         <div class="empty"><div class="ic">${icon('wallet')}</div>
         <h3>لا فواتير مفتوحة</h3><p class="t-sm">افتح جلسة من شاشة الصالة لتظهر هنا.</p></div>`}`;
   },
@@ -300,7 +313,7 @@ const wire = {
     }));
     app.querySelectorAll('[data-pay1]').forEach((b) => b.addEventListener('click', () => {
       const o = store.get().orders.find((x) => x.id === b.dataset.pay1);
-      openPayment({ orders: [o], amount: o.total, label: `طلب ${o.code}` });
+      openPayment({ orders: [o], amount: o.total, label: `طلب ${o.code}`, payerName: o.customer?.name || '' });
     }));
     app.querySelectorAll('[data-print]').forEach((b) => b.addEventListener('click', () => {
       const o = store.get().orders.find((x) => x.id === b.dataset.print);
@@ -315,12 +328,37 @@ const wire = {
       const bill = store.sessionBill(ses.id);
       openPayment({ session: ses, orders: bill.orders, amount: bill.due, label: `طاولة ${ses.tableNumber}`, bill });
     }));
+    app.querySelectorAll('[data-pay-person]').forEach((b) => b.addEventListener('click', () => {
+      const ses = store.sessionById(b.dataset.payPerson);
+      const payer = store.sessionPayerBills(ses.id).find((entry) => entry.name === b.dataset.payer);
+      if (!payer || payer.due <= 0) return;
+      openPayment({
+        session: ses,
+        orders: payer.orders,
+        amount: payer.due,
+        label: `طاولة ${ses.tableNumber} · ${payer.name}`,
+        bill: payer,
+        payerName: payer.name,
+      });
+    }));
     app.querySelectorAll('[data-view]').forEach((b) => b.addEventListener('click', () => {
       const ses = store.sessionById(b.dataset.view);
       const bill = store.sessionBill(ses.id);
+      const payerBills = store.sessionPayerBills(ses.id);
       openSheet(`
         <div class="pad">
           <h2 class="mb4">فاتورة الطاولة ${ses.tableNumber}</h2>
+          ${payerBills.length ? `
+            <div class="glass pad mb4">
+              <b class="t-sm">${icon('users')} الحسابات بالأسماء</b>
+              <div class="col mt2" style="gap:7px">
+                ${payerBills.map((payer) => `
+                  <div class="between dashed" style="padding:9px 11px">
+                    <span>${esc(payer.name)}</span>
+                    <b class="num ${payer.due > 0 ? 'txt-gold' : 'txt-ok'}">${payer.due > 0 ? money(payer.due) : 'مدفوع'}</b>
+                  </div>`).join('')}
+              </div>
+            </div>` : ''}
           <div class="bill">
             ${bill.lines.map((l) => `<div class="r"><span>${esc(l.ar)} <span class="mute">×${l.qty}</span></span>
               <span>${money(l.price * l.qty, false)}</span></div>`).join('')}
@@ -395,7 +433,7 @@ const wire = {
 };
 
 /* ── نافذة التحصيل ───────────────────────────────────────────────────── */
-function openPayment({ session = null, orders = [], amount, label, bill = null }) {
+function openPayment({ session = null, orders = [], amount, label, bill = null, payerName = '' }) {
   let method = 'cash';
   let discount = 0;
   let tip = 0;
@@ -489,6 +527,7 @@ function openPayment({ session = null, orders = [], amount, label, bill = null }
         orderIds: orders.map((o) => o.id),
         method, amount: due, tip, discount, actor: actor(),
         splitOf: splitCount > 1 ? splitCount : null,
+        payerName,
       });
       notify.play('cash');
       fx.burst(window.innerWidth / 2, window.innerHeight / 3, 42);

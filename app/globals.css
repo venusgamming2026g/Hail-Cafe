@@ -660,7 +660,7 @@ img {
 .menu-card {
   position: relative;
   display: grid;
-  min-height: 190px;
+  min-height: 164px;
   overflow: hidden;
   border: 1px solid rgba(197, 160, 89, 0.22);
   border-radius: var(--radius-md);
@@ -684,7 +684,7 @@ img {
 
 .menu-card-image {
   position: relative;
-  min-height: 190px;
+  min-height: 164px;
   overflow: hidden;
   background:
     radial-gradient(circle at 50% 40%, rgba(247, 237, 224, 0.9), rgba(220, 235, 232, 0.6)),
@@ -1704,7 +1704,7 @@ img {
   }
 
   .menu-card {
-    min-height: 220px;
+    min-height: 190px;
   }
 
   .menu-card.with-image {
@@ -1712,7 +1712,7 @@ img {
   }
 
   .menu-card-image {
-    min-height: 220px;
+    min-height: 190px;
   }
 
   .site-footer {

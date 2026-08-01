@@ -9,14 +9,14 @@ import {
 const structuredData = {
   "@context": "https://schema.org",
   "@type": ["Restaurant", "CafeOrCoffeeShop"],
-  name: "مطعم وكافيه هيل",
-  alternateName: "Hail Cafe",
+  name: officialBranch.nameAr,
+  alternateName: officialBranch.nameEn,
   image: "/hail-logo.png",
   telephone: officialBranch.phone,
   address: {
     "@type": "PostalAddress",
-    streetAddress: "شارع الأمير حسن، إربد سيتي سنتر",
-    addressLocality: "إربد",
+    streetAddress: officialBranch.addressAr,
+    addressLocality: "العاصمة",
     addressCountry: "JO",
   },
   hasMap: officialMapUrl,

@@ -1,7 +1,7 @@
 @echo off
 chcp 65001 >nul
 setlocal
-title HAIL OS - نظام هيل كافيه
+title Restaurant OS - نظام إدارة المطاعم والمقاهي
 cd /d "%~dp0"
 
 where node >nul 2>nul
@@ -15,7 +15,7 @@ if errorlevel 1 (
 )
 
 echo.
-echo   جارٍ تشغيل نظام هيل كافيه...
+echo   جارٍ تشغيل المنظومة الرقمية للمطاعم والمقاهي...
 echo.
 set HAIL_OPEN=1
 node server.mjs 3000

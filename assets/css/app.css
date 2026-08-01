@@ -14,6 +14,17 @@
 }
 .topbar.scrolled { box-shadow: 0 10px 30px rgba(0,0,0,.32); }
 
+@media (max-width: 480px) {
+  .topbar { gap: 6px; padding-inline: 10px; }
+  .topbar .brandmark { min-width: 0; flex: 1; }
+  .topbar .brandmark > div { min-width: 0; }
+  .brandmark b,
+  .brandmark span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .topbar > .row { flex: none; gap: 4px !important; }
+  .topbar > .row .btn:not(.btn-icon) { width: 44px; padding-inline: 0; }
+  .topbar > .row .btn:not(.btn-icon) > span { display: none; }
+}
+
 .brandmark { display: flex; align-items: center; gap: var(--s3); flex: none; }
 .brandmark .seal {
   width: 42px; height: 42px; border-radius: 13px; display: grid; place-items: center; flex: none;
@@ -61,7 +72,7 @@
 /* ── بطاقة صنف المنيو ─────────────────────────────────────────────────── */
 .mcard { display: flex; flex-direction: column; }
 .mcard .shot {
-  position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: var(--ink-800);
+  position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: var(--ink-800);
 }
 .mcard .shot img {
   width: 100%; height: 100%; object-fit: cover;

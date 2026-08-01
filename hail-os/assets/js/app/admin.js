@@ -15,7 +15,7 @@ let tab = 'dash';
 let menuFilter = '';
 let menuCat = 'all';
 
-boot({ title: 'الإدارة — هيل كافيه' });
+boot({ title: 'لوحة الإدارة — Restaurant OS' });
 
 /* ── الشريط العلوي ───────────────────────────────────────────────────── */
 const whoBtn = document.createElement('button');
@@ -33,7 +33,7 @@ paintWho();
 
 document.getElementById('bar').replaceWith(topbar({
   title: 'لوحة الإدارة',
-  subtitle: 'هيل كافيه — إربد سيتي سنتر',
+  subtitle: 'مقهى ومطعم النخبة — الفرع الرئيسي',
   back: 'index.html',
   actions: [whoBtn],
 }));
@@ -103,8 +103,6 @@ const views = {
 
     const hours = today.byHour.slice(9, 24);
     const hourLabels = hours.map((h) => String(h.h));
-    const maxHour = Math.max(...today.byHour.map((h) => h.revenue), 1);
-
     const catColors = ['#D2A961', '#E33B24', '#2E9E7E', '#3E90D2', '#B4638F', '#DE9430', '#7C6BAE', '#5A6C7A'];
     const donutData = today.byCat.slice(0, 7).map((c, i) => ({
       label: categories.find((x) => x.id === c.cat)?.ar || c.cat,
@@ -762,7 +760,6 @@ const wire = {
 
     app.querySelectorAll('[data-set]').forEach((el) => el.addEventListener('change', () => {
       const key = el.dataset.set;
-      const mul = Number(el.dataset.mul || 1);
       let v = Number(el.value) || 0;
       if (key === 'taxRate' || key === 'serviceRate') v = v / 100;
       else if (key === 'deliveryFee') v = Math.round(v * 1000);

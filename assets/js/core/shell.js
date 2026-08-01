@@ -10,7 +10,7 @@ import * as notify from './notify.js';
 import { seed } from '../data/seed.js';
 
 /* ── الإقلاع ─────────────────────────────────────────────────────────── */
-export function boot({ title = 'هيل كافيه', autoSeed = true } = {}) {
+export function boot({ title = 'مقهى ومطعم النخبة', autoSeed = true } = {}) {
   const s = store.get();
   fx.applyTheme(s.settings.theme);
   fx.initFx();
@@ -78,7 +78,7 @@ export function topbar({ title, subtitle = '', back = null, actions = [], live =
   bar.innerHTML = `
     ${back ? `<a class="btn btn-icon btn-ghost" href="${back}" aria-label="رجوع">${icon('arrowR')}</a>` : ''}
     <div class="brandmark">
-      <span class="seal">هيل</span>
+      <span class="seal">OS</span>
       <span><b>${esc(title)}</b><span>${esc(subtitle)}</span></span>
     </div>
     <div class="grow"></div>
