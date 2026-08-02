@@ -83,7 +83,9 @@ const SURFACES = [
 ];
 
 /* ── العرض ───────────────────────────────────────────────────────────── */
-function render() {
+/* animate: حركة الظهور للرسم الأول فقط — التحديث الدوري يرسم فوراً بلا ترميش. */
+function render(animate = false) {
+  const scrollY = window.scrollY;
   const s = store.get();
   const rep = store.reportFor();
   const sim = simulatorRunning();
@@ -230,7 +232,9 @@ function render() {
       setTimeout(() => notify.toast(text, { tone, sound, life: 3000 }), delay));
   });
 
-  fx.initReveal(document.getElementById('app'));
+  const appEl = document.getElementById('app');
+  if (animate) fx.initReveal(appEl); else fx.settleReveal(appEl);
+  window.scrollTo(0, scrollY);
 }
 
 function tile(k, v, ic, cls) {
@@ -285,7 +289,10 @@ function openQr() {
 }
 
 /* ── التشغيل ─────────────────────────────────────────────────────────── */
-render();
-loadNetwork().then(render);
+render(true);
+loadNetwork().then(() => render());
 store.subscribe(() => { if (!document.getElementById('printzone').innerHTML) render(); });
-setInterval(() => { if (!document.getElementById('printzone').innerHTML) render(); }, 30000);
+setInterval(() => {
+  if (document.hidden) return;
+  if (!document.getElementById('printzone').innerHTML) render();
+}, 30000);

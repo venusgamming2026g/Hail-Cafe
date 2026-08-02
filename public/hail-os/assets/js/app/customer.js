@@ -213,6 +213,14 @@ let lastTab = null;
 
 function scheduleRender() {
   if (renderQueued) return;
+  /* لا نهدم الواجهة والزبون يكتب اسمه أو ملاحظته — إعادة البناء تمسح نصّه
+     وتغلق كيبورد الجوال. نؤجل الرسم حتى يغادر الحقل. */
+  const el = document.activeElement;
+  const app = document.getElementById('app');
+  if (el && app && app.contains(el) && el.matches('input, textarea') && el.id !== 'q') {
+    el.addEventListener('blur', () => scheduleRender(), { once: true });
+    return;
+  }
   renderQueued = true;
   requestAnimationFrame(() => {
     renderQueued = false;
@@ -229,14 +237,15 @@ function render() {
   wire[tab]?.(app);
   paintTabbar();
   paintCartBar();
-  /* الظهور المتدرّج مرة واحدة عند تبديل التبويب فقط — إعادة الرسم المتكررة كانت تترمش */
+  /* الظهور المتدرّج مرة واحدة عند تبديل التبويب فقط — إعادة الرسم المتكررة كانت تترمش.
+     العناصر الجديدة مع صنف in تشغّل الحركة رغم ذلك، لذا نثبّتها فوراً بلا حركة. */
   if (tabChanged) {
     fx.initReveal(app);
     fx.initTilt(app);
   } else {
-    app.querySelectorAll('.reveal').forEach((n) => n.classList.add('in'));
+    fx.settleReveal(app);
   }
-  if (tab === 'menu') window.scrollTo(0, scrollY);
+  if (!tabChanged) window.scrollTo(0, scrollY);
 }
 
 /* ── التبويبات السفلية ───────────────────────────────────────────────── */
@@ -1104,4 +1113,7 @@ function showBranch() {
 
 /* ── انطلق ───────────────────────────────────────────────────────────── */
 render();
-setInterval(() => { if (tab === 'orders' || tab === 'service') render(); }, 20000);
+setInterval(() => {
+  if (document.hidden) return;
+  if (tab === 'orders' || tab === 'service') scheduleRender();
+}, 20000);

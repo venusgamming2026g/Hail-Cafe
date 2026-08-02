@@ -47,6 +47,13 @@ export function initReveal(root = document) {
   }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
   root.querySelectorAll('.reveal:not(.in)').forEach((n) => io.observe(n));
 }
+/** إظهار فوري بلا حركة — للتحديث الدوري وإعادة الرسم على نفس الشاشة.
+    يُستدعى في نفس المهمة التي بنت العناصر، فيُرسم أول إطار وهي ظاهرة أصلاً:
+    الانتقالات لا تعمل على عنصر جديد حالته الأولى هي حالته النهائية. */
+export function settleReveal(root = document) {
+  root.querySelectorAll('.reveal').forEach((n) => n.classList.add('in'));
+}
+
 /** يوزّع تأخيراً متتالياً على أبناء عنصر لإحساس الموجة */
 export function stagger(container, step = 42, max = 16) {
   Array.from(container.children).forEach((c, i) => {

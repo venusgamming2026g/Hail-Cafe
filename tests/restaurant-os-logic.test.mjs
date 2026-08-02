@@ -179,3 +179,42 @@ test("a full-size state commit reaches the server instead of failing on keepaliv
   globalThis.fetch = realFetch;
   globalThis.setInterval = realSetInterval;
 });
+
+test("saving to the server does not echo a second repaint to every screen", async () => {
+  /* the server returns our own payload after each commit; publishing that as a
+     "remote update" rebuilt every open screen twice per action (visible flicker). */
+  const realFetch = globalThis.fetch;
+  const realSetInterval = globalThis.setInterval;
+  globalThis.setInterval = () => 0;
+  let saved = null;                              // the server remembers the last commit
+  globalThis.fetch = async (url, init) => {
+    let rows;
+    if (String(url).includes("hail_os_state_get")) {
+      rows = saved ? [saved] : [];
+    } else {
+      saved = { revision: (saved?.revision || 0) + 1, payload: JSON.parse(init.body).p_payload };
+      rows = [{ applied: true, ...saved }];
+    }
+    return { ok: true, status: 200, json: async () => rows };
+  };
+
+  seedClean();
+  await store.ready();
+  await store.flush();
+
+  const actions = [];
+  const unsubscribe = store.subscribe((s, action) => actions.push(action));
+  store.placeOrder({ lines: [line("echo-item", 3000)], type: "takeaway",
+    customer: { name: "زبون", phone: "0790000000" } });
+  assert.equal(await store.flush(), true, "the queue must drain");
+
+  assert.deepEqual(
+    actions.filter((a) => a === "remote.sync"), [],
+    "no remote.sync echo may fire when the server state matches what we just wrote",
+  );
+  assert.equal(actions.filter((a) => a === "order.place").length, 1);
+
+  unsubscribe();
+  globalThis.fetch = realFetch;
+  globalThis.setInterval = realSetInterval;
+});

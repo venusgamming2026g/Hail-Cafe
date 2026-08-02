@@ -57,17 +57,34 @@ function paintTabs() {
   host.innerHTML = TABS.map((t) => `
     <button data-tab="${t.id}" aria-selected="${tab === t.id}">${icon(t.ic)}<span>${t.ar}</span></button>`).join('');
   host.querySelectorAll('[data-tab]').forEach((b) =>
-    b.addEventListener('click', () => { tab = b.dataset.tab; notify.play('tap'); window.scrollTo(0, 0); render(); }));
+    b.addEventListener('click', () => { tab = b.dataset.tab; notify.play('tap'); window.scrollTo(0, 0); render(true); }));
 }
 
 /* ── العرض ───────────────────────────────────────────────────────────── */
-function render() {
+/* animate: حركة الظهور والعدّادات عند تبديل التبويب فقط. التحديث الدوري يرسم
+   القيم النهائية فوراً — العدّ من الصفر كل نصف دقيقة كان يوحي بتغيّر الأرقام. */
+function render(animate = false) {
+  const scrollY = window.scrollY;
   paintTabs();
-  document.getElementById('app').innerHTML = views[tab]();
+  const app = document.getElementById('app');
+  app.innerHTML = views[tab]();
   wire[tab]?.();
-  fx.initReveal(document.getElementById('app'));
-  document.querySelectorAll('[data-count]').forEach((n) =>
-    fx.countTo(n, Number(n.dataset.count), { fmt: (v) => n.dataset.money ? moneyPlain(v) : Math.round(v).toLocaleString('en-US') }));
+  if (animate) fx.initReveal(app); else fx.settleReveal(app);
+  const fmtFor = (n) => (v) => n.dataset.money ? moneyPlain(v) : Math.round(v).toLocaleString('en-US');
+  document.querySelectorAll('[data-count]').forEach((n) => {
+    const to = Number(n.dataset.count);
+    if (animate) fx.countTo(n, to, { fmt: fmtFor(n) });
+    else { n.dataset.val = to; n.textContent = fmtFor(n)(to); }
+  });
+  if (!animate) window.scrollTo(0, scrollY);
+}
+
+/* تحديث خلفي: يُؤجَّل أثناء الكتابة في حقل حتى لا يفقد المدير تركيزه ونصّه. */
+function refresh() {
+  if (document.hidden) return;
+  const el = document.activeElement;
+  if (el && document.getElementById('app').contains(el) && el.matches('input, textarea, select')) return;
+  render();
 }
 
 /* ── أدوات عرض ───────────────────────────────────────────────────────── */
@@ -888,6 +905,6 @@ function exportCsv(kind) {
 }
 
 /* ── التشغيل ─────────────────────────────────────────────────────────── */
-render();
-watchNotifications('admin', { onChange: () => { if (tab === 'dash' || tab === 'live') render(); } });
-setInterval(() => { if (tab === 'dash' || tab === 'live') render(); }, 30000);
+render(true);
+watchNotifications('admin', { onChange: () => { if (tab === 'dash' || tab === 'live') refresh(); } });
+setInterval(() => { if (tab === 'dash' || tab === 'live') refresh(); }, 30000);

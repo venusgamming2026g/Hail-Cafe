@@ -35,7 +35,7 @@ const paintLayout = () => {
 layoutBtn.addEventListener('click', () => {
   layout = layout === 'cols' ? 'grid' : 'cols';
   LS.set('hailos:kds:layout', layout);
-  paintLayout(); render(); notify.play('tap');
+  paintLayout(); render(true); notify.play('tap');
 });
 paintLayout();
 
@@ -84,7 +84,7 @@ function paintStations() {
     active = b.dataset.st === 'all' ? null : [b.dataset.st];
     LS.set(STATION_KEY, active);
     notify.play('tap');
-    paintStations(); render();
+    paintStations(); render(true);
   }));
 }
 
@@ -158,8 +158,11 @@ function kcard(o) {
 }
 
 /* ── العرض ───────────────────────────────────────────────────────────── */
-function render() {
+/* animate: حركة الظهور للرسم الأول وتبديل المحطات فقط. التحديث الدوري
+   وإشعارات المزامنة ترسم فوراً، وإلا اختفت الشاشة وعادت كل بضع ثوانٍ. */
+function render(animate = false) {
   const app = document.getElementById('app');
+  const scrollY = window.scrollY;
   const all = store.get().orders
     .filter((o) => ['pending', 'accepted', 'preparing', 'ready'].includes(o.status))
     .filter((o) => !active || o.lines.some((l) => active.includes(l.station)))
@@ -232,15 +235,19 @@ function render() {
     }));
   });
 
-  fx.initReveal(app);
+  if (animate) fx.initReveal(app); else fx.settleReveal(app);
+  window.scrollTo(0, scrollY);
   notify.setBadge(all.filter((o) => o.status === 'pending').length);
 }
 
 /* ── التحديث والمراقبة ───────────────────────────────────────────────── */
 paintStations();
 paintMetrics();
-render();
+render(true);
 
 watchNotifications('kds', { stations: active, onChange: () => { paintStations(); paintMetrics(); render(); } });
 watchLateOrders();
-setInterval(() => { paintMetrics(); render(); }, 15000);   // تحديث المؤقّتات
+setInterval(() => {
+  if (document.hidden) return;                             // لا معنى للتحديث والشاشة مخفية
+  paintMetrics(); render();
+}, 15000);   // تحديث المؤقّتات

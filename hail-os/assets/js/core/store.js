@@ -137,6 +137,24 @@ const clone = (value) => {
 };
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
+/* مقارنة عميقة لا تتأثر بترتيب المفاتيح — قاعدة البيانات تعيد ترتيب مفاتيح
+   JSONB، فمقارنة النصوص تعتبر المحتوى المتطابق مختلفاً وتعيد رسم الشاشات عبثاً. */
+function deepEqual(a, b) {
+  if (a === b) return true;
+  if (typeof a !== typeof b || a === null || b === null) return false;
+  if (typeof a !== 'object') return false;
+  if (Array.isArray(a) !== Array.isArray(b)) return false;
+  if (Array.isArray(a)) {
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) if (!deepEqual(a[i], b[i])) return false;
+    return true;
+  }
+  const keys = Object.keys(a);
+  if (keys.length !== Object.keys(b).length) return false;
+  for (const key of keys) if (!deepEqual(a[key], b[key])) return false;
+  return true;
+}
+
 function normalizeSharedState(input) {
   const next = { ...emptyState(), ...clone(input || {}) };
   for (const key of ARRAY_STATE_KEYS) if (!Array.isArray(next[key])) next[key] = [];
@@ -295,7 +313,15 @@ async function commitRemote(expectedRevision, payload, action) {
 }
 
 function publishRemoteState(next, action = 'remote.sync') {
-  state = normalizeSharedState(next);
+  const normalized = normalizeSharedState(next);
+
+  /* لا جديد فعلياً؟ لا إشعار ولا بثّ إذاً. الخادم يعيد لنا نسختنا بعد كل حفظ،
+     وإعلانها كتحديث كان يعيد بناء كل شاشة مرتين عند كل عملية ويرمّش الواجهة. */
+  const incoming = { ...normalized, version: 0 };
+  const current = { ...state, version: 0 };
+  if (deepEqual(incoming, current)) return;
+
+  state = normalized;
   state.version = Math.max(Number(state.version) || 0, Number(LS.get(KEY, null)?.version) || 0) + 1;
   persist();
   emit(action, { remote: true });

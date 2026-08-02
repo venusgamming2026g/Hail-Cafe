@@ -37,7 +37,9 @@ document.getElementById('bar').replaceWith(topbar({
 const actor = () => store.getActor()?.name || 'الصالة';
 
 /* ── العرض ───────────────────────────────────────────────────────────── */
-function render() {
+/* animate: حركة الظهور للرسم الأول فقط — التحديث الدوري يرسم فوراً بلا ترميش. */
+function render(animate = false) {
+  const scrollY = window.scrollY;
   const s = store.get();
   const calls = s.services.filter((x) => x.status !== 'done')
     .sort((a, b) => (store.SERVICE_TYPES[a.type]?.priority || 5) - (store.SERVICE_TYPES[b.type]?.priority || 5) || a.createdAt - b.createdAt);
@@ -121,7 +123,9 @@ function render() {
     </div>`;
 
   wire();
-  fx.initReveal(document.getElementById('app'));
+  const app = document.getElementById('app');
+  if (animate) fx.initReveal(app); else fx.settleReveal(app);
+  window.scrollTo(0, scrollY);
 }
 
 function tile(k, v, ic, cls) {
@@ -362,7 +366,7 @@ function addReservation() {
 }
 
 /* ── التشغيل ─────────────────────────────────────────────────────────── */
-render();
-watchNotifications('floor', { onChange: render });
+render(true);
+watchNotifications('floor', { onChange: () => render() });
 watchServiceSla();
-setInterval(render, 20000);
+setInterval(() => { if (!document.hidden) render(); }, 20000);

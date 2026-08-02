@@ -378,9 +378,15 @@ select.field { appearance: none; cursor: pointer;
 @keyframes shimmer { to { background-position: -220% 0; } }
 
 /* ── 13. الحركة عند الظهور ────────────────────────────────────────────── */
-.reveal { opacity: 0; transform: translate3d(0, 14px, 0); }
-.reveal.in { animation: reveal .58s var(--e-spring) forwards; animation-delay: var(--d, 0ms); }
-@keyframes reveal { to { opacity: 1; transform: none; } }
+/* transition لا animation: العنصر الذي يولد حاملاً صنف in يُرسم بحالته النهائية
+   فوراً بلا إعادة تشغيل للحركة — إعادة البناء الدورية كانت ترمّش الشاشة كلها.
+   كما يحرّر ذلك خاصية animation لحركات أخرى على العنصر نفسه (نبضة urgent مثلاً). */
+.reveal {
+  opacity: 0; transform: translate3d(0, 14px, 0);
+  transition: opacity .58s var(--e-spring), transform .58s var(--e-spring);
+  transition-delay: var(--d, 0ms);
+}
+.reveal.in { opacity: 1; transform: none; }
 
 .pop { animation: pop .42s var(--e-spring) both; }
 @keyframes pop { from { transform: scale(.86); opacity: 0; } }

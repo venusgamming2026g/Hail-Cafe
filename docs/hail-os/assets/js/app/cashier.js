@@ -61,15 +61,27 @@ function paintTabs() {
       ${t.ar}${n ? ` <span class="badge" style="margin-inline-start:4px">${n}</span>` : ''}</button>`;
   }).join('');
   document.getElementById('tabs').querySelectorAll('[data-tab]').forEach((b) =>
-    b.addEventListener('click', () => { tab = b.dataset.tab; notify.play('tap'); render(); }));
+    b.addEventListener('click', () => { tab = b.dataset.tab; notify.play('tap'); render(true); }));
 }
 
 /* ── العرض ───────────────────────────────────────────────────────────── */
-function render() {
+/* animate: حركة الظهور عند تبديل التبويب فقط — باقي التحديثات ترسم فوراً. */
+function render(animate = false) {
+  const scrollY = window.scrollY;
   paintTabs();
-  document.getElementById('app').innerHTML = views[tab]();
+  const app = document.getElementById('app');
+  app.innerHTML = views[tab]();
   wire[tab]?.();
-  fx.initReveal(document.getElementById('app'));
+  if (animate) fx.initReveal(app); else fx.settleReveal(app);
+  window.scrollTo(0, scrollY);
+}
+
+/* تحديث خلفي: يُؤجَّل ما دام الكاشير يكتب في حقل حتى لا يفقد تركيزه ونصّه. */
+function refresh() {
+  if (document.hidden) return;
+  const el = document.activeElement;
+  if (el && document.getElementById('app').contains(el) && el.matches('input, textarea, select')) return;
+  render();
 }
 
 const views = {
@@ -686,6 +698,6 @@ function printShift() {
 }
 
 /* ── التشغيل ─────────────────────────────────────────────────────────── */
-render();
-watchNotifications('cashier', { onChange: render });
-setInterval(render, 25000);
+render(true);
+watchNotifications('cashier', { onChange: refresh });
+setInterval(refresh, 25000);
