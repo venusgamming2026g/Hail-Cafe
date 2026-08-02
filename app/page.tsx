@@ -1,4 +1,4 @@
-import { CustomerApp } from "../components/customer-app";
+import { HomeApp } from "../components/home-app";
 import {
   officialBranch,
   officialMapUrl,
@@ -47,7 +47,7 @@ export default function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      <CustomerApp />
+      <HomeApp />
     </>
   );
 }

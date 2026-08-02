@@ -3,7 +3,7 @@ export const officialMapUrl =
 
 /* المنيو صار رقمياً بالكامل في lib/menu-data.ts (209 أصناف، 26 قسماً).
    ملف الـ PDF أُزيل — الأصناف والأسعار تُقرأ من البيانات لا من ملف. */
-export const officialMenuUrl = "/#menu";
+export const officialMenuUrl = "/menu";
 
 export const officialBranch = {
   id: "irbid-city-center",

@@ -30,6 +30,7 @@ import {
   WifiOff,
   X,
 } from "lucide-react";
+import Link from "next/link";
 import {
   useCallback,
   useEffect,
@@ -732,15 +733,15 @@ export function CustomerApp() {
       </a>
 
       <header className="site-header">
-        <a href="#" className="brand-link" aria-label={officialBranch.nameEn}>
+        <Link href="/" className="brand-link" aria-label={officialBranch.nameEn}>
           <img src="/hail-logo.png" width="70" height="70" alt={officialBranch.nameAr} />
-        </a>
+        </Link>
         <nav className="desktop-nav" aria-label={locale === "ar" ? "التنقل الرئيسي" : "Primary navigation"}>
+          <Link href="/">{locale === "ar" ? "الرئيسية" : "Home"}</Link>
           <button type="button" onClick={scrollToMenu}>
             {text.menu}
           </button>
-          <a href="#reserve">{locale === "ar" ? "احجز" : "Reserve"}</a>
-          <a href="#atmosphere">{locale === "ar" ? "أجواءنا" : "Atmosphere"}</a>
+          <Link href="/#reserve">{locale === "ar" ? "احجز" : "Reserve"}</Link>
           <a href={officialMapUrl} target="_blank" rel="noreferrer">
             {text.location}
           </a>
@@ -790,22 +791,22 @@ export function CustomerApp() {
             <h1>
               {locale === "ar" ? (
                 <>
-                  من المطبخ للطاولة،
+                  المنيو على مزاجك،
                   <br />
-                  <span>الطلب ما يضيع.</span>
+                  <span>والطلب أسهل.</span>
                 </>
               ) : (
                 <>
-                  From kitchen to table,
+                  The full menu,
                   <br />
-                  <span>every order stays visible.</span>
+                  <span>ordering made simple.</span>
                 </>
               )}
             </h1>
             <p className="hero-lead">
               {locale === "ar"
-                ? "منيو حقيقي، طلبات بجولات، خدمة طاولة فورية، وحالة واضحة من أول كبسة حتى التقديم."
-                : "A real menu, multi-round ordering, instant table service, and a clear status from tap to serving."}
+                ? "كل أطباق هيل بمكان واحد. اختَر سفري أو ابدأ جلسة طاولة وتابع الطلب حتى التقديم."
+                : "All Hail Cafe dishes in one place. Choose takeaway or start a table session and follow every order."}
             </p>
             <div className="hero-actions">
               <button className="primary-button" type="button" onClick={scrollToMenu}>
@@ -823,10 +824,10 @@ export function CustomerApp() {
                 <Utensils size={20} aria-hidden="true" />
                 {locale === "ar" ? "أنا على طاولة" : "I'm at a table"}
               </button>
-              <a className="secondary-button" href="#reserve">
+              <Link className="secondary-button" href="/#reserve">
                 <CalendarDays size={20} aria-hidden="true" />
                 {locale === "ar" ? "احجز طاولتك" : "Reserve a table"}
-              </a>
+              </Link>
             </div>
             <div className="hero-facts">
               <a href={officialMapUrl} target="_blank" rel="noreferrer">
@@ -849,25 +850,18 @@ export function CustomerApp() {
           <div
             className="hero-hatch"
             role="img"
-            aria-label={locale === "ar" ? "أطباق حقيقية من منيو هيل" : "Real dishes from Hail's menu"}
+            aria-label={locale === "ar" ? "تشكيلة فطور من منيو هيل" : "A breakfast spread from Hail's menu"}
           >
-            <div className="hatch-arch" aria-hidden="true">
+            <div className="hatch-arch menu-cover-arch" aria-hidden="true">
               <img
-                className="hero-dish hero-dish-main"
-                src="/menu/combo-platter.webp"
-                width="460"
-                height="320"
-                alt=""
-              />
-              <img
-                className="hero-dish hero-dish-side"
-                src="/menu/mango-juice.webp"
-                width="180"
-                height="260"
+                className="menu-cover-image"
+                src="/hail-gallery/menu-hero.jpeg"
+                width="1164"
+                height="795"
                 alt=""
               />
               <span className="hatch-label">
-                {locale === "ar" ? "من منيو هيل" : "From the Hail menu"}
+                {locale === "ar" ? "منيو هيل الكامل" : "The full Hail menu"}
               </span>
             </div>
           </div>

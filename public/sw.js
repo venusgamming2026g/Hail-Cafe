@@ -9,11 +9,14 @@
  *
  * عند أي تغيير في هذا الملف ارفع رقم النسخة ليُمسح الكاش القديم.
  */
-const CACHE_NAME = "hail-cafe-shell-v3";
+const CACHE_NAME = "hail-cafe-shell-v4";
 
 const SHELL = [
   "/",
+  "/menu",
   "/hail-logo.png",
+  "/hail-gallery/home-hero.jpeg",
+  "/hail-gallery/menu-hero.jpeg",
   "/menu/combo-platter.webp",
   "/menu/mango-juice.webp",
 ];
@@ -57,17 +60,22 @@ self.addEventListener("fetch", (event) => {
 
   // التنقّل: الشبكة أولاً، والصفحة المخبّأة عند الانقطاع
   if (event.request.mode === "navigate") {
+    const pageKey = url.pathname === "/menu" ? "/menu" : "/";
     event.respondWith(
       fetch(event.request)
         .then((response) => {
           const clone = response.clone();
           caches
             .open(CACHE_NAME)
-            .then((cache) => cache.put("/", clone))
+            .then((cache) => cache.put(pageKey, clone))
             .catch(() => undefined);
           return response;
         })
-        .catch(() => caches.match("/")),
+        .catch(() =>
+          caches
+            .match(pageKey)
+            .then((response) => response ?? caches.match("/")),
+        ),
     );
     return;
   }

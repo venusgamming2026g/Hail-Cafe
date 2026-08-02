@@ -2,24 +2,35 @@ import assert from "node:assert/strict";
 import { access, readFile } from "node:fs/promises";
 import test from "node:test";
 
-test("build contains the Hail Cafe customer experience", async () => {
-  const [page, layout, customer] = await Promise.all([
+test("build contains the Hail Cafe landing and menu experiences", async () => {
+  const [page, menuPage, layout, home, customer] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/menu/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../components/home-app.tsx", import.meta.url), "utf8"),
     readFile(new URL("../components/customer-app.tsx", import.meta.url), "utf8"),
   ]);
 
   assert.match(page, /application\/ld\+json/);
   assert.match(page, /Restaurant/);
   assert.match(page, /CafeOrCoffeeShop/);
+  assert.match(page, /HomeApp/);
+  assert.match(menuPage, /CustomerApp/);
   assert.match(layout, /Hail Cafe/);
   assert.match(layout, /\/og\.png/);
   assert.match(layout, /manifest\.webmanifest/);
   assert.match(customer, /طلب الحساب/);
   assert.match(customer, /localStorage/);
   assert.match(customer, /serviceWorker/);
+  assert.match(customer, /hail-gallery\/menu-hero\.jpeg/);
+  assert.match(home, /hail-gallery\/home-hero\.jpeg/);
+  assert.match(home, /hail-gallery\/combo-platter\.jpeg/);
   assert.doesNotMatch(page + layout, /Your site is taking shape/);
-  await access(new URL("../dist/server/index.js", import.meta.url));
+  await Promise.all([
+    access(new URL("../dist/server/index.js", import.meta.url)),
+    access(new URL("../public/hail-gallery/home-hero.jpeg", import.meta.url)),
+    access(new URL("../public/hail-gallery/menu-hero.jpeg", import.meta.url)),
+  ]);
 });
 
 test("local restaurant system supports named split bills", async () => {
