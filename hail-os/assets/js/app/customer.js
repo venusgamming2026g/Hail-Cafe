@@ -395,13 +395,16 @@ const views = {
     </div>`;
   },
 
-  /* ④  الفاتورة */
+  /* ④  الفاتورة — تقسيم بالأسماء قبل إرسالها للكاشير */
   bill() {
     if (!session) return `<div class="empty"><div class="ic">${icon('wallet')}</div><h3>الفاتورة متاحة داخل الفرع</h3></div>`;
     const b = store.sessionBill(session.id);
     const payerBills = store.sessionPayerBills(session.id);
     const orders = store.sessionOrders(session.id);
     const namedPayers = payerBills.filter((p) => p.name !== 'حساب الطاولة');
+    const shared = payerBills.find((p) => p.name === 'حساب الطاولة');
+    const unassigned = shared ? shared.orders.length : 0;
+    const nameChoices = [...new Set([...tableGuests(), ...SUGGESTED_NAMES, payerName].filter(Boolean))];
     if (!b.orders.length) {
       return `<div class="empty"><div class="ic">${icon('wallet')}</div>
         <h3>الفاتورة فارغة</h3><p class="t-sm">لم تُسجَّل أي طلبات على هذه الجلسة بعد.</p></div>`;
@@ -409,64 +412,84 @@ const views = {
     const asked = store.get().services.some((s) => s.sessionId === session.id && s.type === 'bill' && s.status !== 'done');
     return `<div class="page-pad col" style="gap:var(--s4)">
       <div class="glass edge-gold pad">
+        <p class="eyebrow mb2">الطاولة ${tableNumber}</p>
+        <h2 class="mb2">${icon('split')} قسّم الفاتورة قبل الكاشير</h2>
+        <p class="mute t-sm" style="line-height:1.6">
+          إذا طلبتوا كل واحد من تلفونه — الحسابات جاهزة.<br>
+          إذا حدا طلب للكل: وزّع كل طلب على اسم، والضريبة والخدمة تنقسم تلقائياً، وبعدين أرسل للكاشير.
+        </p>
+        ${unassigned ? `<p class="txt-warn t-sm mt3">${icon('alert')} باقي ${unassigned} طلب بدون اسم (حساب الطاولة)</p>` : `
+          <p class="txt-ok t-sm mt3">${icon('check')} كل الطلبات موزّعة بالأسماء — جاهزة للكاشير</p>`}
+      </div>
+
+      <div class="glass pad">
         <div class="between mb3">
-          <div>
-            <p class="eyebrow">فاتورة الطاولة ${tableNumber}</p>
-            <b>${namedPayers.length || 1} حساب · ${b.orders.length} طلب</b>
-          </div>
-          <span class="chip">${icon('clock')} ${since(session.openedAt)}</span>
+          <b class="t-sm">${icon('receipt')} وزّع الطلبات على الأسماء</b>
+          <span class="chip">${orders.length} طلب</span>
         </div>
-        <div class="col" style="gap:8px">
-          ${payerBills.map((payer) => `
-            <div class="between dashed" style="padding:11px 12px;border-radius:14px;background:rgba(255,255,255,.03)">
-              <span>
-                <b class="t-sm">${esc(payer.name)}</b>
-                <small class="mute" style="display:block">${payer.orders.length} طلب · ${sum(payer.lines, (line) => line.qty)} صنف</small>
-              </span>
-              <span class="num ${payer.due > 0 ? 'txt-gold' : 'txt-ok'}">${payer.due > 0 ? money(payer.due) : 'مدفوع'}</span>
-            </div>`).join('')}
-        </div>
-        <div class="bill mt4">
-          <div class="r"><span class="mute">المجموع</span><span>${money(b.subtotal, false)}</span></div>
-          ${b.service ? `<div class="r"><span class="mute">خدمة</span><span>${money(b.service, false)}</span></div>` : ''}
-          <div class="r"><span class="mute">ضريبة</span><span>${money(b.tax, false)}</span></div>
-          <div class="r total"><span>المطلوب</span><span class="v">${money(b.due)}</span></div>
+        <div class="col" style="gap:12px">
+          ${orders.map((o) => {
+            const owner = String(o.customer?.name || '').trim();
+            return `
+            <div class="dashed" style="padding:12px;border-radius:16px;${owner ? 'border-color:rgba(46,158,126,.35)' : 'border-color:rgba(209,80,47,.35)'}">
+              <div class="between mb2">
+                <span>
+                  <b class="t-sm">${esc(o.code)}</b>
+                  <span class="chip ${owner ? 'chip-ok' : 'chip-warn'}" style="margin-inline-start:6px">${esc(owner || 'بدون اسم')}</span>
+                  <small class="mute" style="display:block;margin-top:4px">${o.lines.map((l) => `${esc(l.ar)}×${l.qty}`).join(' · ')}</small>
+                </span>
+                <span class="num txt-gold">${money(o.total)}</span>
+              </div>
+              <label class="label" for="bn-${o.id}">اسم صاحب هذا الطلب</label>
+              <div class="row" style="gap:8px">
+                <input class="field grow" id="bn-${o.id}" data-bill-name="${o.id}" maxlength="60"
+                  placeholder="مثال: أحمد" value="${esc(owner)}">
+                <button class="btn btn-sm btn-gold" data-save-bill-name="${o.id}">تثبيت</button>
+              </div>
+              <div class="row wrap-x mt2" style="gap:6px">
+                ${nameChoices.slice(0, 10).map((n) =>
+                  `<button type="button" class="chip ${owner === n ? 'chip-gold' : ''}" data-quick-bill-name="${o.id}" data-name="${esc(n)}">${esc(n)}</button>`).join('')}
+              </div>
+            </div>`;
+          }).join('')}
         </div>
       </div>
 
       <div class="glass pad">
-        <div class="between mb2">
-          <b class="t-sm">${icon('split')} قسّم الطلبات بالأسماء</b>
-          <span class="chip">احتياط</span>
+        <div class="between mb3">
+          <b class="t-sm">${icon('users')} الحسابات بعد التقسيم</b>
+          <span class="chip chip-ok">${Math.max(namedPayers.length, payerBills.length)} حساب</span>
         </div>
-        <p class="mute t-xs mb4">إذا حدا طلب للكل من جهاز واحد: عيّن اسم لكل طلب هنا قبل ما تروحوا على الكاشير.</p>
         <div class="col" style="gap:10px">
-          ${orders.map((o) => `
-            <div class="dashed" style="padding:11px 12px;border-radius:14px">
+          ${payerBills.map((payer) => `
+            <div style="padding:12px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid var(--hairline)">
               <div class="between mb2">
-                <span>
-                  <b class="t-sm">${esc(o.code)}</b>
-                  <small class="mute" style="display:block">${o.lines.map((l) => `${l.ar}×${l.qty}`).slice(0, 3).map(esc).join(' · ')}${o.lines.length > 3 ? '…' : ''}</small>
-                </span>
-                <span class="num t-sm">${money(o.total)}</span>
+                <b>${esc(payer.name)}</b>
+                <b class="num txt-gold">${money(payer.due)}</b>
               </div>
-              <div class="row" style="gap:8px">
-                <input class="field grow" data-bill-name="${o.id}" maxlength="60"
-                  placeholder="اسم صاحب الطلب" value="${esc(o.customer?.name || '')}">
-                <button class="btn btn-sm btn-gold" data-save-bill-name="${o.id}">حفظ</button>
-              </div>
-              <div class="row wrap-x mt2" style="gap:6px">
-                ${[...new Set([...tableGuests(), ...SUGGESTED_NAMES])].slice(0, 8).map((n) =>
-                  `<button type="button" class="chip" data-quick-bill-name="${o.id}" data-name="${esc(n)}">${esc(n)}</button>`).join('')}
+              <small class="mute" style="display:block;margin-bottom:8px">${payer.orders.length} طلب · ${sum(payer.lines, (l) => l.qty)} صنف</small>
+              <div class="bill">
+                <div class="r"><span class="mute">مجموع الأصناف</span><span>${money(payer.subtotal, false)}</span></div>
+                ${payer.service ? `<div class="r"><span class="mute">خدمة</span><span>${money(payer.service, false)}</span></div>` : ''}
+                <div class="r"><span class="mute">ضريبة</span><span>${money(payer.tax, false)}</span></div>
+                <div class="r total"><span>يدفع</span><span class="v">${money(payer.due)}</span></div>
               </div>
             </div>`).join('')}
         </div>
+        <div class="bill mt4" style="opacity:.85">
+          <div class="r"><span class="mute">إجمالي الطاولة</span><span>${money(b.subtotal, false)}</span></div>
+          ${b.service ? `<div class="r"><span class="mute">خدمة الطاولة</span><span>${money(b.service, false)}</span></div>` : ''}
+          <div class="r"><span class="mute">ضريبة الطاولة</span><span>${money(b.tax, false)}</span></div>
+          <div class="r total"><span>المطلوب الكلي</span><span class="v">${money(b.due)}</span></div>
+        </div>
       </div>
 
-      <button class="btn ${asked ? 'btn-ok' : 'btn-gold'} btn-lg btn-block" data-ask-bill ${asked ? 'disabled' : ''}>
-        ${icon(asked ? 'check' : 'receipt')} ${asked ? 'تم إبلاغ الكاشير — في الطريق إليك' : 'اطلب الفاتورة'}
+      <button class="btn ${asked ? 'btn-ok' : 'btn-gold'} btn-lg btn-block" data-ask-bill ${asked ? 'disabled' : ''} data-unassigned="${unassigned}">
+        ${icon(asked ? 'check' : 'receipt')} ${asked ? 'تم إرسال الفاتورة للكاشير' : (unassigned ? 'أرسل للكاشير (بعد التقسيم أو كحساب مشترك)' : 'أرسل الفاتورة المقسومة للكاشير')}
       </button>
-      <p class="mute t-xs" style="text-align:center">الدفع عند الكاشير. كل اسم = حساب منفصل.</p>
+      <p class="mute t-xs" style="text-align:center;line-height:1.55">
+        بعد الإرسال يظهر عند الكاشير كل اسم كحساب منفصل للتحصيل.
+      </p>
     </div>`;
   },
 };
@@ -634,9 +657,24 @@ const wire = {
   },
 
   bill(root) {
-    root.querySelector('[data-ask-bill]')?.addEventListener('click', () => {
-      store.callService({ sessionId: session.id, tableNumber, type: 'bill', actor: 'الزبون' });
-      notify.toast('تم طلب الفاتورة', { body: 'الكاشير في طريقه إليك', tone: 'ok', sound: 'success' });
+    root.querySelector('[data-ask-bill]')?.addEventListener('click', async () => {
+      const unassigned = Number(root.querySelector('[data-ask-bill]')?.dataset.unassigned || 0);
+      if (unassigned > 0) {
+        const go = await notify.confirmBox('في طلبات بدون اسم', {
+          body: `${unassigned} طلب لسا على «حساب الطاولة». بتقدر تقسّمهم هلق، أو ترسل للكاشير كحساب مشترك.`,
+          okText: 'أرسل كمشترك',
+          cancelText: 'أرجع أقسّم',
+          tone: 'warn',
+        });
+        if (!go) return;
+      }
+      store.callService({ sessionId: session.id, tableNumber, type: 'bill', actor: payerName || 'الزبون' });
+      const bills = store.sessionPayerBills(session.id);
+      const named = bills.filter((p) => p.name !== 'حساب الطاولة').length;
+      notify.toast(named > 1 ? `اترسلت ${named} فواتير مقسومة للكاشير` : 'تم إرسال الفاتورة للكاشير', {
+        body: 'كل اسم يظهر حسابه منفصل عند التحصيل',
+        tone: 'ok', sound: 'success',
+      });
       fx.burst(window.innerWidth / 2, window.innerHeight * 0.4, 28);
       render();
     });
@@ -646,7 +684,7 @@ const wire = {
         const input = root.querySelector(`[data-bill-name="${id}"]`);
         const name = clean(input?.value, 60);
         store.setOrderPayerName(id, name, payerName || 'الزبون');
-        notify.toast(name ? `صار الطلب على حساب ${name}` : 'رجع لحساب الطاولة', { tone: 'ok', sound: 'success' });
+        notify.toast(name ? `طلب مثبت على حساب ${name}` : 'رجع لحساب الطاولة', { tone: 'ok', sound: 'success' });
         render();
       });
     });
@@ -654,11 +692,9 @@ const wire = {
       btn.addEventListener('click', () => {
         const id = btn.dataset.quickBillName;
         const name = btn.dataset.name || '';
-        const input = root.querySelector(`[data-bill-name="${id}"]`);
-        if (input) input.value = name;
         store.setOrderPayerName(id, name, payerName || 'الزبون');
         notify.play('tap');
-        notify.toast(`صار الطلب على حساب ${name}`, { tone: 'ok' });
+        notify.toast(`على حساب ${name}`, { tone: 'ok' });
         render();
       });
     });
