@@ -7,15 +7,19 @@ import { icon, esc } from './util.js';
 import * as store from './store.js';
 import * as fx from './fx.js';
 import * as notify from './notify.js';
-import { seed } from '../data/seed.js';
+import { seed, seedClean } from '../data/seed.js';
 
 /* ── الإقلاع ─────────────────────────────────────────────────────────── */
-export function boot({ title = 'هيل كافيه', autoSeed = true } = {}) {
+export async function boot({ title = 'هيل كافيه', autoSeed = true } = {}) {
+  await store.ready();
   const s = store.get();
   fx.applyTheme(s.settings.theme);
   fx.initFx();
   notify.setBaseTitle(title);
-  if (autoSeed && !s.seeded) seed();
+  if (autoSeed && !s.seeded) {
+    if (store.hasRemoteBackend()) seedClean();
+    else seed();
+  }
   document.documentElement.lang = 'ar';
   document.documentElement.dir = 'rtl';
 

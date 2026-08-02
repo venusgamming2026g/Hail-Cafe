@@ -90,7 +90,7 @@ function paintWho() {
 }
 
 /* ── الإقلاع ─────────────────────────────────────────────────────────── */
-boot({ title: tableNumber ? `هيل كافيه — طاولة ${tableNumber}` : 'هيل كافيه — المنيو' });
+await boot({ title: tableNumber ? `هيل كافيه — طاولة ${tableNumber}` : 'هيل كافيه — المنيو' });
 
 if (tableNumber) {
   session = store.openSessionForTable(tableNumber)
@@ -131,6 +131,10 @@ watchNotifications('customer', {
   },
 });
 store.subscribe(() => {
+  if (tableNumber) {
+    const activeSession = store.openSessionForTable(tableNumber);
+    if (activeSession && activeSession.id !== session?.id) session = activeSession;
+  }
   if (tab === 'menu') {
     paintTabbar();
     return;

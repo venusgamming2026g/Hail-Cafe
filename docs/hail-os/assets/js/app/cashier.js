@@ -17,7 +17,7 @@ let posCat = 'breakfast';
 let posType = 'takeaway';
 let posTable = null;
 
-boot({ title: 'الكاشير — هيل كافيه' });
+await boot({ title: 'الكاشير — هيل كافيه' });
 await staffGate({ surface: 'cashier', title: 'دخول الكاشير' });
 
 /* ── الشريط العلوي ───────────────────────────────────────────────────── */

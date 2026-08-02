@@ -69,3 +69,22 @@ test("ships operations, persistence, idempotency, and offline support", async ()
   assert.match(serviceWorker, /url\.pathname\.startsWith\("\/api\/"\)/);
   assert.match(packageJson, /"name": "hail-cafe-platform"/);
 });
+
+test("restaurant screens use the shared Supabase state without exposing server secrets", async () => {
+  const [backend, store, migration, publishedStore, publicStore] = await Promise.all([
+    readFile(new URL("../hail-os/assets/js/data/backend.js", import.meta.url), "utf8"),
+    readFile(new URL("../hail-os/assets/js/core/store.js", import.meta.url), "utf8"),
+    readFile(new URL("../supabase/migrations/20260802143000_hail_os_shared_state.sql", import.meta.url), "utf8"),
+    readFile(new URL("../docs/hail-os/assets/js/core/store.js", import.meta.url), "utf8"),
+    readFile(new URL("../public/hail-os/assets/js/core/store.js", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(backend, /sb_publishable_/);
+  assert.doesNotMatch(backend + store, /sb_secret_|service_role/);
+  assert.match(store, /hail_os_state_commit/);
+  assert.match(store, /normalizeSharedState/);
+  assert.match(migration, /security definer/i);
+  assert.match(migration, /revoke all on public\.hail_os_state from anon, authenticated/i);
+  assert.equal(publishedStore, store);
+  assert.equal(publicStore, store);
+});

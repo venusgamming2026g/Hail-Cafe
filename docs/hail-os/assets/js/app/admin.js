@@ -15,7 +15,7 @@ let tab = 'dash';
 let menuFilter = '';
 let menuCat = 'all';
 
-boot({ title: 'الإدارة — هيل كافيه' });
+await boot({ title: 'الإدارة — هيل كافيه' });
 await staffGate({ surface: 'admin', title: 'دخول الإدارة' });
 
 /* ── الشريط العلوي ───────────────────────────────────────────────────── */
@@ -813,6 +813,12 @@ const wire = {
       });
       if (!ok) return;
       seedClean();
+      const synced = await store.flush();
+      if (!synced) {
+        notify.toast('تمت التهيئة محلياً، لكن الاتصال بالسحابة متوقف. أبقِ الصفحة مفتوحة حتى تعود المزامنة.', { tone: 'warn', sound: 'error' });
+        render();
+        return;
+      }
       store.clearActor();
       notify.toast('النظام نظيف وجاهز للعمل', { tone: 'info' });
       location.reload();

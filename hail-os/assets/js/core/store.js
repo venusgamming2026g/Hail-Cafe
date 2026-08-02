@@ -6,6 +6,7 @@
 
 import { uid, orderCode, sum, LS } from './util.js';
 import { items as MENU_ITEMS, categories as MENU_CATS, byId as MENU_BY_ID, TAX_RATE } from '../data/menu.js';
+import { BACKEND } from '../data/backend.js';
 
 const KEY = 'hailos:state:v1';
 const CHANNEL = 'hailos:sync';
@@ -110,6 +111,286 @@ function broadcast(action) {
 
 export const TAB_ID = uid('tab');
 
+/* ── المزامنة السحابية بين الأجهزة ──────────────────────────────────── */
+const ARRAY_STATE_KEYS = [
+  'tables', 'sessions', 'orders', 'services', 'payments',
+  'staff', 'inventory', 'reservations', 'events',
+];
+const OBJECT_STATE_KEYS = ['settings', 'menuOverrides', 'counters'];
+const SCALAR_STATE_KEYS = ['v', 'seeded', 'startedAt'];
+
+const remote = {
+  started: false,
+  ready: null,
+  revision: 0,
+  queue: [],
+  flushing: false,
+  timer: null,
+  online: false,
+  lastError: '',
+  lastSyncAt: 0,
+};
+
+const clone = (value) => {
+  if (typeof structuredClone === 'function') return structuredClone(value);
+  return JSON.parse(JSON.stringify(value));
+};
+const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+
+function normalizeSharedState(input) {
+  const next = { ...emptyState(), ...clone(input || {}) };
+  for (const key of ARRAY_STATE_KEYS) if (!Array.isArray(next[key])) next[key] = [];
+  for (const key of OBJECT_STATE_KEYS) if (!next[key] || typeof next[key] !== 'object') next[key] = {};
+
+  /* إذا فُتحت الطاولة من هاتفين في اللحظة نفسها نوحّد الجلستين تلقائياً. */
+  const canonicalByTable = new Map();
+  const duplicateSessions = new Map();
+  const openSessions = next.sessions
+    .filter((session) => session.status === 'open')
+    .sort((a, b) => (a.openedAt || 0) - (b.openedAt || 0));
+  for (const session of openSessions) {
+    const table = Number(session.tableNumber);
+    if (!canonicalByTable.has(table)) canonicalByTable.set(table, session);
+    else duplicateSessions.set(session.id, canonicalByTable.get(table).id);
+  }
+  if (duplicateSessions.size) {
+    next.sessions = next.sessions.filter((session) => !duplicateSessions.has(session.id));
+    for (const order of next.orders) {
+      if (duplicateSessions.has(order.sessionId)) order.sessionId = duplicateSessions.get(order.sessionId);
+    }
+    for (const service of next.services) {
+      if (duplicateSessions.has(service.sessionId)) service.sessionId = duplicateSessions.get(service.sessionId);
+    }
+  }
+  for (const table of next.tables) {
+    const open = canonicalByTable.get(Number(table.number));
+    if (open) {
+      table.sessionId = open.id;
+      if (table.status === 'free') table.status = 'seated';
+    } else if (table.sessionId && !next.sessions.some((session) => session.id === table.sessionId && session.status === 'open')) {
+      table.sessionId = null;
+    }
+  }
+
+  /* يمنع تكرار رقم الطلب عند إرسال هاتفين طلباً في نفس اللحظة. */
+  const usedSequences = new Set();
+  let maxSequence = Math.max(1000, Number(next.counters.orderSeq) || 1000);
+  const chronological = [...next.orders].sort((a, b) => (a.placedAt || 0) - (b.placedAt || 0));
+  for (const order of chronological) {
+    let sequence = Number(order.seq);
+    if (!Number.isInteger(sequence) || sequence < 1 || usedSequences.has(sequence)) {
+      sequence = maxSequence + 1;
+      order.seq = sequence;
+      order.code = orderCode(sequence);
+    }
+    usedSequences.add(sequence);
+    maxSequence = Math.max(maxSequence, sequence);
+  }
+  next.counters.orderSeq = maxSequence;
+
+  next.orders.sort((a, b) => (b.placedAt || 0) - (a.placedAt || 0));
+  next.sessions.sort((a, b) => (b.openedAt || 0) - (a.openedAt || 0));
+  next.services.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  next.payments.sort((a, b) => (b.at || 0) - (a.at || 0));
+  next.events.sort((a, b) => (b.at || 0) - (a.at || 0));
+  if (next.events.length > 600) next.events.length = 600;
+  return next;
+}
+
+function statePatch(before, after) {
+  const patch = { arrays: {}, objects: {}, scalars: {} };
+  for (const key of ARRAY_STATE_KEYS) {
+    const previous = new Map((before[key] || []).map((entry) => [entry.id, entry]));
+    const current = new Map((after[key] || []).map((entry) => [entry.id, entry]));
+    const upsert = [];
+    const remove = [];
+    for (const [id, entry] of current) if (!previous.has(id) || !same(previous.get(id), entry)) upsert.push(clone(entry));
+    for (const id of previous.keys()) if (!current.has(id)) remove.push(id);
+    if (upsert.length || remove.length) patch.arrays[key] = { upsert, remove };
+  }
+  for (const key of OBJECT_STATE_KEYS) {
+    const previous = before[key] || {};
+    const current = after[key] || {};
+    const set = {};
+    const remove = [];
+    for (const [name, value] of Object.entries(current)) {
+      if (!(name in previous) || !same(previous[name], value)) set[name] = clone(value);
+    }
+    for (const name of Object.keys(previous)) if (!(name in current)) remove.push(name);
+    if (Object.keys(set).length || remove.length) patch.objects[key] = { set, remove };
+  }
+  for (const key of SCALAR_STATE_KEYS) if (!same(before[key], after[key])) patch.scalars[key] = clone(after[key]);
+  return patch;
+}
+
+function applyPatch(base, patch) {
+  if (patch.replace) return normalizeSharedState(patch.payload);
+  const next = normalizeSharedState(base);
+  for (const [key, changes] of Object.entries(patch.arrays || {})) {
+    const entries = new Map((next[key] || []).map((entry) => [entry.id, entry]));
+    for (const id of changes.remove || []) entries.delete(id);
+    for (const entry of changes.upsert || []) entries.set(entry.id, clone(entry));
+    next[key] = [...entries.values()];
+  }
+  for (const [key, changes] of Object.entries(patch.objects || {})) {
+    next[key] = { ...(next[key] || {}) };
+    for (const name of changes.remove || []) delete next[key][name];
+    Object.assign(next[key], clone(changes.set || {}));
+  }
+  Object.assign(next, clone(patch.scalars || {}));
+  return normalizeSharedState(next);
+}
+
+function setRemoteStatus(online, error = '') {
+  const changed = remote.online !== online || remote.lastError !== error;
+  remote.online = online;
+  remote.lastError = error;
+  if (online) remote.lastSyncAt = Date.now();
+  if (changed) emit('remote.status', { remote: true, online, error });
+}
+
+async function rpc(name, body) {
+  const response = await fetch(`${BACKEND.url}/rest/v1/rpc/${name}`, {
+    method: 'POST',
+    headers: {
+      apikey: BACKEND.publishableKey,
+      Authorization: `Bearer ${BACKEND.publishableKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+    cache: 'no-store',
+    keepalive: true,
+  });
+  if (!response.ok) throw new Error(`sync-${response.status}`);
+  return response.json();
+}
+
+async function fetchRemote() {
+  const rows = await rpc('hail_os_state_get', { p_scope: BACKEND.scope });
+  if (!Array.isArray(rows) || !rows.length) return { revision: 0, payload: null };
+  return { revision: Number(rows[0].revision) || 0, payload: rows[0].payload };
+}
+
+async function commitRemote(expectedRevision, payload, action) {
+  const rows = await rpc('hail_os_state_commit', {
+    p_scope: BACKEND.scope,
+    p_expected_revision: expectedRevision,
+    p_payload: payload,
+    p_client_id: TAB_ID,
+    p_action: action,
+  });
+  if (!Array.isArray(rows) || !rows.length) return fetchRemote().then((fresh) => ({ applied: false, ...fresh }));
+  return {
+    applied: Boolean(rows[0].applied),
+    revision: Number(rows[0].revision) || 0,
+    payload: rows[0].payload,
+  };
+}
+
+function publishRemoteState(next, action = 'remote.sync') {
+  state = normalizeSharedState(next);
+  state.version = Math.max(Number(state.version) || 0, Number(LS.get(KEY, null)?.version) || 0) + 1;
+  persist();
+  emit(action, { remote: true });
+  broadcast(action);
+}
+
+async function flushRemote() {
+  if (!remote.started || remote.flushing || !remote.queue.length) return;
+  remote.flushing = true;
+  try {
+    while (remote.queue.length) {
+      const batch = remote.queue.slice();
+      let fresh = await fetchRemote();
+      let desired = fresh.payload ? normalizeSharedState(fresh.payload) : emptyState();
+      for (const item of batch) desired = applyPatch(desired, item.patch);
+      desired.version = Math.max(Number(desired.version) || 0, Number(state.version) || 0) + 1;
+
+      const saved = await commitRemote(fresh.revision, desired, batch.at(-1)?.action || 'sync');
+      if (!saved.applied) {
+        remote.revision = saved.revision;
+        continue;
+      }
+
+      remote.queue.splice(0, batch.length);
+      remote.revision = saved.revision;
+      let visible = normalizeSharedState(saved.payload || desired);
+      for (const item of remote.queue) visible = applyPatch(visible, item.patch);
+      publishRemoteState(visible);
+      setRemoteStatus(true);
+    }
+  } catch (error) {
+    setRemoteStatus(false, error?.message || 'sync-failed');
+  } finally {
+    remote.flushing = false;
+  }
+}
+
+function queueRemote(action, patch) {
+  if (!remote.started || !BACKEND.enabled) return;
+  remote.queue.push({ action, patch });
+  void flushRemote();
+}
+
+async function pollRemote() {
+  try {
+    const fresh = await fetchRemote();
+    if (fresh.payload && fresh.revision > remote.revision) {
+      remote.revision = fresh.revision;
+      let visible = normalizeSharedState(fresh.payload);
+      for (const item of remote.queue) visible = applyPatch(visible, item.patch);
+      publishRemoteState(visible);
+    }
+    setRemoteStatus(true);
+    if (remote.queue.length) void flushRemote();
+  } catch (error) {
+    setRemoteStatus(false, error?.message || 'sync-failed');
+  }
+}
+
+async function startRemote() {
+  remote.started = true;
+  try {
+    const fresh = await fetchRemote();
+    remote.revision = fresh.revision;
+    if (fresh.payload) publishRemoteState(fresh.payload, 'remote.ready');
+    else if (state.seeded) {
+      remote.queue.push({ action: 'remote.bootstrap', patch: { replace: true, payload: clone(state) } });
+      await flushRemote();
+    }
+    setRemoteStatus(true);
+  } catch (error) {
+    setRemoteStatus(false, error?.message || 'sync-failed');
+  }
+  remote.timer = setInterval(pollRemote, Math.max(1200, BACKEND.pollMs || 2500));
+  return state;
+}
+
+export function ready() {
+  if (!BACKEND.enabled || typeof fetch !== 'function') return Promise.resolve(state);
+  remote.ready ||= startRemote();
+  return remote.ready;
+}
+
+export function hasRemoteBackend() { return Boolean(BACKEND.enabled); }
+export function syncStatus() {
+  return {
+    enabled: Boolean(BACKEND.enabled), online: remote.online,
+    pending: remote.queue.length, lastError: remote.lastError, lastSyncAt: remote.lastSyncAt,
+  };
+}
+
+export async function flush(timeoutMs = 8000) {
+  if (!remote.started || !remote.queue.length) return true;
+  const deadline = Date.now() + timeoutMs;
+  void flushRemote();
+  while (remote.queue.length && Date.now() < deadline) {
+    await new Promise((resolve) => setTimeout(resolve, 80));
+    if (!remote.flushing) void flushRemote();
+  }
+  return remote.queue.length === 0;
+}
+
 function emit(action, payload) {
   for (const fn of listeners) {
     try { fn(state, action, payload); } catch (err) { console.error('[hail-os] listener', err); }
@@ -144,6 +425,7 @@ export function subscribe(fn) { listeners.add(fn); return () => listeners.delete
 export function commit(action, mutate, meta = {}) {
   const latest = LS.get(KEY, null);
   if (latest && latest.version >= state.version) state = latest;
+  const before = clone(state);
   const result = mutate(state);
   state.version += 1;
   if (meta.log !== false) {
@@ -157,6 +439,7 @@ export function commit(action, mutate, meta = {}) {
   persist();
   emit(action, { ...meta, result });
   broadcast(action);
+  queueRemote(action, statePatch(before, state));
   return result;
 }
 
@@ -703,6 +986,7 @@ export function startOfToday() {
 export function replaceState(next) {
   state = { ...emptyState(), ...next, version: (state.version || 0) + 1 };
   persist(); emit('state.replace', {}); broadcast('state.replace');
+  queueRemote('state.replace', { replace: true, payload: clone(state) });
 }
 export function exportState() { return JSON.stringify(state, null, 2); }
 export function importState(json) {

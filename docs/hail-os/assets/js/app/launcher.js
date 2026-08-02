@@ -12,7 +12,7 @@ import { toSvg } from '../core/qr.js';
 import { MENU_STATS, BRANCH } from '../data/menu.js';
 import { startSimulator, stopSimulator, simulatorRunning, seed } from '../data/seed.js';
 
-boot({ title: 'HAIL OS — نظام هيل كافيه' });
+await boot({ title: 'HAIL OS — نظام هيل كافيه' });
 
 document.getElementById('bar').replaceWith(topbar({
   title: 'HAIL OS',

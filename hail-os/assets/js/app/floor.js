@@ -10,7 +10,7 @@ import * as notify from '../core/notify.js';
 import { boot, topbar, openSheet, watchNotifications, watchServiceSla, pinLogin, staffGate } from '../core/shell.js';
 import { TABLE_ZONES } from '../data/seed.js';
 
-boot({ title: 'الصالة — هيل كافيه' });
+await boot({ title: 'الصالة — هيل كافيه' });
 await staffGate({ surface: 'floor', title: 'دخول الصالة' });
 
 /* ── الشريط العلوي ───────────────────────────────────────────────────── */
