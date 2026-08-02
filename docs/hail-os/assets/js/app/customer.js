@@ -97,8 +97,24 @@ document.getElementById('bar').replaceWith(topbar({
 }));
 paintWho();
 
-watchNotifications('customer', { sessionId: session?.id, onChange: () => render() });
-store.subscribe(() => { if (tab !== 'menu') render(); });
+watchNotifications('customer', {
+  sessionId: session?.id,
+  onChange: (s, action) => {
+    /* لا نُعد رسم المنيو كاملاً عند كل مزامنة — هذا يسبب ترميش opacity */
+    if (tab === 'menu') {
+      paintTabbar();
+      return;
+    }
+    scheduleRender();
+  },
+});
+store.subscribe(() => {
+  if (tab === 'menu') {
+    paintTabbar();
+    return;
+  }
+  scheduleRender();
+});
 
 /* ── أدوات السلة ─────────────────────────────────────────────────────── */
 const keyFor = (itemId, options, note) =>
@@ -166,15 +182,34 @@ function paintCartBar() {
 }
 
 /* ── العرض الرئيسي ───────────────────────────────────────────────────── */
+let renderQueued = false;
+let lastTab = null;
+
+function scheduleRender() {
+  if (renderQueued) return;
+  renderQueued = true;
+  requestAnimationFrame(() => {
+    renderQueued = false;
+    render();
+  });
+}
+
 function render() {
   const app = document.getElementById('app');
   const scrollY = window.scrollY;
+  const tabChanged = lastTab !== tab;
+  lastTab = tab;
   app.innerHTML = views[tab]();
   wire[tab]?.(app);
   paintTabbar();
   paintCartBar();
-  fx.initReveal(app);
-  fx.initTilt(app);
+  /* الظهور المتدرّج مرة واحدة عند تبديل التبويب فقط — إعادة الرسم المتكررة كانت تترمش */
+  if (tabChanged) {
+    fx.initReveal(app);
+    fx.initTilt(app);
+  } else {
+    app.querySelectorAll('.reveal').forEach((n) => n.classList.add('in'));
+  }
   if (tab === 'menu') window.scrollTo(0, scrollY);
 }
 
@@ -444,7 +479,7 @@ function card(it, wide = false) {
   it.tags.slice(0, 1).forEach((t) => marks.push(`<span class="chip">${esc(t)}</span>`));
 
   return `
-    <article class="card mcard card-interactive ${it.available ? '' : 'out'} reveal" data-item="${it.id}"
+    <article class="card mcard card-interactive ${it.available ? '' : 'out'}" data-item="${it.id}"
       role="button" tabindex="0" aria-label="${esc(it.available ? `فتح ${it.ar}` : `${it.ar} غير متوفر`)}"
       aria-disabled="${it.available ? 'false' : 'true'}" ${wide ? 'data-tilt' : ''}>
       <div class="shot">
@@ -533,12 +568,16 @@ const wire = {
     root.querySelector('[data-open-who]')?.addEventListener('click', () => openIdentitySheet());
     const input = root.querySelector('#q');
     if (input) {
+      let searchTimer = 0;
       input.addEventListener('input', (e) => {
         search = e.target.value;
         const pos = e.target.selectionStart;
-        render();
-        const again = document.querySelector('#q');
-        if (again) { again.focus(); again.setSelectionRange(pos, pos); }
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => {
+          render();
+          const again = document.querySelector('#q');
+          if (again) { again.focus(); again.setSelectionRange(pos, pos); }
+        }, 120);
       });
     }
     root.querySelectorAll('[data-cat]').forEach((b) => b.addEventListener('click', () => {
