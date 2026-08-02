@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>هيل كافيه | Hail Cafe</title>
+    <meta name="description" content="هيل كافيه - إربد سيتي سنتر. فطور، قهوة، أطباق للمشاركة وأجواء بتجمع الناس الحلوة.">
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --clay-50: #fdf0ea; --clay-100: #fadbcf; --clay-300: #ff8163;
+            --clay-500: #d1502f; --clay-600: #c0462a; --clay-700: #9d3722;
+            --olive-50: #eef1e2; --olive-100: #dde3c8; --olive-300: #a6b27e;
+            --olive-500: #7c8a55; --olive-600: #6c7a49; --olive-700: #55613a;
+            --camel-50: #f6ecdc; --camel-100: #ecdcc4; --camel-500: #c9a47c;
+            --camel-600: #a68766; --camel-700: #7a6247;
+            --sand-0: #fffdf8; --sand-50: #faf3e7; --sand-100: #f3e9d8;
+            --sand-200: #efe3ce; --sand-300: #e4d9c5;
+            --ink-900: #16120d; --ink-800: #221d16; --ink-700: #322b21;
+            --ink-600: #443b2d; --ink-fg: #f6eee0;
+            --bg-color: #f8efdf;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'IBM Plex Sans Arabic', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--ink-900);
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4, h5, h6, .display-font {
+            font-family: 'Alexandria', sans-serif;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(248, 239, 223, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo img {
+            height: 48px;
+            width: auto;
+        }
+
+        nav ul {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        nav a {
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        nav a:hover {
+            color: var(--clay-600);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            border-radius: 20px;
+            font-family: 'Alexandria', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: var(--clay-600);
+            color: #fff;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--clay-700);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(192, 70, 42, 0.3);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: #fff;
+            border: 2px solid #fff;
+        }
+        
+        .btn-outline:hover {
+            background-color: #fff;
+            color: var(--ink-900);
+        }
+
+        /* Hero */
+        .hero {
+            position: relative;
+            height: 100vh;
+            min-height: 600px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('./hail-gallery/home-hero.jpeg');
+            background-size: cover;
+            background-position: center;
+            z-index: -2;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(22, 18, 13, 0.4), rgba(22, 18, 13, 0.7));
+            z-index: -1;
+        }
+
+        .hero-content {
+            color: #fff;
+            max-width: 800px;
+            padding: 0 2rem;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .hero-kicker {
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            color: var(--clay-100);
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            margin-bottom: 2.5rem;
+            opacity: 0.9;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        /* Section Global */
+        section {
+            padding: 6rem 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 3rem;
+            color: var(--ink-900);
+        }
+
+        /* Featured */
+        .featured-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .featured-card {
+            background: #fff;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .featured-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+        }
+
+        .featured-img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+
+        .featured-info {
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .featured-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .featured-price {
+            color: var(--clay-600);
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        /* About Section */
+        .about-section {
+            background-color: var(--camel-500);
+            color: #fff;
+            border-radius: 30px;
+            margin: 0 2rem;
+            overflow: hidden;
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+
+        .about-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            min-height: 400px;
+        }
+
+        .about-content {
+            padding: 4rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .about-content h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 800;
+        }
+
+        .about-content p {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .about-facts {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .fact {
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        /* Reserve Section */
+        #reserve {
+            display: flex;
+            justify-content: center;
+        }
+
+        .reserve-card {
+            background-color: var(--olive-700);
+            color: #fff;
+            padding: 4rem;
+            border-radius: 30px;
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(85, 97, 58, 0.2);
+        }
+
+        .reserve-card h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .reserve-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 2rem;
+            text-align: right;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .reserve-form input, .reserve-form select {
+            padding: 1rem;
+            border-radius: 12px;
+            border: none;
+            font-family: inherit;
+            background: #fff;
+            color: var(--ink-900);
+        }
+
+        .btn-whatsapp {
+            background-color: #25D366;
+            color: #fff;
+            border: none;
+            width: 100%;
+            margin-top: 1rem;
+        }
+        
+        .btn-whatsapp:hover {
+            background-color: #128C7E;
+        }
+
+        /* Visit */
+        .visit-section {
+            text-align: center;
+        }
+
+        .contact-info {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .contact-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .contact-item svg {
+            width: 32px;
+            height: 32px;
+            color: var(--clay-600);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--clay-600);
+            color: #fff;
+            padding: 4rem 2rem 2rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .footer-logo img {
+            height: 60px;
+            filter: brightness(0) invert(1);
+            margin-bottom: 1rem;
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .footer-social a {
+            background: rgba(255,255,255,0.1);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s ease;
+        }
+        
+        .footer-social a:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            nav ul { display: none; }
+            .about-grid { grid-template-columns: 1fr; }
+            .about-section { margin: 0; border-radius: 0; }
+            .reserve-form { grid-template-columns: 1fr; }
+            .hero-buttons { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <img src="./hail-logo.png" alt="Hail Cafe Logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'40\'><text y=\'20\' font-family=\'sans-serif\'>Hail Cafe</text></svg>'">
+            </a>
+            <nav>
+                <ul>
+                    <li><a href="menu.html">قائمتنا</a></li>
+                    <li><a href="#reserve">احجز</a></li>
+                    <li><a href="#about">قصتنا</a></li>
+                    <li><a href="#visit">الموقع</a></li>
+                </ul>
+            </nav>
+            <a href="menu.html" class="btn btn-primary">المنيو</a>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-bg"></div>
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <div class="hero-kicker">هيل كافيه · إربد سيتي سنتر</div>
+                <h1>كل لحظة إلها طعم، والضحكة غير.</h1>
+                <p>فطور، قهوة، أطباق للمشاركة وأجواء بتجمع الناس الحلوة.</p>
+                <div class="hero-buttons">
+                    <a href="#reserve" class="btn btn-primary">احجز طاولتك الآن</a>
+                    <a href="menu.html" class="btn btn-outline">تصفّح المنيو</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="container">
+            <h2 class="section-title">الأطباق المميّزة</h2>
+            <div class="featured-grid">
+                <div class="featured-card">
+                    <img src="./hail-gallery/combo-platter.jpeg" alt="كومبو بلاتر" class="featured-img" onerror="this.src='./hail-logo.png'">
+                    <div class="featured-info">
+                        <h3 class="featured-title display-font">كومبو بلاتر</h3>
+                        <div class="featured-price">9.95 د.أ</div>
+                    </div>
+                </div>
+                <div class="featured-card">
+                    <img src="./hail-gallery/nachos.jpeg" alt="ناتشوز هيل" class="featured-img" onerror="this.src='./hail-logo.png'">
+                    <div class="featured-info">
+                        <h3 class="featured-title display-font">ناتشوز هيل</h3>
+                        <div class="featured-price">5.25 د.أ</div>
+                    </div>
+                </div>
+                <div class="featured-card">
+                    <img src="./hail-gallery/cheesecake.jpeg" alt="تشيزكيك بالشوكولاتة" class="featured-img" onerror="this.src='./hail-logo.png'">
+                    <div class="featured-info">
+                        <h3 class="featured-title display-font">تشيزكيك بالشوكولاتة</h3>
+                        <div class="featured-price">4.50 د.أ</div>
+                    </div>
+                </div>
+                <div class="featured-card">
+                    <img src="./hail-gallery/mocktails.jpeg" alt="موهيتو بلو أوشن" class="featured-img" onerror="this.src='./hail-logo.png'">
+                    <div class="featured-info">
+                        <h3 class="featured-title display-font">موهيتو بلو أوشن</h3>
+                        <div class="featured-price">3.75 د.أ</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="about-section">
+            <div class="about-grid">
+                <img src="./hail-gallery/combo-platter.jpeg" alt="Our Food" class="about-img" onerror="this.src='./hail-logo.png'">
+                <div class="about-content">
+                    <h2>مستوحى من تراثنا، ومصمّم لراحتكم.</h2>
+                    <p>في هيل، الأكل الحلو بداية الحكاية. المكان دافئ، التفاصيل قريبة، وكل طاولة معمولة لتجمع الصحبة وتخلّي اللحظة أطول.</p>
+                    <div class="about-facts">
+                        <span class="fact">منيو متنوّع</span>
+                        <span class="fact">جلسات داخلية</span>
+                        <span class="fact">طلبات طاولة</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="reserve">
+            <div class="reserve-card">
+                <h2>احجز طاولتك</h2>
+                <p>استمتع بتجربة مميزة معنا. احجز الآن عبر الواتساب.</p>
+                <div class="reserve-form">
+                    <div class="form-group">
+                        <label>الاسم</label>
+                        <input type="text" id="resName" placeholder="الاسم الكريم">
+                    </div>
+                    <div class="form-group">
+                        <label>عدد الأشخاص</label>
+                        <select id="resGuests">
+                            <option value="2">2 أشخاص</option>
+                            <option value="3">3 أشخاص</option>
+                            <option value="4">4 أشخاص</option>
+                            <option value="5">5 أشخاص</option>
+                            <option value="6+">6 أو أكثر</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>التاريخ والوقت</label>
+                        <input type="datetime-local" id="resDate">
+                    </div>
+                    <div class="form-group full-width">
+                        <button onclick="sendReservation()" class="btn btn-whatsapp">تأكيد عبر الواتساب</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="visit" class="visit-section container">
+            <h2 class="section-title">موقعنا</h2>
+            <div class="contact-info">
+                <div class="contact-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                    <strong>العنوان</strong>
+                    <span>إربد سيتي سنتر<br>شارع الأمير حسن، إربد</span>
+                    <a href="https://maps.app.goo.gl/eoNayNYzrtsnVGEi6?g_st=ic" target="_blank" style="color: var(--clay-600); font-weight: bold; margin-top: 0.5rem;">عرض على الخريطة</a>
+                </div>
+                <div class="contact-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    <strong>هاتف</strong>
+                    <span dir="ltr">+962 7 9813 0305</span>
+                </div>
+                <div class="contact-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <strong>ساعات العمل</strong>
+                    <span>يوميًا: 10 ص — 12 ص<br>الجمعة: 2 م — 12 ص</span>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-info">
+                <div class="footer-logo">
+                    <img src="./hail-logo.png" alt="Hail Cafe Logo" onerror="this.src='./favicon.svg'">
+                </div>
+                <p>كل لحظة إلها طعم، والضحكة غير.<br>إربد سيتي سنتر، الأردن</p>
+                <div class="footer-social">
+                    <a href="https://instagram.com/hailcafejo" target="_blank" aria-label="Instagram">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                    </a>
+                    <a href="https://www.facebook.com/Haelcafejo" target="_blank" aria-label="Facebook">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+                    </a>
+                </div>
+            </div>
+            <div class="footer-links" style="display: flex; gap: 4rem;">
+                <div>
+                    <h4 style="margin-bottom: 1rem;">روابط سريعة</h4>
+                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem;">
+                        <li><a href="index.html">الرئيسية</a></li>
+                        <li><a href="menu.html">المنيو</a></li>
+                        <li><a href="#about">قصتنا</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="margin-bottom: 1rem;">للتواصل</h4>
+                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem;">
+                        <li dir="ltr" style="text-align: right;">+962 7 9813 0305</li>
+                        <li>إربد سيتي سنتر</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 هيل كافيه. جميع الحقوق محفوظة.</p>
+        </div>
+    </footer>
+
+    <script>
+        function sendReservation() {
+            const name = document.getElementById('resName').value || 'ضيف';
+            const guests = document.getElementById('resGuests').value;
+            const datetime = document.getElementById('resDate').value;
+            
+            let message = `مرحباً، أود حجز طاولة في هيل كافيه.%0A`;
+            message += `الاسم: ${name}%0A`;
+            message += `العدد: ${guests} أشخاص%0A`;
+            if (datetime) {
+                const dt = new Date(datetime);
+                message += `الموعد: ${dt.toLocaleString('ar-JO')}`;
+            }
+            
+            window.open(`https://wa.me/962798130305?text=${message}`, '_blank');
+        }
+
+        // Header scroll effect
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) {
+                header.style.background = 'rgba(248, 239, 223, 0.95)';
+                header.style.boxShadow = '0 2px 10px rgba(0,0,0,0.05)';
+            } else {
+                header.style.background = 'rgba(248, 239, 223, 0.85)';
+                header.style.boxShadow = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

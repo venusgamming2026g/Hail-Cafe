@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منيو هيل كافيه | Hail Cafe Menu</title>
+    <meta name="description" content="تصفح منيو هيل كافيه. كل الأطباق بمكان واحد.">
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --clay-50: #fdf0ea; --clay-100: #fadbcf; --clay-300: #ff8163;
+            --clay-500: #d1502f; --clay-600: #c0462a; --clay-700: #9d3722;
+            --olive-50: #eef1e2; --olive-100: #dde3c8; --olive-300: #a6b27e;
+            --olive-500: #7c8a55; --olive-600: #6c7a49; --olive-700: #55613a;
+            --camel-50: #f6ecdc; --camel-100: #ecdcc4; --camel-500: #c9a47c;
+            --camel-600: #a68766; --camel-700: #7a6247;
+            --sand-0: #fffdf8; --sand-50: #faf3e7; --sand-100: #f3e9d8;
+            --bg-color: #f8efdf;
+            --ink-900: #16120d;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'IBM Plex Sans Arabic', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--ink-900);
+            line-height: 1.6;
+        }
+        h1, h2, h3, .display-font { font-family: 'Alexandria', sans-serif; }
+        a { text-decoration: none; color: inherit; }
+        
+        /* Header */
+        header {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            background: rgba(248, 239, 223, 0.85); backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05); transition: all 0.3s ease;
+        }
+        .nav-container {
+            max-width: 1200px; margin: 0 auto; padding: 1rem 2rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo img { height: 48px; width: auto; }
+        nav ul { display: flex; gap: 2rem; list-style: none; }
+        nav a { font-weight: 500; transition: color 0.2s ease; }
+        nav a:hover { color: var(--clay-600); }
+        .btn {
+            display: inline-block; padding: 0.75rem 1.5rem; border-radius: 20px;
+            font-family: 'Alexandria', sans-serif; font-weight: 700;
+            cursor: pointer; transition: all 0.3s ease; text-align: center;
+        }
+        .btn-primary { background-color: var(--clay-600); color: #fff; border: none; }
+        .btn-primary:hover { background-color: var(--clay-700); transform: translateY(-2px); }
+
+        /* Hero */
+        .hero {
+            position: relative; height: 50vh; min-height: 400px;
+            display: flex; align-items: center; justify-content: center;
+            text-align: center; overflow: hidden; margin-bottom: 2rem;
+        }
+        .hero-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('./hail-gallery/menu-hero.jpeg'); background-size: cover; background-position: center;
+            z-index: -2; border-bottom-left-radius: 50% 10%; border-bottom-right-radius: 50% 10%;
+        }
+        .hero-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(22, 18, 13, 0.5), rgba(22, 18, 13, 0.8));
+            z-index: -1; border-bottom-left-radius: 50% 10%; border-bottom-right-radius: 50% 10%;
+        }
+        .hero-content { color: #fff; padding: 0 2rem; animation: fadeIn 1s ease-out; margin-top: 4rem;}
+        .hero h1 { font-size: 3rem; font-weight: 800; margin-bottom: 1rem; }
+        .hero p { font-size: 1.25rem; opacity: 0.9; }
+
+        /* Service Strip */
+        .service-strip {
+            display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap;
+            margin: -3rem auto 3rem; position: relative; z-index: 10;
+            background: #fff; padding: 1.5rem 2rem; border-radius: 20px;
+            max-width: 800px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            width: 90%;
+        }
+        .service-step {
+            display: flex; align-items: center; gap: 0.75rem; font-weight: 600; color: var(--camel-700);
+        }
+        .step-num {
+            background: var(--camel-100); color: var(--camel-700);
+            width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; font-weight: 700;
+        }
+
+        /* Menu Section */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem 6rem; }
+        
+        .tabs-container {
+            position: sticky; top: 80px; z-index: 90;
+            background: var(--bg-color); padding: 1rem 0; margin-bottom: 2rem;
+        }
+        .tabs-scroll {
+            display: flex; gap: 0.75rem; overflow-x: auto; padding-bottom: 1rem;
+            scrollbar-width: thin; scrollbar-color: var(--camel-500) transparent;
+        }
+        .tabs-scroll::-webkit-scrollbar { height: 6px; }
+        .tabs-scroll::-webkit-scrollbar-thumb { background: var(--camel-500); border-radius: 10px; }
+        
+        .tab-btn {
+            background: #fff; border: 1px solid var(--camel-100);
+            padding: 0.75rem 1.5rem; border-radius: 30px; white-space: nowrap;
+            font-family: inherit; font-weight: 600; color: var(--ink-700);
+            cursor: pointer; transition: all 0.2s ease;
+        }
+        .tab-btn:hover { background: var(--camel-50); }
+        .tab-btn.active {
+            background: var(--clay-600); color: #fff; border-color: var(--clay-600);
+        }
+
+        .menu-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .menu-item {
+            background: #fff; border-radius: 20px; overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: all 0.3s ease;
+            display: flex; flex-direction: column; animation: fadeIn 0.5s ease-out;
+        }
+        .menu-item:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
+        
+        .item-img { width: 100%; height: 200px; object-fit: cover; }
+        .item-content { padding: 1.5rem; display: flex; flex-direction: column; flex-grow: 1; }
+        .item-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; line-height: 1.4; }
+        .item-price {
+            margin-top: auto; color: var(--clay-600); font-weight: 700; font-size: 1.1rem;
+            display: inline-block; background: var(--clay-50); padding: 0.25rem 0.75rem; border-radius: 8px;
+            align-self: flex-start;
+        }
+
+        /* Footer */
+        footer { background-color: var(--clay-600); color: #fff; padding: 4rem 2rem 2rem; }
+        .footer-content {
+            max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between;
+            align-items: flex-start; flex-wrap: wrap; gap: 2rem;
+        }
+        .footer-logo img { height: 60px; filter: brightness(0) invert(1); margin-bottom: 1rem; }
+        .footer-bottom {
+            text-align: center; margin-top: 4rem; padding-top: 2rem;
+            border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.9rem; opacity: 0.8;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        @media (max-width: 768px) {
+            nav ul { display: none; }
+            .hero h1 { font-size: 2rem; }
+            .service-strip { gap: 1rem; padding: 1rem; }
+            .service-step { font-size: 0.9rem; }
+            .menu-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+            .item-img { height: 140px; }
+            .item-content { padding: 1rem; }
+            .item-title { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <img src="./hail-logo.png" alt="Hail Cafe Logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'40\'><text y=\'20\' font-family=\'sans-serif\'>Hail Cafe</text></svg>'">
+            </a>
+            <nav>
+                <ul>
+                    <li><a href="index.html">الرئيسية</a></li>
+                    <li><a href="index.html#reserve">احجز</a></li>
+                    <li><a href="index.html#about">قصتنا</a></li>
+                    <li><a href="index.html#visit">الموقع</a></li>
+                </ul>
+            </nav>
+            <a href="index.html" class="btn btn-primary" style="background:transparent; color: var(--ink-900); border: 1px solid var(--ink-900);">عودة للرئيسية</a>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-bg"></div>
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1>المنيو على مزاجك، والطلب أسهل.</h1>
+                <p>كل أطباق هيل بمكان واحد.</p>
+            </div>
+        </section>
+
+        <div class="service-strip">
+            <div class="service-step"><span class="step-num">1</span>اختر</div>
+            <div class="service-step"><span class="step-num">2</span>يُحضّر</div>
+            <div class="service-step"><span class="step-num">3</span>جاهز</div>
+            <div class="service-step"><span class="step-num">4</span>يُقدّم</div>
+        </div>
+
+        <section class="container">
+            <div class="tabs-container">
+                <div class="tabs-scroll" id="tabs-container">
+                    <button class="tab-btn active" data-category="all">الكل</button>
+                    <!-- Tabs injected via JS -->
+                </div>
+            </div>
+
+            <div class="menu-grid" id="menu-grid">
+                <!-- Items injected via JS -->
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-info">
+                <div class="footer-logo">
+                    <img src="./hail-logo.png" alt="Hail Cafe Logo" onerror="this.src='./favicon.svg'">
+                </div>
+                <p>كل لحظة إلها طعم، والضحكة غير.<br>إربد سيتي سنتر، الأردن</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 هيل كافيه. جميع الحقوق محفوظة.</p>
+        </div>
+    </footer>
+
+    <script>
+        const categories = [
+            { id: 'breakfast', name: 'الفطور', fallback: './menu/foul.webp' },
+            { id: 'salads', name: 'السلطات', fallback: './menu/hail-salad.webp' },
+            { id: 'cold-appetizers', name: 'المقبلات الباردة', fallback: './menu/labneh-zaatar.webp' },
+            { id: 'hot-appetizers', name: 'المقبلات الساخنة', fallback: './menu/combo-platter.webp' },
+            { id: 'pasta', name: 'الباستا', fallback: './menu/pesto-pasta.webp' },
+            { id: 'pasta-addons', name: 'إضافات الباستا', fallback: './menu/pesto-pasta.webp' },
+            { id: 'pizza', name: 'البيتزا', fallback: './menu/hail-pizza.webp' },
+            { id: 'sandwiches', name: 'الساندوش', fallback: './menu/caesar-sandwich.webp' },
+            { id: 'burgers', name: 'البرغر', fallback: './menu/classic-burger.webp' },
+            { id: 'fatta', name: 'الفتة', fallback: './menu/kashmiri-chicken.webp' },
+            { id: 'soups', name: 'الشوربات', fallback: './menu/chicken-cream-pot.webp' },
+            { id: 'mains', name: 'الأطباق الرئيسية', fallback: './menu/beef-steak.webp' },
+            { id: 'juices', name: 'العصائر', fallback: './menu/mango-juice.webp' },
+            { id: 'smoothies', name: 'السموثي', fallback: './menu/strawberry-smoothie.webp' },
+            { id: 'milkshakes', name: 'الميلك شيك', fallback: './menu/milkshake.webp' },
+            { id: 'mojito', name: 'الموهيتو', fallback: './menu/mojito.webp' },
+            { id: 'iced-coffee', name: 'القهوة الباردة', fallback: './menu/iced-coffee.webp' },
+            { id: 'frappe', name: 'الفرابيه', fallback: './menu/caramel-frappe.webp' },
+            { id: 'iced-tea', name: 'الشاي المثلج', fallback: './menu/mojito.webp' },
+            { id: 'cocktails', name: 'الكوكتيل', fallback: './menu/hail-cocktail.webp' },
+            { id: 'hot-drinks', name: 'المشروبات الساخنة', fallback: './menu/hot-coffee.webp' },
+            { id: 'special-coffee', name: 'القهوة المختصة', fallback: './menu/hot-coffee.webp' },
+            { id: 'herbs', name: 'الأعشاب', fallback: './menu/hot-coffee.webp' },
+            { id: 'sweets', name: 'الحلويات', fallback: './menu/caramel-frappe.webp' },
+            { id: 'hookah', name: 'المعسل', fallback: './menu/mojito.webp' },
+            { id: 'soft-drinks', name: 'المشروبات الغازية والمياه', fallback: './menu/red-bull.webp' }
+        ];
+
+        // Raw input data mapping text lines to json
+        const rawData = {
+            'breakfast': `فول 2.000 JOD image: ./menu/foul.webp
+قلّاية بندورة 2.500
+حمص 2.000
+لبنة مع زعتر وفرافيش 2.750 image: ./menu/labneh-zaatar.webp
+فتة حمص 2.250
+حلّوم 2.950
+أومليت 2.750 image: ./menu/omelette.webp
+بيض عيون 2.000
+تاكو فلافل 2.750
+شكشوكة خاصة 2.250
+بطاطا 2.000
+كيش تيركي 3.000
+صوصج مع البيض 3.100
+روست بيف مع كشكوان 2.900
+فلافل مع الخضار 2.250
+تيركي مع شدر 2.900
+لبنة 2.250
+مكس أجبان 2.750
+محمرة مع مكس أجبان 2.750
+حلّوم مع الجرجير 2.750
+زيت وزعتر 2.000
+لوتس ونوتيلا 3.250`,
+            'salads': `فتوش بخلطة الشيف 4.000
+تبولة فاخرة 4.500
+يونانية سلط 3.950
+سلطة الشيف الخاصة 4.750 image: ./menu/hail-salad.webp
+شنكليش سلط 4.500
+سيزر سلط 4.250
+مكس سي فود سلط 8.500 image: ./menu/seafood-salad.webp`,
+            'cold-appetizers': `ورق عنب 2.250
+شنكليش 2.750
+محمرة 2.250
+لبنة فراقيش 2.500
+حمص بالخلطة الخاصة 2.750`,
+            'hot-appetizers': `مسخن كب 3.750
+كريب لحم 4.950
+ناتشوز 5.250 image: ./menu/nachos.webp
+فطر محشي 4.750
+شرم جاكيت 5.750
+دجاج داينمايت 3.750 image: ./menu/dynamite-chicken.webp
+روبيتو بولز 4.750
+شريمب داينمايت 6.500
+بطاطا حارة 2.500
+سجق أرمني 4.250
+دجاج كشميري 5.250 image: ./menu/kashmiri-chicken.webp
+فلافل سيجار 2.500
+كومبو بلاتر 9.950 image: ./menu/combo-platter.webp`,
+            'pasta': `بينا بيستو 5.000 image: ./menu/pesto-pasta.webp
+بولونيز 4.500
+بينا أرابياتا 4.500
+فوتوتشيني ألفريدو 4.500
+فوتوتشيني سبيشل 7.150 image: ./menu/pasta-special.webp`,
+            'pasta-addons': `إضافة دجاج 1.500
+إضافة شريمب 3.000`,
+            'pizza': `بيتزا الشيف الخاصة 5.250 image: ./menu/hail-pizza.webp
+بيتزا ألفريدو 5.500
+بيروني بيتزا 4.500 image: ./menu/pepperoni-pizza.webp
+بيتزا خضار 4.500 image: ./menu/vegetable-pizza.webp
+مارجاريتا بيتزا 3.950
+صنف بيتزا 4.950`,
+            'sandwiches': `ساندوش مكس شيز تيركي 5.250
+ساندوش شيش طاووق راب 4.750
+ساندوش كريما دجاج 5.500
+حلّوم ساندوش 4.950 image: ./menu/halloumi-sandwich.webp
+سيزر ساندوش 5.250 image: ./menu/caesar-sandwich.webp
+كلب لوف 5.250`,
+            'burgers': `كريسبي تشكن برغر 4.750
+سلايدر برغر 5.250 image: ./menu/slider-burger.webp
+مشروم برغر 5.500
+كلاسيك برغر 5.000 image: ./menu/classic-burger.webp
+جريل تشكن برغر 4.500`,
+            'fatta': `فتة العرايس 2.950
+فتة مسخن 2.750`,
+            'soups': `شوربة عدس 2.500
+شوربة فطر 3.000`,
+            'mains': `بيف ستيك 12.500 image: ./menu/beef-steak.webp
+كلاسيك مكس سي فود 13.900 image: ./menu/seafood-main.webp
+دجاج جريل 7.750 image: ./menu/grilled-chicken.webp
+دجاج رول محشي فستق حلبي 7.750
+فيش أند شيبس 7.000
+بيف بلاك بيبر 8.500 image: ./menu/black-pepper-beef.webp
+فخارة شرحات لحم 7.950
+بتر تشكن 7.750
+فخارة دجاج بالكريمة 7.750 image: ./menu/chicken-cream-pot.webp
+فخارة فريكة بالدجاج والكريمة 7.750`,
+            'juices': `عصير ليمون 3.500
+عصير أناناس 3.500
+عصير فراولة 3.500 image: ./menu/strawberry-juice.webp
+عصير مانجا 3.500 image: ./menu/mango-juice.webp
+عصير كيوي 3.500
+عصير أناناس ونعنع 3.500
+عصير جوافة 3.500
+عصير ليمون ونعنع 3.500
+عصير برتقال 3.500
+عصير فراولة وباشن 3.500`,
+            'smoothies': `خوخ سموثي 3.750
+باشن سموثي 3.750
+فراولة سموثي 3.250 image: ./menu/strawberry-smoothie.webp
+شمام وهيل 3.750
+مكس بيري سموثي 3.500
+مانجا سموثي 3.250
+ليمون ونعنع سموثي 3.250
+ليمون وكيوي سموثي 3.250
+بطيخ ليمونيد 3.500
+ليمون سموثي 3.250`,
+            'milkshakes': `ميلك شيك لوتس 3.250 image: ./menu/milkshake.webp
+ميلك شيك فراولة 3.250
+ميلك شيك شوكليت 3.250
+ميلك شيك فانيلا 3.250
+ميلك شيك تشيز كيك 3.250
+ميلك شيك بيناكولادا 3.250
+ميلك شيك سبيشل 3.250
+ميلك شيك أوريو 3.250
+ميلك شيك سنكرز 3.250
+ميلك شيك كروكان 3.250
+ميلك شيك عربية 3.250
+ميلك شيك موز وتوت 3.250
+ميلك شيك فيريرو 3.250`,
+            'mojito': `موهيتو كاندي 3.250 image: ./menu/mojito.webp
+موهيتو ليتشي أناناس 3.250
+موهيتو سبيشل منعش 3.750
+موهيتو خيار وريحان 3.250
+موهيتو بلو باشن 4.250
+موهيتو مانجا بيتش 3.250
+موهيتو بلو أوشن 3.750`,
+            'iced-coffee': `موكا آيس كوفي 3.500 image: ./menu/iced-coffee.webp
+هيزل آيس كوفي 3.500
+كريم بروليه آيس شيكن 3.750
+آيس أمريكانو 3.000
+منت تشوكلت لاتيه 3.750
+لاتيه آيس كوفي 3.250`,
+            'frappe': `كراميل فراب 4.250 image: ./menu/caramel-frappe.webp
+أوريو فراب 3.750
+فروت فليكس فراب 3.750
+فانيلا فراب 3.750
+شوكليت فراب 3.750
+ويفر فراب 3.750
+برتزل فراب 3.750`,
+            'iced-tea': `ليمون آيس تي 3.500
+رازبيري آيس تي 3.500
+خوخ آيس تي 3.500`,
+            'cocktails': `روكا بانانا 3.500
+موز وحليب 3.500
+فراولة وموز 3.500
+بنانا بيري 4.000
+كوكتيل النخبة 4.000 image: ./menu/hail-cocktail.webp
+أفوكادو 4.000
+بيتش كولادا 3.750
+جوافة غرين أبل 3.500
+مانجا باشن 3.750`,
+            'hot-drinks': `كابتشينو 2.750 image: ./menu/hot-coffee.webp
+موكا 2.750
+بينك لاتيه 2.750
+إسبريسو أفوكاتو 2.750
+نسكافيه 2.500
+أوريو كوفي 3.250
+سنكرز كوفي 3.250
+فرنش كوفي 3.250
+سبانش لاتيه 3.750
+أمريكانو 2.750
+كورتادو 2.750
+دبل إسبريسو 2.750
+سنجل إسبريسو 2.250
+هوت شوكلت 3.250 image: ./menu/hot-chocolate.webp
+هوت شوكلت فاخر 3.250
+قهوة تركية سنجل 2.250
+قهوة تركية دبل 2.750
+مكياتو 2.750`,
+            'special-coffee': `V60 3.500
+فرنش بريس 2.750
+سايفون 3.750`,
+            'herbs': `يانسون 1.750
+أعشاب مشكلة 1.750
+شاي أخضر 1.750
+ميرمية 1.750
+بابونج 1.750
+شاي 1.750
+زنجبيل وليمون وعسل 2.750
+زنجبيل وحليب وعسل 2.750
+شاي كرك 2.500`,
+            'sweets': `تارت فراولة 4.500
+تيراميسو 4.500
+سان سيباستيان 4.500
+موس شوكولاتة 4.500
+تشيزكيك توت العليق 4.500
+براونيز 4.500
+تشيزكيك أوريو 4.500`,
+            'hookah': `تفاحتين نخلة 5.000
+تفاحتين مزايا 4.200
+ليمون ونعنع 4.200
+بطيخ ونعنع 4.200
+توت بلو بيري 4.200
+عنب 4.200
+توت ونعنع 4.200
+كرز ونعنع 4.200
+مسكة 4.200
+علكة وقرفة 4.200
+علكة ونعنع 4.200
+تفاح ونعنع 4.200
+كاندي دروبس 4.200
+خلطة المعسل الخاصة 4.200
+لفلي 4.200
+آيس سويت 4.200
+برتقال ونعنع 4.200`,
+            'soft-drinks': `بوم بوم 2.500
+ريد بول 3.000 image: ./menu/red-bull.webp
+كود ريد 2.500
+مياه بيريه 2.250
+ماء 0.600 image: ./menu/water.webp`
+        };
+
+        const allItems = [];
+
+        // Parse data
+        categories.forEach(cat => {
+            const lines = rawData[cat.id].split('\n').map(l => l.trim()).filter(l => l);
+            lines.forEach(line => {
+                let name = line;
+                let price = "0.000";
+                let image = cat.fallback;
+                
+                // Extract image if present
+                const imgMatch = line.match(/image:\s*(.+)$/);
+                if (imgMatch) {
+                    image = imgMatch[1];
+                    name = name.replace(imgMatch[0], '').trim();
+                }
+
+                // Extract price
+                const parts = name.split(' ');
+                // Find the first token that looks like a number (e.g. 2.500 or 12.500)
+                let priceIndex = -1;
+                for (let i=0; i<parts.length; i++) {
+                    if (parts[i].match(/^\d+\.\d{3}$/)) {
+                        priceIndex = i;
+                        break;
+                    }
+                }
+                
+                if (priceIndex !== -1) {
+                    price = parts[priceIndex];
+                    name = parts.slice(0, priceIndex).join(' ');
+                }
+
+                // Remove JOD text if any
+                name = name.replace('JOD', '').trim();
+
+                allItems.push({
+                    categoryId: cat.id,
+                    name: name,
+                    price: price,
+                    image: image
+                });
+            });
+        });
+
+        // Setup Tabs
+        const tabsContainer = document.getElementById('tabs-container');
+        categories.forEach(cat => {
+            const btn = document.createElement('button');
+            btn.className = 'tab-btn';
+            btn.dataset.category = cat.id;
+            btn.innerText = cat.name;
+            tabsContainer.appendChild(btn);
+        });
+
+        // Setup Menu Grid
+        const menuGrid = document.getElementById('menu-grid');
+
+        function renderItems(category) {
+            menuGrid.innerHTML = '';
+            const items = category === 'all' ? allItems : allItems.filter(i => i.categoryId === category);
+            
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'menu-item';
+                
+                const img = document.createElement('img');
+                img.className = 'item-img';
+                img.src = item.image;
+                img.alt = item.name;
+                img.onerror = () => { img.src = './hail-logo.png'; };
+                
+                const content = document.createElement('div');
+                content.className = 'item-content';
+                
+                const title = document.createElement('h3');
+                title.className = 'item-title display-font';
+                title.innerText = item.name;
+                
+                const price = document.createElement('div');
+                price.className = 'item-price';
+                price.innerText = item.price + ' د.أ';
+                
+                content.appendChild(title);
+                content.appendChild(price);
+                
+                card.appendChild(img);
+                card.appendChild(content);
+                
+                menuGrid.appendChild(card);
+            });
+        }
+
+        // Event listeners for tabs
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                
+                // Scroll behavior
+                const container = document.getElementById('tabs-container');
+                const btnRect = e.target.getBoundingClientRect();
+                const contRect = container.getBoundingClientRect();
+                
+                if (btnRect.left < contRect.left || btnRect.right > contRect.right) {
+                    e.target.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                }
+
+                renderItems(e.target.dataset.category);
+            });
+        });
+
+        // Initial render
+        renderItems('all');
+        
+        // Header scroll effect
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) {
+                header.style.background = 'rgba(248, 239, 223, 0.95)';
+                header.style.boxShadow = '0 2px 10px rgba(0,0,0,0.05)';
+            } else {
+                header.style.background = 'rgba(248, 239, 223, 0.85)';
+                header.style.boxShadow = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
