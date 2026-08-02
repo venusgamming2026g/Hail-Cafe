@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { access, readFile } from "node:fs/promises";
 import test from "node:test";
 
-test("build contains the Restaurant OS customer experience", async () => {
+test("build contains the Hail Cafe customer experience", async () => {
   const [page, layout, customer] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
@@ -12,7 +12,7 @@ test("build contains the Restaurant OS customer experience", async () => {
   assert.match(page, /application\/ld\+json/);
   assert.match(page, /Restaurant/);
   assert.match(page, /CafeOrCoffeeShop/);
-  assert.match(layout, /Restaurant OS/);
+  assert.match(layout, /Hail Cafe/);
   assert.match(layout, /\/og\.png/);
   assert.match(layout, /manifest\.webmanifest/);
   assert.match(customer, /طلب الحساب/);

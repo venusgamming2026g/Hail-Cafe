@@ -3,6 +3,7 @@
 import {
   ArrowLeft,
   Bell,
+  CalendarDays,
   Check,
   ChefHat,
   ChevronLeft,
@@ -10,7 +11,6 @@ import {
   Clock3,
   Coffee,
   Droplets,
-  ExternalLink,
   Facebook,
   Instagram,
   Languages,
@@ -25,11 +25,19 @@ import {
   Sparkles,
   Trash2,
   UserRound,
+  Users,
   Utensils,
   WifiOff,
   X,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+} from "react";
 import {
   formatJod,
   getItemImage,
@@ -41,7 +49,6 @@ import {
 import {
   officialBranch,
   officialMapUrl,
-  officialMenuUrl,
   officialSocial,
   type ServiceRequestType,
 } from "../lib/restaurant";
@@ -257,7 +264,11 @@ export function CustomerApp() {
   const [categories, setCategories] =
     useState<MenuCategory[]>(officialCategories);
   const [items, setItems] = useState<MenuItem[]>(officialItems);
-  const [activeCategory, setActiveCategory] = useState("all");
+  /* يبدأ على أول قسم لا على "الكل" — عرض 209 أصناف دفعة واحدة
+     يجعل الصفحة أطول من 26 ألف بكسل. */
+  const [activeCategory, setActiveCategory] = useState(
+    officialCategories[0]?.id ?? "",
+  );
   const [search, setSearch] = useState("");
   const [cart, setCart] = useState<CartLine[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
@@ -276,6 +287,13 @@ export function CustomerApp() {
   const [toast, setToast] = useState<ToastState | null>(null);
   const [online, setOnline] = useState(true);
   const [queuedCount, setQueuedCount] = useState(0);
+  const [reserveDate, setReserveDate] = useState("");
+  const [reserveTime, setReserveTime] = useState("19:00");
+  const [reserveGuests, setReserveGuests] = useState("2");
+  /* يُضبط الحدّ الأدنى للتاريخ على الـ DOM بعد التركيب. حسابه أثناء
+     العرض يجعل الخادم والمتصفح يختلفان إذا عبرا منتصف الليل، فيقع خطأ
+     hydration؛ وحفظه في حالة React يسبّب عرضاً متتالياً بلا داعٍ. */
+  const reserveDateRef = useRef<HTMLInputElement>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const text = copy[locale];
   const direction = locale === "ar" ? "rtl" : "ltr";
@@ -433,19 +451,35 @@ export function CustomerApp() {
   const totalMils = subtotalMils + taxMils;
   const cartQuantity = cart.reduce((sum, line) => sum + line.quantity, 0);
 
+  /* الصفحة تبقى قصيرة: يُعرض قسم واحد فقط في كل مرة.
+     البحث يبحث في المنيو كامله وتُعرض نتائجه مقسّمة بعناوين. */
   const visibleItems = useMemo(() => {
     const query = search.trim().toLocaleLowerCase();
-    return items.filter((entry) => {
-      const categoryMatches =
-        activeCategory === "all" || entry.categoryId === activeCategory;
-      const searchMatches =
-        !query ||
+    if (query) {
+      return items.filter((entry) =>
         `${entry.nameAr} ${entry.nameEn ?? ""}`
           .toLocaleLowerCase()
-          .includes(query);
-      return categoryMatches && searchMatches;
-    });
+          .includes(query),
+      );
+    }
+    return items.filter((entry) => entry.categoryId === activeCategory);
   }, [activeCategory, items, search]);
+
+  const groupedItems = useMemo(() => {
+    return categories
+      .map((category) => ({
+        category,
+        entries: visibleItems.filter(
+          (entry) => entry.categoryId === category.id,
+        ),
+      }))
+      .filter((group) => group.entries.length > 0);
+  }, [categories, visibleItems]);
+
+  useEffect(() => {
+    const node = reserveDateRef.current;
+    if (node) node.min = new Date().toISOString().slice(0, 10);
+  }, []);
 
   function updateQuantity(itemId: string, delta: number) {
     setCart((current) => {
@@ -637,12 +671,58 @@ export function CustomerApp() {
     }
   }
 
+  function smoothBehavior(): ScrollBehavior {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      ? "auto"
+      : "smooth";
+  }
+
   function scrollToMenu() {
     document.getElementById("menu")?.scrollIntoView({
-      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-        ? "auto"
-        : "smooth",
+      behavior: smoothBehavior(),
     });
+  }
+
+  /* اختيار قسم يمسح البحث دائماً — وإلا اجتمع فلترُ القسم مع نص البحث
+     وظهرت "لا يوجد" للمستخدم بلا سبب مفهوم. */
+  function selectCategory(categoryId: string) {
+    setActiveCategory(categoryId);
+    setSearch("");
+  }
+
+  /* لا يوجد جدول حجوزات في D1 ولا مسار API له، والبيانات المنظّمة تعلن
+     acceptsReservations: false. لذلك يفتح الطلب محادثة واتساب حقيقية مع
+     الفرع بدل إرساله إلى نقطة نهاية غير موجودة. */
+  function submitReservation(event: FormEvent) {
+    event.preventDefault();
+    if (!reserveDate) {
+      showToast({
+        kind: "error",
+        message:
+          locale === "ar" ? "اختر تاريخ الحجز أولاً." : "Pick a date first.",
+      });
+      return;
+    }
+    const lines =
+      locale === "ar"
+        ? [
+            "مرحباً، أريد حجز طاولة في هيل كافيه.",
+            `التاريخ: ${reserveDate}`,
+            `الساعة: ${reserveTime}`,
+            `عدد الأشخاص: ${reserveGuests}`,
+          ]
+        : [
+            "Hello, I'd like to reserve a table at Hail Cafe.",
+            `Date: ${reserveDate}`,
+            `Time: ${reserveTime}`,
+            `Guests: ${reserveGuests}`,
+          ];
+    const waNumber = officialBranch.phone.replace(/[^0-9]/g, "");
+    window.open(
+      `https://wa.me/${waNumber}?text=${encodeURIComponent(lines.join("\n"))}`,
+      "_blank",
+      "noopener,noreferrer",
+    );
   }
 
   return (
@@ -659,11 +739,10 @@ export function CustomerApp() {
           <button type="button" onClick={scrollToMenu}>
             {text.menu}
           </button>
+          <a href="#reserve">{locale === "ar" ? "احجز" : "Reserve"}</a>
+          <a href="#atmosphere">{locale === "ar" ? "أجواءنا" : "Atmosphere"}</a>
           <a href={officialMapUrl} target="_blank" rel="noreferrer">
             {text.location}
-          </a>
-          <a href={officialMenuUrl} target="_blank" rel="noreferrer">
-            {text.officialMenu}
           </a>
         </nav>
         <div className="header-actions">
@@ -744,6 +823,10 @@ export function CustomerApp() {
                 <Utensils size={20} aria-hidden="true" />
                 {locale === "ar" ? "أنا على طاولة" : "I'm at a table"}
               </button>
+              <a className="secondary-button" href="#reserve">
+                <CalendarDays size={20} aria-hidden="true" />
+                {locale === "ar" ? "احجز طاولتك" : "Reserve a table"}
+              </a>
             </div>
             <div className="hero-facts">
               <a href={officialMapUrl} target="_blank" rel="noreferrer">
@@ -763,7 +846,11 @@ export function CustomerApp() {
             </div>
           </div>
 
-          <div className="hero-hatch" aria-label={locale === "ar" ? "أطباق حقيقية من المنيو" : "Real dishes from the menu"}>
+          <div
+            className="hero-hatch"
+            role="img"
+            aria-label={locale === "ar" ? "أطباق حقيقية من منيو هيل" : "Real dishes from Hail's menu"}
+          >
             <div className="hatch-arch" aria-hidden="true">
               <img
                 className="hero-dish hero-dish-main"
@@ -780,12 +867,8 @@ export function CustomerApp() {
                 alt=""
               />
               <span className="hatch-label">
-                {locale === "ar" ? "صور المنيو الرسمية" : "Official menu photography"}
+                {locale === "ar" ? "من منيو هيل" : "From the Hail menu"}
               </span>
-            </div>
-            <div className="double-diamond" aria-hidden="true">
-              <i />
-              <i />
             </div>
           </div>
         </section>
@@ -847,55 +930,59 @@ export function CustomerApp() {
                 </button>
               )}
             </div>
-            <a
-              className="pdf-link"
-              href={officialMenuUrl}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <ReceiptText size={19} aria-hidden="true" />
-              {text.officialMenu}
-              <ExternalLink size={15} aria-hidden="true" />
-            </a>
           </div>
 
           <div className="category-rail" role="tablist" aria-label={locale === "ar" ? "تصنيفات المنيو" : "Menu categories"}>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={activeCategory === "all"}
-              className={activeCategory === "all" ? "active" : ""}
-              onClick={() => setActiveCategory("all")}
-            >
-              {text.all}
-            </button>
             {categories.map((entry) => (
               <button
                 type="button"
                 role="tab"
-                aria-selected={activeCategory === entry.id}
-                className={activeCategory === entry.id ? "active" : ""}
+                aria-selected={!search.trim() && activeCategory === entry.id}
+                className={
+                  !search.trim() && activeCategory === entry.id ? "active" : ""
+                }
                 key={entry.id}
-                onClick={() => setActiveCategory(entry.id)}
+                onClick={() => selectCategory(entry.id)}
               >
                 {locale === "ar" ? entry.nameAr : entry.nameEn}
               </button>
             ))}
           </div>
 
-          {visibleItems.length ? (
-            <div className="menu-grid">
-              {visibleItems.map((entry) => {
+          {groupedItems.length ? (
+            <div className="menu-groups">
+              {groupedItems.map((group) => (
+                <section
+                  className="menu-group"
+                  key={group.category.id}
+                  id={`menu-group-${group.category.id}`}
+                  aria-labelledby={`menu-cat-${group.category.id}`}
+                >
+                  <div className="menu-group-head">
+                    <h3 id={`menu-cat-${group.category.id}`}>
+                      {locale === "ar"
+                        ? group.category.nameAr
+                        : group.category.nameEn || group.category.nameAr}
+                    </h3>
+                    <span>
+                      {group.entries.length}
+                      {locale === "ar" ? " صنف" : " items"}
+                    </span>
+                  </div>
+                  <div className="menu-grid">
+              {group.entries.map((entry) => {
                 const quantity =
                   cart.find((line) => line.itemId === entry.id)?.quantity ?? 0;
                 const imageUrl = getItemImage(entry);
                 return (
                   <article
-                    className={`menu-card ${imageUrl ? "with-image" : ""} ${!entry.available ? "unavailable" : ""}`}
+                    className={`menu-card ${!entry.available ? "unavailable" : ""}`}
                     key={entry.id}
                   >
-                    {imageUrl ? (
-                      <div className="menu-card-image">
+                    {/* كل البطاقات بالبنية نفسها؛ 174 من 209 أصناف بلا صورة
+                        فيحلّ محلها معيّن الهوية بدل فراغ يكسر الشبكة. */}
+                    <div className="menu-card-image">
+                      {imageUrl ? (
                         <img
                           src={imageUrl}
                           width="280"
@@ -903,24 +990,15 @@ export function CustomerApp() {
                           loading="lazy"
                           alt={locale === "ar" ? entry.nameAr : entry.nameEn || entry.nameAr}
                         />
-                      </div>
-                    ) : (
-                      <div className="menu-card-mark" aria-hidden="true">
-                        <span />
-                        <span />
-                      </div>
-                    )}
+                      ) : (
+                        <span className="menu-card-mark" aria-hidden="true">
+                          <i />
+                          <i />
+                        </span>
+                      )}
+                    </div>
                     <div className="menu-card-body">
                       <div>
-                        <p className="menu-card-category">
-                          {locale === "ar"
-                            ? categories.find(
-                                (category) => category.id === entry.categoryId,
-                              )?.nameAr
-                            : categories.find(
-                                (category) => category.id === entry.categoryId,
-                              )?.nameEn}
-                        </p>
                         <h3>
                           {locale === "ar"
                             ? entry.nameAr
@@ -977,6 +1055,9 @@ export function CustomerApp() {
                   </article>
                 );
               })}
+                  </div>
+                </section>
+              ))}
             </div>
           ) : (
             <div className="empty-state">
@@ -984,15 +1065,103 @@ export function CustomerApp() {
               <p>{text.empty}</p>
               <button
                 type="button"
-                onClick={() => {
-                  setSearch("");
-                  setActiveCategory("all");
-                }}
+                onClick={() => selectCategory(categories[0]?.id ?? "")}
               >
-                {locale === "ar" ? "اعرض كل المنيو" : "Show the full menu"}
+                {locale === "ar" ? "ارجع للمنيو" : "Back to the menu"}
               </button>
             </div>
           )}
+        </section>
+
+        <section className="atmosphere-section" id="atmosphere">
+          <div className="atmosphere-media">
+            <img
+              src="/menu/combo-platter.webp"
+              width="720"
+              height="480"
+              alt={
+                locale === "ar"
+                  ? "طاولة مشتركة من منيو هيل كافيه"
+                  : "A shared table from the Hail Cafe menu"
+              }
+              loading="lazy"
+            />
+          </div>
+          <div className="atmosphere-copy">
+            <h2>{locale === "ar" ? "أجواءنا" : "Our atmosphere"}</h2>
+            <p>
+              {locale === "ar"
+                ? "مستوحى من تراثنا، ومصمّم لراحتكم. هنا تلتقي الصحبة الحلوة في مساحة تجمع بين حداثة التصميم ودفء الضيافة العربية الأصيلة."
+                : "Drawn from our heritage and built for your comfort. This is where good company meets a space that blends contemporary design with warm Arabic hospitality."}
+            </p>
+          </div>
+        </section>
+
+        <section className="reserve-section" id="reserve">
+          <form className="reserve-card" onSubmit={submitReservation}>
+            <h2>{locale === "ar" ? "احجز طاولتك" : "Reserve your table"}</h2>
+            <p>
+              {locale === "ar"
+                ? "نحن بانتظار استضافتك في هيل كافيه."
+                : "We look forward to hosting you at Hail Cafe."}
+            </p>
+            <div className="reserve-fields">
+              <div className="reserve-field">
+                <label htmlFor="reserve-date">
+                  <CalendarDays size={15} aria-hidden="true" />{" "}
+                  {locale === "ar" ? "التاريخ" : "Date"}
+                </label>
+                <input
+                  id="reserve-date"
+                  ref={reserveDateRef}
+                  type="date"
+                  required
+                  value={reserveDate}
+                  onChange={(event) => setReserveDate(event.target.value)}
+                />
+              </div>
+              <div className="reserve-field">
+                <label htmlFor="reserve-time">
+                  <Clock3 size={15} aria-hidden="true" />{" "}
+                  {locale === "ar" ? "الساعة" : "Time"}
+                </label>
+                <input
+                  id="reserve-time"
+                  type="time"
+                  required
+                  value={reserveTime}
+                  onChange={(event) => setReserveTime(event.target.value)}
+                />
+              </div>
+              <div className="reserve-field">
+                <label htmlFor="reserve-guests">
+                  <Users size={15} aria-hidden="true" />{" "}
+                  {locale === "ar" ? "عدد الأشخاص" : "Guests"}
+                </label>
+                <select
+                  id="reserve-guests"
+                  value={reserveGuests}
+                  onChange={(event) => setReserveGuests(event.target.value)}
+                >
+                  {Array.from({ length: 12 }, (_, index) => index + 1).map(
+                    (count) => (
+                      <option key={count} value={String(count)}>
+                        {count}
+                      </option>
+                    ),
+                  )}
+                </select>
+              </div>
+            </div>
+            <button className="reserve-submit" type="submit">
+              {locale === "ar" ? "احجز الآن" : "Reserve now"}
+            </button>
+            <p className="reserve-note">
+              {locale === "ar"
+                ? "يفتح الطلب محادثة واتساب مع الفرع لتأكيد الحجز."
+                : "This opens a WhatsApp chat with the branch to confirm."}
+            </p>
+          </form>
         </section>
 
         <section className="visit-section" id="visit">

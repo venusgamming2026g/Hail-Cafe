@@ -126,7 +126,7 @@ const TONE = {
   ok:   { ic: 'check', bg: 'rgba(46,158,126,.18)', fg: 'var(--ok-400)' },
   warn: { ic: 'alert', bg: 'rgba(222,148,48,.18)', fg: 'var(--warn-400)' },
   bad:  { ic: 'alert', bg: 'rgba(223,76,64,.18)', fg: 'var(--bad-400)' },
-  gold: { ic: 'sparkle', bg: 'rgba(210,169,97,.18)', fg: 'var(--gold-400)' },
+  gold: { ic: 'sparkle', bg: 'rgba(192,70,42,.18)', fg: 'var(--clay-300)' },
 };
 
 export function toast(title, { body = '', tone: t = 'info', life = 4600, sound = null, iconName = null, onClick = null } = {}) {

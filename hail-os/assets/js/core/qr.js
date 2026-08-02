@@ -292,7 +292,7 @@ export function matrix(text, ecl = 'M') {
  * يرسم رمز QR كـ SVG قابل للطباعة والتكبير بلا فقدان جودة.
  */
 export function toSvg(text, {
-  ecl = 'M', size = 240, margin = 3, dark = '#0C0F13', light = '#FFFFFF',
+  ecl = 'M', size = 240, margin = 3, dark = '#16120d', light = '#FFFFFF',
   radius = 0.5, logo = null, logoSize = 0.22, gradient = null,
 } = {}) {
   const m = matrix(text, ecl);

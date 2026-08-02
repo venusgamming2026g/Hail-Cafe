@@ -12,10 +12,10 @@ import { toSvg } from '../core/qr.js';
 import { MENU_STATS, BRANCH } from '../data/menu.js';
 import { startSimulator, stopSimulator, simulatorRunning, seed } from '../data/seed.js';
 
-boot({ title: 'Restaurant OS — المنظومة التفاعلية' });
+boot({ title: 'HAIL OS — نظام هيل كافيه' });
 
 document.getElementById('bar').replaceWith(topbar({
-  title: 'Restaurant OS',
+  title: 'HAIL OS',
   subtitle: 'النظام الداخلي المتكامل',
   live: true,
 }));
@@ -50,7 +50,7 @@ const localOnly = () => /localhost|127\.0\.0\.1/.test(qrBase);
 /* ── الشاشات ─────────────────────────────────────────────────────────── */
 const SURFACES = [
   {
-    href: 'menu.html?t=3', ic: 'qr', glow: 'rgba(210,169,97,.32)',
+    href: 'menu.html?t=3', ic: 'qr', glow: 'rgba(192,70,42,.32)',
     title: 'منيو الزبون (QR)', tag: 'واجهة الطاولة',
     desc: 'المنيو الرسمي كاملاً مع السلة والطلب متعدّد الجولات، تتبّع حيّ للطلب، نداء الخدمة، والفاتورة.',
     stat: () => `${MENU_STATS.items} صنف`,
@@ -89,9 +89,9 @@ function render() {
 
   document.getElementById('app').innerHTML = `
     <section class="cover">
-      <div class="crest float">OS</div>
+      <div class="crest float">هيل</div>
       <p class="eyebrow" style="justify-content:center">نظام مطعم داخلي متكامل</p>
-      <h1><span class="gold-text">Restaurant OS</span><br>كل ما يحتاجه المطعم في نظام واحد</h1>
+      <h1><span class="gold-text">HAIL OS</span><br>كل ما يحتاجه المطعم في نظام واحد</h1>
       <p class="lead">
         من مسح رمز QR على الطاولة، إلى المطبخ والصالة والكاشير، وصولاً إلى تقارير المدير —
         كل الشاشات تتزامن لحظياً بلا خادم ولا إعدادات.
@@ -103,9 +103,9 @@ function render() {
         <div><b class="gold-text">5</b><span>شاشات تشغيل</span></div>
       </div>
       <div class="seam mt6" style="max-width:320px;margin-inline:auto;display:flex;align-items:center;gap:8px">
-        <i style="width:9px;height:9px;background:var(--gold-500);transform:rotate(45deg);border-radius:2px"></i>
-        <span style="height:1px;flex:1;background:linear-gradient(90deg,transparent,var(--gold-600),transparent)"></span>
-        <i style="width:9px;height:9px;background:var(--gold-500);transform:rotate(45deg);border-radius:2px"></i>
+        <i style="width:9px;height:9px;background:var(--clay-500);transform:rotate(45deg);border-radius:2px"></i>
+        <span style="height:1px;flex:1;background:linear-gradient(90deg,transparent,var(--clay-600),transparent)"></span>
+        <i style="width:9px;height:9px;background:var(--clay-500);transform:rotate(45deg);border-radius:2px"></i>
       </div>
     </section>
 
@@ -135,7 +135,7 @@ function render() {
           </a>`).join('')}
 
         <button class="launch reveal" id="qrbtn" style="text-align:start">
-          <span class="glowdot" style="--glow:rgba(210,169,97,.34)"></span>
+          <span class="glowdot" style="--glow:rgba(192,70,42,.34)"></span>
           <span class="between">
             <span class="ic">${icon('qr')}</span>
             <span class="chip chip-gold">جاهز للطباعة</span>
@@ -266,10 +266,10 @@ function openQr() {
       <div class="qrsheet">
         ${tables.map((t) => `
           <div class="qrcard">
-            <div class="brand">مقهى ومطعم النخبة</div>
+            <div class="brand">هيل كافيه</div>
             <div class="qr">${toSvg(urlFor(t.number), {
               size: 190, ecl: 'Q', margin: 2, radius: 0.9,
-              dark: '#12161A', light: '#FFFFFF', gradient: ['#1A2026', '#4A3A1C'],
+              dark: '#221d16', light: '#FFFFFF', gradient: ['#322b21', '#9d3722'],
             })}</div>
             <div class="no">${t.number}</div>
             <div class="hint">امسح الرمز لعرض المنيو والطلب من طاولتك</div>

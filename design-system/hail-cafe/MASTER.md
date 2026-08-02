@@ -17,31 +17,44 @@
 
 ### Color Palette
 
+Identity: **"رمل وطين" (Sand & Clay)** — warm, sunlit, earthen. No cool greys,
+no blue-blacks, no metallic gold. See `PROJECT-BRIEF.md` for the full ramps.
+
 | Role | Hex | CSS Variable |
 |------|-----|--------------|
-| Primary | `#92400E` | `--color-primary` |
-| On Primary | `#FFFFFF` | `--color-on-primary` |
-| Secondary | `#B45309` | `--color-secondary` |
-| Accent/CTA | `#92400E` | `--color-accent` |
-| Background | `#FEF3C7` | `--color-background` |
-| Foreground | `#78350F` | `--color-foreground` |
-| Muted | `#EDEEF0` | `--color-muted` |
-| Border | `#FDE68A` | `--color-border` |
-| Destructive | `#DC2626` | `--color-destructive` |
-| Ring | `#92400E` | `--color-ring` |
+| Primary | `#c0462a` | `--clay-600` |
+| On Primary | `#FFFFFF` | — |
+| Brand terracotta | `#d1502f` | `--clay-500` |
+| Secondary | `#6c7a49` | `--olive-600` |
+| Accent/CTA | `#c0462a` | `--clay-600` |
+| Warm band | `#c9a47c` | `--camel-500` |
+| Background | `#faf3e7` | `--sand-50` |
+| Raised surface | `#fffdf8` | `--sand-0` |
+| Foreground | `#221d16` | `--ink-800` |
+| Muted | `#6d6151` | `--muted` |
+| Border | `#e4d9c5` | `--sand-300` |
+| Success | `#3f7c4f` | `--success` |
+| Warning | `#96650f` | `--warning` |
+| Destructive | `#a32620` | `--danger` |
+| Ring | `#c0462a` | `--focus` |
 
-**Color Notes:** Warm brown + cream white [Accent adjusted from #F8FAFC for WCAG 3:1]
+**Color Notes:** Warm sand ground + terracotta accent + sage olive counterpoint +
+camel band. All pairings validated — body text ≥ 4.5:1, UI/focus ≥ 3:1.
+`--clay-500` and `--olive-500` are large-text-only over white; step to `-600` for
+body copy.
 
 ### Typography
 
-- **Heading Font:** Noto Naskh Arabic
-- **Body Font:** Noto Sans Arabic
-- **Mood:** arabic, elegant, traditional, cultural, RTL, readable
-- **Google Fonts:** [Noto Naskh Arabic + Noto Sans Arabic](https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@300;400;500;700&display=swap)
+- **Heading Font:** Alexandria (expressive Arabic display)
+- **Body Font:** IBM Plex Sans Arabic (body and operations)
+- **Mood:** arabic, geometric, warm, contemporary, RTL, readable
+- **Loading:** self-hosted woff2 via `assets/css/fonts.css` (works offline), and
+  `next/font/google` in `app/layout.tsx` for the Next.js surfaces.
 
-**CSS Import:**
+**CSS variables:**
 ```css
-@import url('https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@300;400;500;700&display=swap');
+--font-display: 'Alexandria', 'Plex Arabic', system-ui, sans-serif;
+--font-body:    'Plex Arabic', 'Alexandria', system-ui, sans-serif;
 ```
 
 ### Spacing Variables
@@ -74,49 +87,52 @@
 ### Buttons
 
 ```css
-/* Primary Button */
+/* Primary Button — clay-600 carries white text at 5.06:1 */
 .btn-primary {
-  background: #92400E;
-  color: white;
+  background: var(--clay-600);
+  color: #fff;
+  min-height: 44px;
   padding: 12px 24px;
-  border-radius: 8px;
+  border-radius: 999px;
   font-weight: 600;
-  transition: all 200ms ease;
+  transition: background 200ms ease, transform 140ms ease;
   cursor: pointer;
 }
 
-.btn-primary:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
+.btn-primary:hover { background: var(--clay-700); }
+.btn-primary:active { transform: scale(0.97); }
 
 /* Secondary Button */
 .btn-secondary {
   background: transparent;
-  color: #92400E;
-  border: 2px solid #92400E;
+  color: var(--clay-700);
+  border: 1.5px solid var(--clay-600);
+  min-height: 44px;
   padding: 12px 24px;
-  border-radius: 8px;
+  border-radius: 999px;
   font-weight: 600;
-  transition: all 200ms ease;
+  transition: background 200ms ease;
   cursor: pointer;
 }
+
+.btn-secondary:hover { background: var(--clay-50); }
 ```
 
 ### Cards
 
 ```css
 .card {
-  background: #FEF3C7;
-  border-radius: 12px;
+  background: var(--sand-0);
+  border: 1px solid var(--sand-300);
+  border-radius: var(--radius-md);
   padding: 24px;
-  box-shadow: var(--shadow-md);
-  transition: all 200ms ease;
-  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 200ms ease, transform 200ms ease;
 }
 
-.card:hover {
-  box-shadow: var(--shadow-lg);
+.card-interactive { cursor: pointer; }
+.card-interactive:hover {
+  box-shadow: var(--shadow-md);
   transform: translateY(-2px);
 }
 ```
@@ -125,17 +141,35 @@
 
 ```css
 .input {
+  min-height: 44px;
   padding: 12px 16px;
-  border: 1px solid #E2E8F0;
-  border-radius: 8px;
+  background: var(--sand-0);
+  border: 1px solid var(--sand-300);
+  border-radius: var(--radius-sm);
   font-size: 16px;
-  transition: border-color 200ms ease;
+  transition: border-color 200ms ease, box-shadow 200ms ease;
 }
 
 .input:focus {
-  border-color: #92400E;
+  border-color: var(--clay-600);
   outline: none;
-  box-shadow: 0 0 0 3px #92400E20;
+  box-shadow: 0 0 0 3px rgb(192 70 42 / 14%);
+}
+```
+
+### Terrazzo ground
+
+The signature texture. CSS-generated, never a raster asset.
+
+```css
+.terrazzo {
+  background-color: var(--sand-50);
+  background-image:
+    radial-gradient(circle at 12% 22%, var(--clay-100) 0 5px, transparent 6px),
+    radial-gradient(circle at 68% 14%, var(--olive-100) 0 4px, transparent 5px),
+    radial-gradient(circle at 84% 62%, var(--camel-100) 0 6px, transparent 7px),
+    radial-gradient(circle at 34% 78%, var(--clay-100) 0 4px, transparent 5px);
+  background-size: 190px 190px;
 }
 ```
 
@@ -161,21 +195,21 @@
 
 ## Style Guidelines
 
-**Style:** SaaS Mobile (High-Tech Boutique)
+**Style:** Warm Earthen Hospitality (Sand & Clay)
 
-**Keywords:** saas, electric blue, gradient, fintech, spring animation, dual font, glassmorphism, boutique, premium, calistoga, inter, mono, tactile, haptic, bento
+**Keywords:** terracotta, sage olive, camel, warm sand, terrazzo, arabic geometric, RTL, tactile, matte, banded sections, rounded, sunlit, appetite-forward
 
-**Best For:** B2B SaaS mobile dashboards, fintech apps, developer tool mobile companions, marketing analytics apps, HR/operations apps, modern business productivity
+**Best For:** Restaurant and cafe surfaces, menus and ordering flows, table service, and the operations screens that sit behind them.
 
-**Key Effects:** Spring animations (mass:1 damping:15 stiffness:120); gradient buttons (0052FF→4D7CFF); scale press 0.96→1.0 with haptics; floating FAB with gentle bobbing (Reanimated); glassmorphism BlurView navigation bars; staggered fade-in entrance (Y:20→0 + opacity:0→1); pulsing status dot on section badges; layout transitions (LayoutAnimation or Reanimated entering)
+**Key Effects:** Flat matte surfaces with warm hairlines; terrazzo speckle ground; double-diamond seam dividers; press scale 0.97; 200ms color transitions; short fade-and-lift on scroll entry (12px). Deliberately **excluded:** glassmorphism, backdrop blur, aurora blobs, metallic gradients, sheen sweeps, and any infinite decorative animation.
 
 ### Page Pattern
 
-**Pattern Name:** Real-Time / Operations Landing
+**Pattern Name:** Banded Hospitality Landing
 
-- **Conversion Strategy:** For ops/security/iot products. Demo or sandbox link. Trust signals.
-- **CTA Placement:** Primary CTA in nav + After metrics
-- **Section Order:** 1. Hero (product + live preview or status), 2. Key metrics/indicators, 3. How it works, 4. CTA (Start trial / Contact)
+- **Conversion Strategy:** Appetite first. Real photography, visible prices, and a booking form that is reachable without leaving the page.
+- **CTA Placement:** Primary CTA in nav + in hero + the reservation band
+- **Section Order:** 1. Hero (photography + booking CTA), 2. Featured dishes with prices, 3. Atmosphere band (camel), 4. Reservation panel (terrazzo ground + olive card), 5. Clay footer with hours and location
 
 ---
 
@@ -199,6 +233,11 @@ gsap.from(el, { opacity: 0, y: 12, duration: 0.35, ease: 'power1.out', scrollTri
 
 - ❌ Poor food photos
 - ❌ Hidden hours
+- ❌ **Cool greys and blue-blacks** — every neutral carries a warm bias
+- ❌ **Metallic gold / copper gradients** — retired with the obsidian theme
+- ❌ **Glassmorphism and backdrop blur** — surfaces are matte
+- ❌ **`--clay-500` or `--olive-500` behind white body text** — step to `-600`
+- ❌ **`--camel-500` as a border, icon, or text color on sand** — 2.10:1
 
 ### Additional Forbidden Patterns
 

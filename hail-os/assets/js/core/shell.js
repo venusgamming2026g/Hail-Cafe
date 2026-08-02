@@ -10,7 +10,7 @@ import * as notify from './notify.js';
 import { seed } from '../data/seed.js';
 
 /* ── الإقلاع ─────────────────────────────────────────────────────────── */
-export function boot({ title = 'مقهى ومطعم النخبة', autoSeed = true } = {}) {
+export function boot({ title = 'هيل كافيه', autoSeed = true } = {}) {
   const s = store.get();
   fx.applyTheme(s.settings.theme);
   fx.initFx();
@@ -78,7 +78,7 @@ export function topbar({ title, subtitle = '', back = null, actions = [], live =
   bar.innerHTML = `
     ${back ? `<a class="btn btn-icon btn-ghost" href="${back}" aria-label="رجوع">${icon('arrowR')}</a>` : ''}
     <div class="brandmark">
-      <span class="seal">OS</span>
+      <span class="seal">هيل</span>
       <span><b>${esc(title)}</b><span>${esc(subtitle)}</span></span>
     </div>
     <div class="grow"></div>
@@ -239,7 +239,7 @@ export function pinLogin({ surface, title = 'تسجيل دخول الطاقم' }
     box.innerHTML = `
       <div class="pad-lg" style="text-align:center">
         <div class="center" style="width:56px;height:56px;border-radius:18px;margin:0 auto 14px;
-             background:rgba(210,169,97,.16);color:var(--gold-400)">${icon('lock')}</div>
+             background:rgba(192,70,42,.16);color:var(--clay-300)">${icon('lock')}</div>
         <h3>${esc(title)}</h3>
         <p class="mute t-sm mb4">أدخل الرقم السري المكوّن من 4 أرقام</p>
         <div class="pindots mb6" data-dots>${'<i></i>'.repeat(4)}</div>

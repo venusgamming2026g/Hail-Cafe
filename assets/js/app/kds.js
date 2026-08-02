@@ -14,7 +14,7 @@ const STATION_KEY = 'hailos:kds:stations';
 let active = LS.get(STATION_KEY, null);     // null = كل المحطات
 let layout = LS.get('hailos:kds:layout', 'cols');
 
-boot({ title: 'شاشة المطبخ (KDS) — Restaurant OS' });
+boot({ title: 'المطبخ — هيل كافيه' });
 
 /* ── الشريط العلوي ───────────────────────────────────────────────────── */
 const fsBtn = document.createElement('button');

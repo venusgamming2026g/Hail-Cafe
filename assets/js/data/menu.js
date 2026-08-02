@@ -9,13 +9,13 @@ export const CURRENCY = { code: 'JOD', ar: 'د.أ', en: 'JOD', decimals: 3 };
 
 /* محطات التحضير — يُوجَّه كل صنف تلقائياً لشاشة المحطة المسؤولة */
 export const STATIONS = {
-  hot:    { id: 'hot',    ar: 'المطبخ الساخن', en: 'Hot kitchen', color: '#E8663A', icon: 'flame' },
-  grill:  { id: 'grill',  ar: 'الشوي',         en: 'Grill',       color: '#C0392B', icon: 'beef' },
-  oven:   { id: 'oven',   ar: 'الفرن',         en: 'Oven',        color: '#D98324', icon: 'pizza' },
-  cold:   { id: 'cold',   ar: 'المطبخ البارد', en: 'Cold kitchen',color: '#2E9E7E', icon: 'salad' },
-  bar:    { id: 'bar',    ar: 'البار',         en: 'Bar',         color: '#3B82C4', icon: 'cup' },
-  pastry: { id: 'pastry', ar: 'الحلويات',      en: 'Pastry',      color: '#B4638F', icon: 'cake' },
-  hookah: { id: 'hookah', ar: 'المعسل',        en: 'Hookah',      color: '#7C6BAE', icon: 'smoke' },
+  hot:    { id: 'hot',    ar: 'المطبخ الساخن', en: 'Hot kitchen', color: '#e2593a', icon: 'flame' },
+  grill:  { id: 'grill',  ar: 'الشوي',         en: 'Grill',       color: '#a8382a', icon: 'beef' },
+  oven:   { id: 'oven',   ar: 'الفرن',         en: 'Oven',        color: '#d4922b', icon: 'pizza' },
+  cold:   { id: 'cold',   ar: 'المطبخ البارد', en: 'Cold kitchen',color: '#7c8a55', icon: 'salad' },
+  bar:    { id: 'bar',    ar: 'البار',         en: 'Bar',         color: '#3f7f6a', icon: 'cup' },
+  pastry: { id: 'pastry', ar: 'الحلويات',      en: 'Pastry',      color: '#a8546e', icon: 'cake' },
+  hookah: { id: 'hookah', ar: 'المعسل',        en: 'Hookah',      color: '#7b6091', icon: 'smoke' },
 };
 
 /* [ id, arabic, english, station, prep-minutes, icon ] */
@@ -61,7 +61,7 @@ const ITEMS = [
   ['breakfast-omelette','breakfast','أومليت','Omelette',2750,'omelette',{}],
   ['breakfast-fried-eggs','breakfast','بيض عيون','Fried eggs',2000,'',{}],
   ['breakfast-falafel-taco','breakfast','تاكو فلافل','Falafel taco',2750,'',{t:['نباتي']}],
-  ['breakfast-shakshuka','breakfast','شكشوكة خاصة','Special shakshuka',2250,'',{t:['حار']}],
+  ['breakfast-shakshuka','breakfast','شكشوكة على طريقة هيل','Hail shakshuka',2250,'',{t:['حار']}],
   ['breakfast-potatoes','breakfast','بطاطا','Potatoes',2000,'',{t:['نباتي']}],
   ['breakfast-turkey-quiche','breakfast','كيش تيركي','Turkey quiche',3000,'',{}],
   ['breakfast-sausage-eggs','breakfast','صوصج مع البيض','Sausage with eggs',3100,'',{}],
@@ -76,10 +76,10 @@ const ITEMS = [
   ['breakfast-lotus-nutella','breakfast','لوتس ونوتيلا','Lotus and Nutella',3250,'',{t:['حلو']}],
 
   // ── السلطات ─────────────────────────────────────────────────────────────
-  ['salad-fattoush-hail','salads','فتوش بخلطة الشيف','Special fattoush',4000,'',{t:['نباتي']}],
-  ['salad-tabbouleh','salads','تبولة فاخرة','Special tabbouleh',4500,'',{t:['نباتي']}],
+  ['salad-fattoush-hail','salads','فتوش وخلطة على طريقة هيل','Hail fattoush',4000,'',{t:['نباتي']}],
+  ['salad-tabbouleh','salads','تبولة هيل','Hail tabbouleh',4500,'',{t:['نباتي']}],
   ['salad-greek','salads','يونانية سلط','Greek salad',3950,'',{t:['نباتي']}],
-  ['salad-hail','salads','سلطة الشيف الخاصة','Chef special salad',4750,'hail-salad',{f:1}],
+  ['salad-hail','salads','هيل سلط','Hail salad',4750,'hail-salad',{f:1}],
   ['salad-shanklish','salads','شنكليش سلط','Shanklish salad',4500,'',{t:['نباتي']}],
   ['salad-caesar','salads','سيزر سلط','Caesar salad',4250,'',{}],
   ['salad-seafood','salads','مكس سي فود سلط','Mixed seafood salad',8500,'seafood-salad',{t:['بحري']}],
@@ -89,7 +89,7 @@ const ITEMS = [
   ['cold-shanklish','cold-appetizers','شنكليش','Shanklish',2750,'',{t:['نباتي']}],
   ['cold-muhammara','cold-appetizers','محمرة','Muhammara',2250,'',{t:['نباتي','حار']}],
   ['cold-labneh-crisps','cold-appetizers','لبنة فراقيش','Labneh with crisps',2500,'',{t:['نباتي']}],
-  ['cold-hail-hummus','cold-appetizers','حمص بالخلطة الخاصة','Special hummus',2750,'',{t:['نباتي']}],
+  ['cold-hail-hummus','cold-appetizers','هيل حمص','Hail hummus',2750,'',{t:['نباتي']}],
 
   // ── المقبلات الساخنة ────────────────────────────────────────────────────
   ['hot-musakhan-cups','hot-appetizers','مسخن كب','Musakhan cups',3750,'',{}],
@@ -111,12 +111,12 @@ const ITEMS = [
   ['pasta-bolognese','pasta','بولونيز','Bolognese',4500,'',{}],
   ['pasta-arrabbiata','pasta','بينا أرابياتا','Penne arrabbiata',4500,'',{t:['نباتي','حار']}],
   ['pasta-fettuccine-alfredo','pasta','فوتوتشيني ألفريدو','Fettuccine alfredo',4500,'',{}],
-  ['pasta-hail-special','pasta','فوتوتشيني سبيشل','Fettuccine special',7150,'pasta-special',{f:1}],
+  ['pasta-hail-special','pasta','هيل فوتوتشيني سبيشل','Hail fettuccine special',7150,'pasta-special',{f:1}],
   ['addon-chicken','pasta-addons','إضافة دجاج','Chicken add-on',1500,'',{n:'إضافة للباستا',ne:'Pasta add-on'}],
   ['addon-shrimp','pasta-addons','إضافة شريمب','Shrimp add-on',3000,'',{n:'إضافة للباستا',ne:'Pasta add-on',t:['بحري']}],
 
   // ── البيتزا ─────────────────────────────────────────────────────────────
-  ['pizza-hail','pizza','بيتزا الشيف الخاصة','Chef special pizza',5250,'hail-pizza',{f:1}],
+  ['pizza-hail','pizza','بيتزا هيل','Hail pizza',5250,'hail-pizza',{f:1}],
   ['pizza-alfredo','pizza','بيتزا ألفريدو','Alfredo pizza',5500,'',{}],
   ['pizza-pepperoni','pizza','بيروني بيتزا','Pepperoni pizza',4500,'pepperoni-pizza',{}],
   ['pizza-vegetable','pizza','بيتزا خضار','Vegetable pizza',4500,'vegetable-pizza',{t:['نباتي']}],
@@ -188,7 +188,7 @@ const ITEMS = [
   ['milkshake-vanilla','milkshakes','ميلك شيك فانيلا','Vanilla milkshake',3250,'',{}],
   ['milkshake-cheesecake','milkshakes','ميلك شيك تشيز كيك','Cheesecake milkshake',3250,'',{}],
   ['milkshake-pinacolada','milkshakes','ميلك شيك بيناكولادا','Piña colada milkshake',3250,'',{}],
-  ['milkshake-hail','milkshakes','ميلك شيك سبيشل','Special milkshake',3250,'',{}],
+  ['milkshake-hail','milkshakes','ميلك شيك هيل','Hail milkshake',3250,'',{}],
   ['milkshake-oreo','milkshakes','ميلك شيك أوريو','Oreo milkshake',3250,'',{}],
   ['milkshake-snickers','milkshakes','ميلك شيك سنكرز','Snickers milkshake',3250,'',{}],
   ['milkshake-crocant','milkshakes','ميلك شيك كروكان','Crocant milkshake',3250,'',{}],
@@ -199,7 +199,7 @@ const ITEMS = [
   // ── الموهيتو ────────────────────────────────────────────────────────────
   ['mojito-candy','mojito','موهيتو كاندي','Candy mojito',3250,'mojito',{}],
   ['mojito-pineapple-lychee','mojito','موهيتو ليتشي أناناس','Pineapple lychee mojito',3250,'',{}],
-  ['mojito-hail','mojito','موهيتو سبيشل منعش','Special mojito',3750,'',{f:1}],
+  ['mojito-hail','mojito','موهيتو هيل','Hail mojito',3750,'',{f:1}],
   ['mojito-cucumber-basil','mojito','موهيتو خيار وريحان','Cucumber and basil mojito',3250,'',{}],
   ['mojito-blue-passion','mojito','موهيتو بلو باشن','Blue passion mojito',4250,'',{}],
   ['mojito-mango-peach','mojito','موهيتو مانجا بيتش','Mango peach mojito',3250,'',{}],
@@ -232,7 +232,7 @@ const ITEMS = [
   ['cocktail-banana-milk','cocktails','موز وحليب','Banana and milk',3500,'',{}],
   ['cocktail-strawberry-banana','cocktails','فراولة وموز','Strawberry and banana',3500,'',{}],
   ['cocktail-berry-banana','cocktails','بنانا بيري','Berry and banana',4000,'',{}],
-  ['cocktail-hail','cocktails','كوكتيل النخبة','Gourmet cocktail',4000,'hail-cocktail',{f:1}],
+  ['cocktail-hail','cocktails','هيل كوكتيل','Hail cocktail',4000,'hail-cocktail',{f:1}],
   ['cocktail-avocado','cocktails','أفوكادو','Avocado',4000,'',{}],
   ['cocktail-peach-colada','cocktails','بيتش كولادا','Peach colada',3750,'',{}],
   ['cocktail-guava-apple','cocktails','جوافة غرين أبل','Guava and green apple',3500,'',{}],
@@ -253,7 +253,7 @@ const ITEMS = [
   ['hot-double-espresso','hot-drinks','دبل إسبريسو','Double espresso',2750,'',{}],
   ['hot-single-espresso','hot-drinks','سنجل إسبريسو','Single espresso',2250,'',{}],
   ['hot-chocolate','hot-drinks','هوت شوكلت','Hot chocolate',3250,'hot-chocolate',{}],
-  ['hot-hail-chocolate','hot-drinks','هوت شوكلت فاخر','Deluxe hot chocolate',3250,'',{}],
+  ['hot-hail-chocolate','hot-drinks','هيل هوت شوكلت','Hail hot chocolate',3250,'',{}],
   ['hot-turkish-single','hot-drinks','قهوة تركية سنجل','Turkish coffee single',2250,'',{}],
   ['hot-turkish-double','hot-drinks','قهوة تركية دبل','Turkish coffee double',2750,'',{}],
   ['hot-macchiato','hot-drinks','مكياتو','Macchiato',2750,'',{}],
@@ -297,7 +297,7 @@ const ITEMS = [
   ['hookah-gum-mint','hookah','علكة ونعنع','Gum and mint',4200,'',{}],
   ['hookah-apple-mint','hookah','تفاح ونعنع','Apple and mint',4200,'',{}],
   ['hookah-candy-drops','hookah','كاندي دروبس','Candy drops',4200,'',{}],
-  ['hookah-hail-mix','hookah','خلطة المعسل الخاصة','Special hookah mix',4200,'',{f:1}],
+  ['hookah-hail-mix','hookah','خلطة هيل','Hail mix',4200,'',{f:1}],
   ['hookah-lovely','hookah','لفلي','Lovely',4200,'',{}],
   ['hookah-ice-sweet','hookah','آيس سويت','Ice sweet',4200,'',{}],
   ['hookah-orange-mint','hookah','برتقال ونعنع','Orange and mint',4200,'',{}],
@@ -439,16 +439,16 @@ export const MENU_STATS = {
 
 /* ── معلومات الفرع الرسمية ─────────────────────────────────────────────── */
 export const BRANCH = {
-  id: 'main-branch',
-  ar: 'مقهى ومطعم النخبة — الفرع الرئيسي',
-  en: 'Gourmet Cafe & Restaurant — Main Branch',
-  addressAr: 'شارع الفخامة، العاصمة',
-  addressEn: 'Luxury Street, City Center',
-  phone: '+962790000000',
-  phoneDisplay: '+962 79 000 0000',
-  map: 'https://maps.google.com',
-  instagram: 'https://instagram.com',
-  facebook: 'https://facebook.com',
+  id: 'irbid-city-center',
+  ar: 'هيل كافيه — إربد سيتي سنتر',
+  en: 'Hail Cafe — Irbid City Center',
+  addressAr: 'شارع الأمير حسن، إربد سيتي سنتر، إربد، الأردن',
+  addressEn: 'Prince Hasan Street, Irbid City Center, Irbid, Jordan',
+  phone: '+962798130305',
+  phoneDisplay: '+962 79 813 0305',
+  map: 'https://maps.app.goo.gl/eoNayNYzrtsnVGEi6?g_st=ic',
+  instagram: 'https://instagram.com/hailcafejo',
+  facebook: 'https://www.facebook.com/Haelcafejo',
   hours: [
     { ar: 'الأحد',    en: 'Sunday',    open: '10:00', close: '00:00' },
     { ar: 'الاثنين',  en: 'Monday',    open: '10:00', close: '00:00' },

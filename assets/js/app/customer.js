@@ -14,7 +14,7 @@ import { categories, BRANCH, MENU_STATS } from '../data/menu.js';
 const q = params();
 const tableNumber = q.t || q.table ? clamp(Number(q.t || q.table), 1, 99) : null;
 const CART_KEY = `hailos:cart:${tableNumber || 'go'}`;
-const PAYER_KEY = `restaurantos:payer:${tableNumber || 'go'}`;
+const PAYER_KEY = `hailos:payer:${tableNumber || 'go'}`;
 
 let cart = LS.get(CART_KEY, []);
 let tab = 'menu';
@@ -26,7 +26,7 @@ let customer = LS.get('hailos:customer', { name: '', phone: '', address: '' });
 let payerName = tableNumber ? LS.get(PAYER_KEY, '') : '';
 
 /* ── الإقلاع ─────────────────────────────────────────────────────────── */
-boot({ title: tableNumber ? `مقهى ومطعم النخبة — طاولة ${tableNumber}` : 'مقهى ومطعم النخبة — المنيو' });
+boot({ title: tableNumber ? `هيل كافيه — طاولة ${tableNumber}` : 'هيل كافيه — المنيو' });
 
 if (tableNumber) {
   session = store.openSessionForTable(tableNumber)
@@ -34,8 +34,8 @@ if (tableNumber) {
 }
 
 document.getElementById('bar').replaceWith(topbar({
-  title: 'مقهى ومطعم النخبة',
-  subtitle: tableNumber ? `طاولة رقم ${tableNumber} · الفرع الرئيسي` : 'الفرع الرئيسي',
+  title: 'هيل كافيه',
+  subtitle: tableNumber ? `طاولة رقم ${tableNumber} · إربد سيتي سنتر` : 'إربد سيتي سنتر',
   live: false,
   actions: [(() => {
     const b = document.createElement('button');
@@ -179,10 +179,10 @@ const views = {
     return `
       <section class="hero">
         <div class="row wrap-x" style="gap:var(--s5);align-items:center">
-          <div class="hatch"><img src="assets/menu/combo-platter.webp" alt="من أطباق المطعم" loading="eager"></div>
+          <div class="hatch"><img src="assets/menu/combo-platter.webp" alt="من أطباق هيل كافيه" loading="eager"></div>
           <div class="grow" style="min-width:200px">
-            <p class="eyebrow mb2">منيو رقمي · الفرع الرئيسي</p>
-            <h1 class="mb2">أهلاً بك في <span class="gold-text">مقهى ومطعم النخبة</span></h1>
+            <p class="eyebrow mb2">منيو رسمي · إربد سيتي سنتر</p>
+            <h1 class="mb2">أهلاً بك في <span class="gold-text">هيل كافيه</span></h1>
             <p class="soft t-sm" style="max-width:46ch">
               ${tableNumber
                 ? `أنت على <b>الطاولة رقم ${tableNumber}</b>. اختر ما يحلو لك وأرسل الطلب مباشرة إلى المطبخ.`
@@ -207,7 +207,7 @@ const views = {
       </div>
 
       ${!search && activeCat === 'all' && featured.length ? `
-        <div class="sec-head"><h2>${icon('sparkle')} مختارات الشيف</h2><span class="line"></span></div>
+        <div class="sec-head"><h2>${icon('sparkle')} مختارات هيل</h2><span class="line"></span></div>
         <div class="feat">${featured.map((it) => card(it, true)).join('')}</div>` : ''}
 
       <div class="catrail-wrap">
@@ -806,7 +806,7 @@ function showBranch() {
       <b class="t-sm">${icon('clock')} أوقات الدوام</b>
       <div class="mt2">
         ${BRANCH.hours.map((h, i) => `
-          <div class="between t-sm" style="padding:5px 0;${i === today ? 'color:var(--gold-400);font-weight:600' : ''}">
+          <div class="between t-sm" style="padding:5px 0;${i === today ? 'color:var(--clay-300);font-weight:600' : ''}">
             <span>${h.ar}${i === today ? ' · اليوم' : ''}</span>
             <span class="num" dir="ltr">${h.open} – ${h.close}</span>
           </div>`).join('')}

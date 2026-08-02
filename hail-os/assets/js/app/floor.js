@@ -10,7 +10,7 @@ import * as notify from '../core/notify.js';
 import { boot, topbar, openSheet, watchNotifications, watchServiceSla, pinLogin } from '../core/shell.js';
 import { TABLE_ZONES } from '../data/seed.js';
 
-boot({ title: 'إدارة الصالة والطاولات — Restaurant OS' });
+boot({ title: 'الصالة — هيل كافيه' });
 
 /* ── الشريط العلوي ───────────────────────────────────────────────────── */
 const whoBtn = document.createElement('button');
@@ -58,9 +58,9 @@ function render() {
           <h2>${icon('grid')} خريطة الصالة</h2>
           <div class="legend">
             <span><i style="background:var(--ink-600)"></i>فارغة</span>
-            <span><i style="background:#2E9E7E"></i>مشغولة</span>
-            <span><i style="background:#3E90D2"></i>محجوزة</span>
-            <span><i style="background:#DE9430"></i>تحتاج تنظيف</span>
+            <span><i style="background:#7c8a55"></i>مشغولة</span>
+            <span><i style="background:#d4a82b"></i>محجوزة</span>
+            <span><i style="background:#d1502f"></i>تحتاج تنظيف</span>
           </div>
         </div>
 

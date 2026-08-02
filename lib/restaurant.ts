@@ -1,18 +1,20 @@
 export const officialMapUrl =
-  "https://maps.google.com";
+  "https://maps.app.goo.gl/eoNayNYzrtsnVGEi6?g_st=ic";
 
-export const officialMenuUrl = "/hail-cafe-menu-official.pdf";
+/* المنيو صار رقمياً بالكامل في lib/menu-data.ts (209 أصناف، 26 قسماً).
+   ملف الـ PDF أُزيل — الأصناف والأسعار تُقرأ من البيانات لا من ملف. */
+export const officialMenuUrl = "/#menu";
 
 export const officialBranch = {
-  id: "main-branch",
-  nameAr: "مقهى ومطعم النخبة",
-  nameEn: "Gourmet Cafe & Restaurant",
-  addressAr: "الفرع الرئيسي - شارع الفخامة، العاصمة",
-  addressEn: "Main Branch - Luxury Street, City Center",
-  phone: "+962790000000",
-  phoneDisplay: "+962 7 9000 0000",
+  id: "irbid-city-center",
+  nameAr: "هيل كافيه - إربد سيتي سنتر",
+  nameEn: "Hail Cafe - Irbid City Center",
+  addressAr: "شارع الأمير حسن، إربد سيتي سنتر، إربد، الأردن",
+  addressEn: "Prince Hasan Street, Irbid City Center, Irbid, Jordan",
+  phone: "+962798130305",
+  phoneDisplay: "+962 7 9813 0305",
   mapUrl: officialMapUrl,
-  plusCode: "CITY-CENTER-DEMO",
+  plusCode: "GVP8+F2 Irbid, Jordan",
   hours: [
     { dayAr: "الأحد", dayEn: "Sunday", opens: "10:00", closes: "24:00" },
     { dayAr: "الاثنين", dayEn: "Monday", opens: "10:00", closes: "24:00" },
@@ -25,9 +27,9 @@ export const officialBranch = {
 } as const;
 
 export const officialSocial = {
-  instagram: "https://instagram.com",
-  facebook: "https://facebook.com",
-  linktree: "https://linktr.ee",
+  instagram: "https://instagram.com/hailcafejo",
+  facebook: "https://www.facebook.com/Haelcafejo",
+  linktree: "https://linktr.ee/hailcafe",
 } as const;
 
 export const serviceRequestTypes = [

@@ -2,13 +2,13 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Restaurant OS - نظام إدارة المطاعم والمقاهي",
-    short_name: "Restaurant OS",
-    description: "المنيو الرقمي والطلب وخدمة الطاولة المباشرة وكاشير العمليات.",
+    name: "Hail Cafe - هيل كافيه",
+    short_name: "Hail Cafe",
+    description: "المنيو الرسمي والطلب وخدمة الطاولة في هيل كافيه.",
     start_url: "/",
     display: "standalone",
-    background_color: "#F7F5EF",
-    theme_color: "#172026",
+    background_color: "#FAF3E7",
+    theme_color: "#C0462A",
     lang: "ar",
     dir: "rtl",
     icons: [

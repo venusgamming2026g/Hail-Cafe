@@ -7,13 +7,13 @@
 import { uid, orderCode, sum, LS } from './util.js';
 import { items as MENU_ITEMS, categories as MENU_CATS, byId as MENU_BY_ID, TAX_RATE } from '../data/menu.js';
 
-const KEY = 'restaurantos:state:v1';
-const CHANNEL = 'restaurantos:sync';
+const KEY = 'hailos:state:v1';
+const CHANNEL = 'hailos:sync';
 
 /* ── الإعدادات الافتراضية ────────────────────────────────────────────── */
 export const DEFAULT_SETTINGS = {
-  brandAr: 'مقهى ومطعم النخبة',
-  brandEn: 'Gourmet Cafe & Restaurant',
+  brandAr: 'هيل كافيه',
+  brandEn: 'Hail Cafe',
   taxRate: TAX_RATE,          // ضريبة المبيعات 7% كما في المنيو الرسمي
   serviceRate: 0.10,          // خدمة اختيارية على الصالة
   serviceEnabled: true,

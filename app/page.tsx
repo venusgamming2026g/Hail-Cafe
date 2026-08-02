@@ -16,7 +16,7 @@ const structuredData = {
   address: {
     "@type": "PostalAddress",
     streetAddress: officialBranch.addressAr,
-    addressLocality: "العاصمة",
+    addressLocality: "إربد",
     addressCountry: "JO",
   },
   hasMap: officialMapUrl,
@@ -35,7 +35,9 @@ const structuredData = {
     closes: entry.closes,
   })),
   servesCuisine: "Restaurant and cafe menu",
-  acceptsReservations: false,
+  /* الحجز متاح عبر نطاق "احجز طاولتك" في الصفحة الرئيسية،
+     ويُؤكَّد بمحادثة واتساب مع الفرع. */
+  acceptsReservations: true,
 };
 
 export default function Home() {

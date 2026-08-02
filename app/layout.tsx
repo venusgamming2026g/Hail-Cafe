@@ -31,19 +31,19 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: new URL(origin),
     title: {
-      default: "نظام إدارة المطاعم والمقاهي | المنيو والطلب الرقمي",
-      template: "%s | Restaurant OS",
+      default: "هيل كافيه | المنيو والطلب وخدمة الطاولة",
+      template: "%s | هيل كافيه",
     },
     description:
-      "المنظومة الرقمية الشاملة لإدارة المطاعم والمقاهي: منيو QR ذكي، طلب طاولة، كاشير، شاشة مطبخ (KDS)، وإدارة الصالة.",
-    applicationName: "Restaurant OS",
+      "المنيو الرسمي لمطعم وكافيه هيل في إربد سيتي سنتر، مع طلب سفري، طلب من الطاولة، متابعة التحضير، وخدمة طاولة مباشرة.",
+    applicationName: "Hail Cafe",
     keywords: [
-      "نظام مطاعم",
-      "Restaurant OS",
-      "منيو رقمي",
-      "كاشير مطاعم",
-      "نظام كافيهات",
-      "طلب طاولة",
+      "هيل كافيه",
+      "Hail Cafe",
+      "مطعم إربد",
+      "كافيه إربد",
+      "إربد سيتي سنتر",
+      "منيو هيل",
     ],
     alternates: { canonical: `${origin}/` },
     icons: {
@@ -56,16 +56,16 @@ export async function generateMetadata(): Promise<Metadata> {
       url: origin,
       locale: "ar_JO",
       alternateLocale: "en_US",
-      title: "نظام إدارة المطاعم والمقاهي | المنظومة الذكية",
+      title: "هيل كافيه | من المطبخ للطاولة",
       description:
-        "منيو رقمي وطلب سفري وطلب طاولة وخدمة كاشير ومطبخ متكاملة.",
-      siteName: "Restaurant OS",
-      images: [{ url: socialImage, width: 1732, height: 909, alt: "Restaurant OS" }],
+        "منيو رسمي وطلب سفري وطلب طاولة وخدمة مباشرة في إربد سيتي سنتر.",
+      siteName: "Hail Cafe",
+      images: [{ url: socialImage, width: 1732, height: 909, alt: "Hail Cafe" }],
     },
     twitter: {
       card: "summary_large_image",
-      title: "نظام إدارة المطاعم والمقاهي | المنظومة الذكية",
-      description: "المنيو الرسمي وطلبات الطاولة والسفري والعمليات.",
+      title: "هيل كافيه | من المطبخ للطاولة",
+      description: "المنيو الرسمي وطلبات الطاولة والسفري.",
       images: [socialImage],
     },
   };
@@ -74,7 +74,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#172026",
+  themeColor: "#c0462a",
   colorScheme: "light",
 };
 

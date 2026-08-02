@@ -17,7 +17,7 @@ let posCat = 'breakfast';
 let posType = 'takeaway';
 let posTable = null;
 
-boot({ title: 'نقطة البيع والكاشير — Restaurant OS' });
+boot({ title: 'الكاشير — هيل كافيه' });
 
 /* ── الشريط العلوي ───────────────────────────────────────────────────── */
 const whoBtn = document.createElement('button');

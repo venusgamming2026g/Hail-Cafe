@@ -72,7 +72,7 @@ export function countTo(node, to, { from = null, dur = 900, fmt = (v) => Math.ro
 }
 
 /* ── 5. انفجار احتفالي (تأكيد الطلب / إقفال الفاتورة) ────────────────── */
-const CONFETTI = ['#D2A961', '#E4C489', '#E33B24', '#2E9E7E', '#3E90D2', '#F6E7C4'];
+const CONFETTI = ['#d4a82b', '#e8c65a', '#d1502f', '#7c8a55', '#d4a82b', '#f6ecdc'];
 
 export function burst(x = innerWidth / 2, y = innerHeight / 3, count = 46) {
   if (reduced()) return;
@@ -107,7 +107,7 @@ export function flyTo(fromEl, toEl, label = '') {
   ghost.textContent = label || '+1';
   ghost.style.cssText = `position:fixed;z-index:9400;left:${a.left + a.width / 2 - 18}px;top:${a.top + a.height / 2 - 18}px;
     width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.8rem;
-    background:linear-gradient(135deg,#F3E3BC,#D2A961);color:#14100A;box-shadow:0 8px 24px rgba(210,169,97,.5);pointer-events:none`;
+    background:linear-gradient(135deg,#e2603c,#c0462a);color:#fff;box-shadow:0 8px 24px rgba(192,70,42,.5);pointer-events:none`;
   document.body.append(ghost);
   ghost.animate([
     { transform: 'translate(0,0) scale(1)', opacity: 1 },
@@ -176,7 +176,7 @@ export function unlockScroll() {
 export function applyTheme(mode) {
   document.documentElement.dataset.theme = mode === 'day' ? 'day' : 'night';
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.content = mode === 'day' ? '#F4F1EA' : '#090B0E';
+  if (meta) meta.content = mode === 'day' ? '#faf3e7' : '#16120d';
 }
 
 /* ── 8. ساعة حيّة ────────────────────────────────────────────────────── */
@@ -191,7 +191,7 @@ export function liveClock(node) {
 }
 
 /* ── 9. رسم بياني خطي/عمودي مصغّر (SVG خالص) ────────────────────────── */
-export function sparkline(values, { w = 260, h = 62, stroke = 'var(--gold-500)', fill = true } = {}) {
+export function sparkline(values, { w = 260, h = 62, stroke = 'var(--clay-500)', fill = true } = {}) {
   if (!values.length) return '';
   const max = Math.max(...values, 1);
   const step = w / Math.max(1, values.length - 1);
@@ -209,7 +209,7 @@ export function sparkline(values, { w = 260, h = 62, stroke = 'var(--gold-500)',
   </svg>`;
 }
 
-export function bars(values, labels = [], { h = 150, color = 'var(--gold-500)' } = {}) {
+export function bars(values, labels = [], { h = 150, color = 'var(--clay-500)' } = {}) {
   const max = Math.max(...values, 1);
   return `<div class="row" style="align-items:flex-end;gap:6px;height:${h}px">
     ${values.map((v, i) => `

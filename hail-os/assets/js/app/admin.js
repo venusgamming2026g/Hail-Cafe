@@ -15,7 +15,7 @@ let tab = 'dash';
 let menuFilter = '';
 let menuCat = 'all';
 
-boot({ title: 'لوحة الإدارة — Restaurant OS' });
+boot({ title: 'الإدارة — هيل كافيه' });
 
 /* ── الشريط العلوي ───────────────────────────────────────────────────── */
 const whoBtn = document.createElement('button');
@@ -33,7 +33,7 @@ paintWho();
 
 document.getElementById('bar').replaceWith(topbar({
   title: 'لوحة الإدارة',
-  subtitle: 'مقهى ومطعم النخبة — الفرع الرئيسي',
+  subtitle: 'هيل كافيه — إربد سيتي سنتر',
   back: 'index.html',
   actions: [whoBtn],
 }));
@@ -103,7 +103,7 @@ const views = {
 
     const hours = today.byHour.slice(9, 24);
     const hourLabels = hours.map((h) => String(h.h));
-    const catColors = ['#D2A961', '#E33B24', '#2E9E7E', '#3E90D2', '#B4638F', '#DE9430', '#7C6BAE', '#5A6C7A'];
+    const catColors = ['#d4a82b', '#d1502f', '#7c8a55', '#d4a82b', '#a8546e', '#c9a47c', '#7b6091', '#7a6247'];
     const donutData = today.byCat.slice(0, 7).map((c, i) => ({
       label: categories.find((x) => x.id === c.cat)?.ar || c.cat,
       value: c.revenue, color: catColors[i % catColors.length],
@@ -390,7 +390,7 @@ const views = {
         ${s.staff.map((p) => `
           <div class="card pad reveal">
             <div class="row mb4">
-              <span class="av" style="width:46px;height:46px;border-radius:14px;background:var(--grad-gold);color:#14100A;font-size:1rem">
+              <span class="av" style="width:46px;height:46px;border-radius:14px;background:var(--grad-clay);color:#fff;font-size:1rem">
                 ${esc(p.name.slice(0, 1))}</span>
               <span class="grow">
                 <b>${esc(p.name)}</b>
