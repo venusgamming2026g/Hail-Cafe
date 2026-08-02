@@ -234,7 +234,16 @@ function render(animate = false) {
 
   const appEl = document.getElementById('app');
   if (animate) fx.initReveal(appEl); else fx.settleReveal(appEl);
-  window.scrollTo(0, scrollY);
+  window.scrollTo({ top: scrollY, behavior: 'instant' });
+}
+
+/* تحديث خلفي: لا يهدم قائمةً مفتوحة أو حقلاً بيده تركيز، ولا يعمل والشاشة مخفية. */
+function refresh() {
+  if (document.hidden) return;
+  if (document.getElementById('printzone').innerHTML) return;
+  const el = document.activeElement;
+  if (el && document.getElementById('app').contains(el) && el.matches('input, textarea, select')) return;
+  render();
 }
 
 function tile(k, v, ic, cls) {
@@ -290,9 +299,6 @@ function openQr() {
 
 /* ── التشغيل ─────────────────────────────────────────────────────────── */
 render(true);
-loadNetwork().then(() => render());
-store.subscribe(() => { if (!document.getElementById('printzone').innerHTML) render(); });
-setInterval(() => {
-  if (document.hidden) return;
-  if (!document.getElementById('printzone').innerHTML) render();
-}, 30000);
+loadNetwork().then(() => render());   // رسم مضمون بعد وصول عناوين الشبكة
+store.subscribe(refresh);
+setInterval(refresh, 30000);

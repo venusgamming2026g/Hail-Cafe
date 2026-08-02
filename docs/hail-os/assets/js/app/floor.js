@@ -125,7 +125,7 @@ function render(animate = false) {
   wire();
   const app = document.getElementById('app');
   if (animate) fx.initReveal(app); else fx.settleReveal(app);
-  window.scrollTo(0, scrollY);
+  window.scrollTo({ top: scrollY, behavior: 'instant' });
 }
 
 function tile(k, v, ic, cls) {
@@ -205,9 +205,11 @@ function wire() {
 
   app.querySelectorAll('[data-served]').forEach((b) => b.addEventListener('click', (e) => {
     e.stopPropagation();
+    /* نقرأ موقع الزر قبل الحفظ — الحفظ يعيد بناء الواجهة فيصبح الزر خارجها
+       ويرجع موقعه صفراً، فينفجر الاحتفال في زاوية الشاشة. */
+    const r = b.getBoundingClientRect();
     store.setOrderStatus(b.dataset.served, 'served', actor());
     notify.play('success');
-    const r = b.getBoundingClientRect();
     fx.burst(r.left, r.top, 20);
     render();
   }));

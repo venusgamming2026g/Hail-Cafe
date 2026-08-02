@@ -54,6 +54,23 @@ export function settleReveal(root = document) {
   root.querySelectorAll('.reveal').forEach((n) => n.classList.add('in'));
 }
 
+/** حفظ واسترجاع تمرير القوائم الداخلية عبر إعادة البناء — قائمة طويلة ترجع
+    لأولها مع كل تحديث تجعل المستخدم يفقد مكانه. يلتقط كل عنصر يحمل
+    data-keep-scroll ويعيد موضعه بعد الاستبدال بنفس المفتاح. */
+export function scrollSnapshot(root = document) {
+  const saved = {};
+  root.querySelectorAll('[data-keep-scroll]').forEach((n) => {
+    saved[n.dataset.keepScroll] = { top: n.scrollTop, left: n.scrollLeft };
+  });
+  return saved;
+}
+export function scrollRestore(saved, root = document) {
+  root.querySelectorAll('[data-keep-scroll]').forEach((n) => {
+    const s = saved[n.dataset.keepScroll];
+    if (s) { n.scrollTop = s.top; n.scrollLeft = s.left; }
+  });
+}
+
 /** يوزّع تأخيراً متتالياً على أبناء عنصر لإحساس الموجة */
 export function stagger(container, step = 42, max = 16) {
   Array.from(container.children).forEach((c, i) => {

@@ -76,7 +76,7 @@ function render(animate = false) {
     if (animate) fx.countTo(n, to, { fmt: fmtFor(n) });
     else { n.dataset.val = to; n.textContent = fmtFor(n)(to); }
   });
-  if (!animate) window.scrollTo(0, scrollY);
+  if (!animate) window.scrollTo({ top: scrollY, behavior: 'instant' });
 }
 
 /* تحديث خلفي: يُؤجَّل أثناء الكتابة في حقل حتى لا يفقد المدير تركيزه ونصّه. */

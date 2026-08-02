@@ -70,10 +70,13 @@ function render(animate = false) {
   const scrollY = window.scrollY;
   paintTabs();
   const app = document.getElementById('app');
+  const inner = fx.scrollSnapshot(app);
   app.innerHTML = views[tab]();
   wire[tab]?.();
   if (animate) fx.initReveal(app); else fx.settleReveal(app);
-  window.scrollTo(0, scrollY);
+  fx.scrollRestore(inner, app);
+  /* استرجاع فوري — scroll-behavior:smooth يجعل الاسترجاع ينزلق بشكل مرئي */
+  window.scrollTo({ top: scrollY, behavior: 'instant' });
 }
 
 /* تحديث خلفي: يُؤجَّل ما دام الكاشير يكتب في حقل حتى لا يفقد تركيزه ونصّه. */
@@ -189,7 +192,7 @@ const views = {
           <input class="field num mb4" id="ptable" type="number" min="1" max="24" value="${posTable || ''}" placeholder="مثال: 7">` : ''}
 
         <b class="t-sm">${icon('cart')} الأصناف (${sum(posCart, (l) => l.qty)})</b>
-        <div class="col mt2" style="gap:6px;max-height:44vh;overflow:auto">
+        <div class="col mt2" data-keep-scroll="pos-cart" style="gap:6px;max-height:44vh;overflow:auto">
           ${posCart.length ? posCart.map((l, i) => `
             <div class="row" style="gap:8px">
               <span class="grow t-sm">${esc(l.ar)}</span>
@@ -251,7 +254,7 @@ const views = {
 
         <div class="glass pad">
           <b class="mb4" style="display:block">${icon('list')} آخر العمليات</b>
-          <div class="scroll-y" style="max-height:320px">
+          <div class="scroll-y" data-keep-scroll="shift-pays" style="max-height:320px">
             ${pays.slice(0, 20).map((p) => `
               <div class="between t-sm" style="padding:7px 0;border-bottom:1px solid var(--hairline)">
                 <span>

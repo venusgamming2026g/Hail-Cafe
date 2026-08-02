@@ -245,7 +245,7 @@ function render() {
   } else {
     fx.settleReveal(app);
   }
-  if (!tabChanged) window.scrollTo(0, scrollY);
+  if (!tabChanged) window.scrollTo({ top: scrollY, behavior: 'instant' });
 }
 
 /* ── التبويبات السفلية ───────────────────────────────────────────────── */

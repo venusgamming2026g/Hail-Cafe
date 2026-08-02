@@ -71,7 +71,8 @@ function paintStations() {
     }
   }
   host.className = 'stationbar';
-  host.innerHTML = `<div class="scroll-x catrail" style="padding:0">
+  const rail = fx.scrollSnapshot(host);
+  host.innerHTML = `<div class="scroll-x catrail" data-keep-scroll="stations" style="padding:0">
     <button data-st="all" aria-selected="${!active}">${icon('layers')}<span>كل المحطات</span>
       ${sum(Object.values(counts)) ? `<span class="badge gold">${sum(Object.values(counts))}</span>` : ''}</button>
     ${Object.values(STATIONS).map((s) => `
@@ -80,6 +81,7 @@ function paintStations() {
         ${counts[s.id] ? `<span class="badge">${counts[s.id]}</span>` : ''}
       </button>`).join('')}
   </div>`;
+  fx.scrollRestore(rail, host);
   host.querySelectorAll('[data-st]').forEach((b) => b.addEventListener('click', () => {
     active = b.dataset.st === 'all' ? null : [b.dataset.st];
     LS.set(STATION_KEY, active);
@@ -236,7 +238,7 @@ function render(animate = false) {
   });
 
   if (animate) fx.initReveal(app); else fx.settleReveal(app);
-  window.scrollTo(0, scrollY);
+  window.scrollTo({ top: scrollY, behavior: 'instant' });
   notify.setBadge(all.filter((o) => o.status === 'pending').length);
 }
 
