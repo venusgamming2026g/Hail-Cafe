@@ -140,6 +140,21 @@
   }
   .lux-card.out { opacity: .5; }
   .lux-card.out:hover { transform: none; box-shadow: none; border-color: var(--hairline); }
+
+  /* زر إضافة خفيف يوضّح أن الصنف يُطلب من الطاولة مباشرة */
+  .lux-add {
+    flex: none; width: 30px; height: 30px; border-radius: 50%;
+    display: grid; place-items: center;
+    border: 1px solid var(--lux-line); color: var(--lux-gold);
+    background: color-mix(in srgb, var(--lux-gold) 9%, transparent);
+    transition: background var(--t-base) var(--e-out), color var(--t-base) var(--e-out),
+                transform var(--t-base) var(--e-spring);
+  }
+  .lux-add svg { width: 14px; height: 14px; }
+  .lux-card:hover .lux-add {
+    background: linear-gradient(135deg, var(--lux-gold), var(--lux-gold-2));
+    color: #221a06; transform: scale(1.08);
+  }
   @media (max-width: 560px) { .lux-trio img { width: 88px; height: 88px; } }
 
   /* شريط الأقسام بلون الذهب في هذه الواجهة */

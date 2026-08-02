@@ -538,6 +538,7 @@ function card(it) {
         <b>${money(it.price, false)}</b>
         <span>د.أ</span>
       </div>
+      ${it.available ? `<span class="lux-add" aria-hidden="true">${icon('plus')}</span>` : ''}
     </article>`;
 }
 
