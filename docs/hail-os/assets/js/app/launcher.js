@@ -23,9 +23,10 @@ document.getElementById('bar').replaceWith(topbar({
 const isFile = location.protocol === 'file:';
 
 /* ── اكتشاف عنوان الشبكة المناسب لرموز QR ────────────────────────────── */
-/* localhost لا يعمل على الجوال، لذا نسأل الخادم عن عناوين الشبكة الحقيقية. */
+/* كل طاولة لها QR منفصل يفتح menu.html?t=N على نفس مسار النظام. */
+const pageDir = () => location.href.replace(/\/[^/?#]*([?#].*)?$/, '/');
 let netOptions = [];
-let qrBase = LS.get('hailos:qrbase', null) || (isFile ? '' : location.origin);
+let qrBase = LS.get('hailos:qrbase', null) || (isFile ? '' : pageDir().replace(/\/$/, ''));
 
 async function loadNetwork() {
   if (isFile) return;
@@ -34,11 +35,10 @@ async function loadNetwork() {
     if (!res.ok) return;
     const { port, addresses } = await res.json();
     netOptions = addresses.map((a) => ({ url: `http://${a.ip}:${port}`, label: `${a.ip} — ${a.name}` }));
-    netOptions.push({ url: location.origin, label: 'هذا الجهاز فقط (localhost)' });
-    /* إن لم يختر المستخدم شيئاً، اختر أول عنوان شبكة حقيقي تلقائياً */
+    netOptions.push({ url: pageDir().replace(/\/$/, ''), label: 'هذا المسار الحالي' });
     const saved = LS.get('hailos:qrbase', null);
     if (!saved || !netOptions.some((o) => o.url === saved)) {
-      qrBase = netOptions[0]?.url || location.origin;
+      qrBase = netOptions[0]?.url || pageDir().replace(/\/$/, '');
     } else {
       qrBase = saved;
     }
@@ -46,13 +46,14 @@ async function loadNetwork() {
 }
 
 const localOnly = () => /localhost|127\.0\.0\.1/.test(qrBase);
+const menuUrlForTable = (n) => `${(qrBase || pageDir().replace(/\/$/, '')).replace(/\/$/, '')}/menu.html?t=${n}`;
 
 /* ── الشاشات ─────────────────────────────────────────────────────────── */
 const SURFACES = [
   {
     href: 'menu.html?t=3', ic: 'qr', glow: 'rgba(192,70,42,.32)',
     title: 'منيو الزبون (QR)', tag: 'واجهة الطاولة',
-    desc: 'المنيو الرسمي كاملاً مع السلة والطلب متعدّد الجولات، تتبّع حيّ للطلب، نداء الخدمة، والفاتورة.',
+    desc: 'كل طاولة لها رمز QR منفصل. المسح يفتح الطلب على رقم الطاولة مباشرة، أو يُختار الرقم يدوياً.',
     stat: () => `${MENU_STATS.items} صنف`,
   },
   {
@@ -177,7 +178,7 @@ function render() {
           <select class="field netbox mb2" id="qrbase">
             ${netOptions.length
               ? netOptions.map((o) => `<option value="${esc(o.url)}" ${o.url === qrBase ? 'selected' : ''}>${esc(o.url)} · ${esc(o.label)}</option>`).join('')
-              : `<option value="${esc(location.origin)}">${esc(location.origin)}</option>`}
+              : `<option value="${esc(pageDir().replace(/\/$/, ''))}">${esc(pageDir().replace(/\/$/, ''))}</option>`}
           </select>
           <p class="t-xs ${localOnly() ? 'txt-warn' : 'mute'}">
             ${localOnly()
@@ -241,7 +242,7 @@ function openQr() {
   const tables = store.get().tables;
   const host = document.getElementById('printzone');
 
-  const urlFor = (n) => `${qrBase || 'http://localhost:8787'}/menu.html?t=${n}`;
+  const urlFor = (n) => menuUrlForTable(n);
 
   host.innerHTML = `
     <div class="wrap mt6 mb6">
@@ -259,7 +260,7 @@ function openQr() {
 
       <p class="t-sm mb4 noprint ${localOnly() ? 'txt-warn' : 'mute'}">
         ${localOnly() ? icon('alert') : icon('wifi')}
-        الرموز تشير إلى <b class="netbox">${esc(qrBase || 'http://localhost:8787')}</b>
+        الرموز تشير إلى <b class="netbox">${esc(qrBase || pageDir().replace(/\/$/, ''))}</b>
         ${localOnly() ? '— هذا عنوان محلي لن يفتح من الجوال. غيّره من بطاقة «التشغيل على الأجهزة».' : ''}
       </p>
 
