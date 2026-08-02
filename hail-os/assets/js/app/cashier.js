@@ -112,6 +112,7 @@ const views = {
       ${open.length ? `<div class="grid auto-320">${open.map(({ ses, bill }) => {
         const payerBills = store.sessionPayerBills(ses.id);
         const hasNamedPayers = payerBills.some((payer) => payer.name !== 'حساب الطاولة');
+        const multiPayers = payerBills.length > 1 || hasNamedPayers;
         return `
         <div class="card pad reveal">
           <div class="between mb4">
@@ -121,18 +122,19 @@ const views = {
             </div>
             <span class="chip chip-gold num">${money(bill.due)}</span>
           </div>
-          <p class="mute t-xs mb4">${bill.orders.length} طلب · ${sum(bill.lines, (l) => l.qty)} صنف${hasNamedPayers ? ` · ${payerBills.length} حسابات بالأسماء` : ''}</p>
-          ${hasNamedPayers ? `
+          <p class="mute t-xs mb4">${bill.orders.length} طلب · ${sum(bill.lines, (l) => l.qty)} صنف${multiPayers ? ` · ${payerBills.length} حسابات بالأسماء` : ''}</p>
+          ${multiPayers ? `
             <div class="col mb4" style="gap:7px">
               ${payerBills.map((payer) => `
                 <button class="btn btn-ghost between" style="width:100%;padding-inline:12px"
-                  data-pay-person="${ses.id}" data-payer="${esc(payer.name)}" ${payer.due <= 0 ? 'disabled' : ''}>
+                  data-pay-person="${ses.id}" data-payer="${encodeURIComponent(payer.name)}" ${payer.due <= 0 ? 'disabled' : ''}>
                   <span>${icon(payer.due > 0 ? 'user' : 'check')} ${esc(payer.name)}</span>
                   <b class="num ${payer.due > 0 ? 'txt-gold' : 'txt-ok'}">${payer.due > 0 ? money(payer.due) : 'مدفوع'}</b>
                 </button>`).join('')}
-            </div>` : ''}
+            </div>` : `
+            <p class="mute t-xs mb3">${icon('info')} الحساب مشترك — عيّن اسماً لكل طلب من التفاصيل لتقسيم الفاتورة.</p>`}
           <div class="row" style="gap:8px">
-            <button class="btn btn-gold grow" data-pay="${ses.id}">${icon('cash')} ${hasNamedPayers ? 'تحصيل كامل الطاولة' : 'تحصيل'}</button>
+            <button class="btn btn-gold grow" data-pay="${ses.id}">${icon('cash')} ${multiPayers ? 'تحصيل كامل الطاولة' : 'تحصيل'}</button>
             <button class="btn btn-ghost" data-view="${ses.id}" aria-label="تفاصيل">${icon('eye')}</button>
           </div>
         </div>`;
@@ -330,7 +332,8 @@ const wire = {
     }));
     app.querySelectorAll('[data-pay-person]').forEach((b) => b.addEventListener('click', () => {
       const ses = store.sessionById(b.dataset.payPerson);
-      const payer = store.sessionPayerBills(ses.id).find((entry) => entry.name === b.dataset.payer);
+      const payerName = decodeURIComponent(b.dataset.payer || '');
+      const payer = store.sessionPayerBills(ses.id).find((entry) => entry.name === payerName);
       if (!payer || payer.due <= 0) return;
       openPayment({
         session: ses,
@@ -338,45 +341,11 @@ const wire = {
         amount: payer.due,
         label: `طاولة ${ses.tableNumber} · ${payer.name}`,
         bill: payer,
-        payerName: payer.name,
+        payerName: payer.name === 'حساب الطاولة' ? '' : payer.name,
       });
     }));
     app.querySelectorAll('[data-view]').forEach((b) => b.addEventListener('click', () => {
-      const ses = store.sessionById(b.dataset.view);
-      const bill = store.sessionBill(ses.id);
-      const payerBills = store.sessionPayerBills(ses.id);
-      openSheet(`
-        <div class="pad">
-          <h2 class="mb4">فاتورة الطاولة ${ses.tableNumber}</h2>
-          ${payerBills.length ? `
-            <div class="glass pad mb4">
-              <b class="t-sm">${icon('users')} الحسابات بالأسماء</b>
-              <div class="col mt2" style="gap:7px">
-                ${payerBills.map((payer) => `
-                  <div class="between dashed" style="padding:9px 11px">
-                    <span>${esc(payer.name)}</span>
-                    <b class="num ${payer.due > 0 ? 'txt-gold' : 'txt-ok'}">${payer.due > 0 ? money(payer.due) : 'مدفوع'}</b>
-                  </div>`).join('')}
-              </div>
-            </div>` : ''}
-          <div class="bill">
-            ${bill.lines.map((l) => `<div class="r"><span>${esc(l.ar)} <span class="mute">×${l.qty}</span></span>
-              <span>${money(l.price * l.qty, false)}</span></div>`).join('')}
-            <div class="divider" style="margin:10px 0"></div>
-            <div class="r"><span class="mute">المجموع</span><span>${money(bill.subtotal, false)}</span></div>
-            ${bill.service ? `<div class="r"><span class="mute">خدمة</span><span>${money(bill.service, false)}</span></div>` : ''}
-            <div class="r"><span class="mute">ضريبة</span><span>${money(bill.tax, false)}</span></div>
-            ${bill.discounted ? `<div class="r txt-ok"><span>خصم</span><span>−${money(bill.discounted, false)}</span></div>` : ''}
-            ${bill.paidAmount ? `<div class="r txt-ok"><span>مدفوع</span><span>−${money(bill.paidAmount, false)}</span></div>` : ''}
-            <div class="r total"><span>المطلوب</span><span class="v">${money(bill.due)}</span></div>
-          </div>
-          <button class="btn btn-ghost btn-block mt4" data-pr>${icon('print')} طباعة</button>
-        </div>`, {
-        onMount(sheet) {
-          sheet.querySelector('[data-pr]').addEventListener('click', () =>
-            printReceipt({ ...bill, title: `فاتورة الطاولة ${ses.tableNumber}` }));
-        },
-      });
+      openBillDetail(store.sessionById(b.dataset.view));
     }));
   },
 
@@ -431,6 +400,97 @@ const wire = {
     document.getElementById('printshift')?.addEventListener('click', printShift);
   },
 };
+
+/* ── تفاصيل الفاتورة + تعيين الأسماء للتقسيم ─────────────────────────── */
+function openBillDetail(ses) {
+  if (!ses) return;
+  const draw = (sheet) => {
+    const bill = store.sessionBill(ses.id);
+    const payerBills = store.sessionPayerBills(ses.id);
+    const orders = store.sessionOrders(ses.id);
+    sheet.querySelector('.scroll-y').innerHTML = `
+      <div class="pad">
+        <h2 class="mb4">فاتورة الطاولة ${ses.tableNumber}</h2>
+
+        <div class="glass pad mb4">
+          <b class="t-sm">${icon('users')} تقسيم بالأسماء</b>
+          <p class="mute t-xs mt2 mb3">عيّن اسماً لكل طلب ليظهر كحساب منفصل عند التحصيل.</p>
+          <div class="col" style="gap:10px">
+            ${orders.map((o) => `
+              <div class="dashed" style="padding:10px 12px">
+                <div class="between mb2">
+                  <span>
+                    <b class="t-sm">${esc(o.code)}</b>
+                    <small class="mute" style="display:block">${o.lines.length} صنف · ${money(o.total)}</small>
+                  </span>
+                  <span class="chip">${esc(o.customer?.name || 'حساب الطاولة')}</span>
+                </div>
+                <div class="row" style="gap:8px">
+                  <input class="field grow" data-name-input="${o.id}" maxlength="60"
+                    placeholder="اسم صاحب الطلب" value="${esc(o.customer?.name || '')}">
+                  <button class="btn btn-sm btn-gold" data-save-name="${o.id}">حفظ</button>
+                </div>
+              </div>`).join('')}
+          </div>
+        </div>
+
+        <div class="glass pad mb4">
+          <b class="t-sm mb2" style="display:block">${icon('wallet')} الحسابات الآن</b>
+          <div class="col" style="gap:7px">
+            ${payerBills.map((payer) => `
+              <button class="btn btn-ghost between" style="width:100%;padding-inline:12px"
+                data-collect-payer="${encodeURIComponent(payer.name)}" ${payer.due <= 0 ? 'disabled' : ''}>
+                <span>${esc(payer.name)} · ${payer.orders.length} طلب</span>
+                <b class="num ${payer.due > 0 ? 'txt-gold' : 'txt-ok'}">${payer.due > 0 ? money(payer.due) : 'مدفوع'}</b>
+              </button>`).join('')}
+          </div>
+        </div>
+
+        <div class="bill mb4">
+          ${bill.lines.map((l) => `<div class="r"><span>${esc(l.ar)} <span class="mute">×${l.qty}</span></span>
+            <span>${money(l.price * l.qty, false)}</span></div>`).join('')}
+          <div class="divider" style="margin:10px 0"></div>
+          <div class="r total"><span>المطلوب</span><span class="v">${money(bill.due)}</span></div>
+        </div>
+        <button class="btn btn-gold btn-block mb2" data-pay-all>${icon('cash')} تحصيل كامل الطاولة</button>
+        <button class="btn btn-ghost btn-block" data-pr>${icon('print')} طباعة</button>
+      </div>`;
+
+    sheet.querySelectorAll('[data-save-name]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.saveName;
+        const input = sheet.querySelector(`[data-name-input="${id}"]`);
+        const name = (input?.value || '').trim();
+        store.setOrderPayerName(id, name, actor());
+        notify.toast(name ? `تم تعيين الحساب: ${name}` : 'أُرجع الطلب لحساب الطاولة', { tone: 'ok', sound: 'success' });
+        draw(sheet);
+        render();
+      });
+    });
+    sheet.querySelectorAll('[data-collect-payer]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const payerName = decodeURIComponent(btn.dataset.collectPayer || '');
+        const payer = store.sessionPayerBills(ses.id).find((entry) => entry.name === payerName);
+        if (!payer || payer.due <= 0) return;
+        openPayment({
+          session: ses,
+          orders: payer.orders,
+          amount: payer.due,
+          label: `طاولة ${ses.tableNumber} · ${payer.name}`,
+          bill: payer,
+          payerName: payer.name === 'حساب الطاولة' ? '' : payer.name,
+        });
+      });
+    });
+    sheet.querySelector('[data-pay-all]')?.addEventListener('click', () => {
+      openPayment({ session: ses, orders: bill.orders, amount: bill.due, label: `طاولة ${ses.tableNumber}`, bill });
+    });
+    sheet.querySelector('[data-pr]')?.addEventListener('click', () =>
+      printReceipt({ ...bill, title: `فاتورة الطاولة ${ses.tableNumber}` }));
+  };
+
+  openSheet('', { onMount: (sheet) => draw(sheet) });
+}
 
 /* ── نافذة التحصيل ───────────────────────────────────────────────────── */
 function openPayment({ session = null, orders = [], amount, label, bill = null, payerName = '' }) {

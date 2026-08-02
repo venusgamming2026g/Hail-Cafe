@@ -184,6 +184,9 @@ export function seed({ force = false } = {}) {
   const payerNamesByTable = {
     3: ['ليان', 'محمود'],
     7: ['سارة', 'أحمد'],
+    12: ['رنيم', 'يوسف'],
+    19: ['نور'],
+    23: ['كريم', 'هدى'],
   };
   liveTables.forEach((num, i) => {
     const ses = {

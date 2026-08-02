@@ -309,18 +309,24 @@ const views = {
     if (!session) return `<div class="empty"><div class="ic">${icon('wallet')}</div><h3>الفاتورة متاحة داخل الفرع</h3></div>`;
     const b = store.sessionBill(session.id);
     const payerBills = store.sessionPayerBills(session.id);
+    const namedPayers = payerBills.filter((p) => p.name !== 'حساب الطاولة');
+    const onlyShared = payerBills.length === 1 && payerBills[0]?.name === 'حساب الطاولة';
     if (!b.orders.length) {
       return `<div class="empty"><div class="ic">${icon('wallet')}</div>
         <h3>الفاتورة فارغة</h3><p class="t-sm">لم تُسجَّل أي طلبات على هذه الجلسة بعد.</p></div>`;
     }
     const asked = store.get().services.some((s) => s.sessionId === session.id && s.type === 'bill' && s.status !== 'done');
     return `<div class="page-pad col" style="gap:var(--s4)">
-      ${payerBills.length ? `
-        <div class="glass pad">
-          <div class="between mb2">
-            <b class="t-sm">${icon('users')} تقسيم الفاتورة بالأسماء</b>
-            <span class="chip">${payerBills.length} حساب</span>
-          </div>
+      <div class="glass pad">
+        <div class="between mb2">
+          <b class="t-sm">${icon('users')} تقسيم الفاتورة بالأسماء</b>
+          <span class="chip ${namedPayers.length ? 'chip-ok' : ''}">${namedPayers.length || 1} حساب</span>
+        </div>
+        ${onlyShared ? `
+          <p class="mute t-xs mb3">الحساب الآن <b>مشترك للطاولة</b> لأن الطلبات أُرسلت بدون اسم.</p>
+          <p class="t-sm mb3">لتقسيم الفاتورة: كل شخص يكتب <b>اسمه</b> في السلة قبل إرسال طلبه — فيظهر حساب منفصل عند الكاشير.</p>
+          <button class="btn btn-gold btn-sm" data-goto="menu">${icon('user')} اطلب باسمك الآن</button>
+        ` : `
           <p class="mute t-xs mb4">كل شخص يدفع حسابه منفصلاً عند الكاشير.</p>
           <div class="col" style="gap:8px">
             ${payerBills.map((payer) => `
@@ -332,7 +338,8 @@ const views = {
                 <span class="num ${payer.due > 0 ? 'txt-gold' : 'txt-ok'}">${payer.due > 0 ? money(payer.due) : 'مدفوع'}</span>
               </div>`).join('')}
           </div>
-        </div>` : ''}
+        `}
+      </div>
       <div class="glass edge-gold pad">
         <div class="between mb4">
           <div>
@@ -524,6 +531,7 @@ const wire = {
   },
 
   bill(root) {
+    root.querySelector('[data-goto="menu"]')?.addEventListener('click', () => { tab = 'menu'; render(); });
     root.querySelector('[data-ask-bill]')?.addEventListener('click', () => {
       store.callService({ sessionId: session.id, tableNumber, type: 'bill', actor: 'الزبون' });
       notify.toast('تم طلب الفاتورة', { body: 'الكاشير في طريقه إليك', tone: 'ok', sound: 'success' });
@@ -665,11 +673,15 @@ function openCart() {
             ${orderType === 'delivery' ? `<textarea class="field" id="caddr" rows="2" placeholder="العنوان بالتفصيل">${esc(customer.address)}</textarea>` : ''}
           </div>` : `
           <div class="chip chip-ok mb2">${icon('table')} الطاولة رقم ${tableNumber}${session ? ` · جولة ${session.round + 1}` : ''}</div>
-          <div class="glass pad mb4" style="padding:12px">
-            <label class="label" for="payername">${icon('user')} اسم صاحب الطلب</label>
+          <div class="glass edge-gold pad mb4" style="padding:12px">
+            <label class="label" for="payername">${icon('user')} اسم صاحب الطلب — لتقسيم الفاتورة</label>
             <input class="field" id="payername" maxlength="60" autocomplete="name"
-              placeholder="مثال: أحمد — اختياري" value="${esc(payerName)}">
-            <p class="mute t-xs mt2">اكتب الاسم ليظهر حسابه منفصلاً عند الكاشير. اتركه فارغاً لإضافته إلى حساب الطاولة.</p>
+              placeholder="مثال: أحمد" value="${esc(payerName)}" required>
+            <div class="row wrap-x mt2" style="gap:7px" id="payerchips">
+              ${['أحمد', 'سارة', 'ليان', 'محمود', 'رنيم', 'يوسف'].map((n) =>
+                `<button type="button" class="chip ${payerName === n ? 'chip-gold' : ''}" data-payer-chip="${esc(n)}">${esc(n)}</button>`).join('')}
+            </div>
+            <p class="mute t-xs mt2">اكتب اسمك ليظهر حسابك منفصلاً عند الكاشير. بدون اسم يُضاف الطلب لحساب الطاولة المشترك.</p>
           </div>`}
 
         ${lines.length ? `
@@ -721,6 +733,18 @@ function openCart() {
     sheet.querySelectorAll('[data-type]').forEach((b) => b.addEventListener('click', () => {
       orderType = b.dataset.type; notify.play('tap'); draw(sheet, close);
     }));
+    sheet.querySelectorAll('[data-payer-chip]').forEach((b) => b.addEventListener('click', () => {
+      const input = sheet.querySelector('#payername');
+      payerName = b.dataset.payerChip || '';
+      if (input) input.value = payerName;
+      LS.set(PAYER_KEY, payerName);
+      notify.play('tap');
+      draw(sheet, close);
+    }));
+    sheet.querySelector('#payername')?.addEventListener('input', (e) => {
+      payerName = clean(e.target.value, 60);
+      LS.set(PAYER_KEY, payerName);
+    });
     sheet.querySelector('#clear')?.addEventListener('click', async () => {
       const ok = await notify.confirmBox('إفراغ السلة؟', { okText: 'إفراغ', tone: 'bad' });
       if (!ok) return;

@@ -386,6 +386,22 @@ export function setOrderStatus(orderId, status, actor) {
   }, { actor, entity: 'order', entityId: orderId, text: `الطلب → ${ORDER_STATUS[status]?.ar || status}` });
 }
 
+/** تعيين اسم صاحب الطلب — أساس تقسيم الفاتورة بالأسماء */
+export function setOrderPayerName(orderId, name, actor) {
+  const cleaned = String(name || '').trim().replace(/\s+/g, ' ').slice(0, 60);
+  return commit('order.payer', (s) => {
+    const o = s.orders.find((x) => x.id === orderId);
+    if (!o) return;
+    if (!o.customer) o.customer = { name: '', phone: '', address: '' };
+    o.customer.name = cleaned;
+  }, {
+    actor: actor || currentActor(),
+    entity: 'order',
+    entityId: orderId,
+    text: cleaned ? `تعيين الحساب: ${cleaned}` : 'إرجاع الطلب لحساب الطاولة',
+  });
+}
+
 export function setLineStatus(orderId, lid, status, actor) {
   return commit('order.line', (s) => {
     const o = s.orders.find((x) => x.id === orderId);
