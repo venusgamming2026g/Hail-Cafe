@@ -7,7 +7,7 @@ import { icon, esc, money, moneyPlain, since, clockTime, dateLabel, sum, params,
 import * as store from '../core/store.js';
 import * as fx from '../core/fx.js';
 import * as notify from '../core/notify.js';
-import { boot, topbar, openSheet, watchNotifications, pinLogin } from '../core/shell.js';
+import { boot, topbar, openSheet, watchNotifications, pinLogin, staffGate } from '../core/shell.js';
 import { categories, BRANCH } from '../data/menu.js';
 
 const q = params();
@@ -18,6 +18,7 @@ let posType = 'takeaway';
 let posTable = null;
 
 boot({ title: 'الكاشير — هيل كافيه' });
+await staffGate({ surface: 'cashier', title: 'دخول الكاشير' });
 
 /* ── الشريط العلوي ───────────────────────────────────────────────────── */
 const whoBtn = document.createElement('button');
@@ -27,7 +28,7 @@ const paintWho = () => {
   whoBtn.innerHTML = `${icon('user')}<span>${a ? esc(a.name) : 'دخول الطاقم'}</span>`;
 };
 whoBtn.addEventListener('click', async () => {
-  if (store.getActor()) { store.clearActor(); paintWho(); return; }
+  if (store.getActor()) { store.clearActor(); location.reload(); return; }
   const st = await pinLogin({ surface: 'cashier', title: 'دخول الكاشير' });
   if (st) { paintWho(); notify.toast(`أهلاً ${st.name}`, { tone: 'ok' }); render(); }
 });
@@ -461,8 +462,11 @@ function openBillDetail(ses) {
         const id = btn.dataset.saveName;
         const input = sheet.querySelector(`[data-name-input="${id}"]`);
         const name = (input?.value || '').trim();
-        store.setOrderPayerName(id, name, actor());
-        notify.toast(name ? `تم تعيين الحساب: ${name}` : 'أُرجع الطلب لحساب الطاولة', { tone: 'ok', sound: 'success' });
+        const changed = store.setOrderPayerName(id, name, actor());
+        notify.toast(
+          changed === false ? 'لا يمكن تغيير اسم حساب بدأ تحصيله' : (name ? `تم تعيين الحساب: ${name}` : 'أُرجع الطلب لحساب الطاولة'),
+          changed === false ? { tone: 'warn', sound: 'error' } : { tone: 'ok', sound: 'success' },
+        );
         draw(sheet);
         render();
       });
@@ -502,8 +506,9 @@ function openPayment({ session = null, orders = [], amount, label, bill = null, 
 
   const draw = (sheet, close) => {
     const due = Math.max(0, amount - discount);
-    const perHead = Math.ceil(due / splitCount / 50) * 50;
-    const change = Math.max(0, given - (due + tip));
+    const perHead = splitCount > 1 ? Math.ceil(due / splitCount) : due;
+    const payable = perHead + tip;
+    const change = Math.max(0, given - payable);
 
     sheet.querySelector('.scroll-y').innerHTML = `
       <div class="pad">
@@ -514,7 +519,8 @@ function openPayment({ session = null, orders = [], amount, label, bill = null, 
           <div class="r"><span class="mute">المستحق</span><span>${money(amount, false)}</span></div>
           ${discount ? `<div class="r txt-ok"><span>خصم</span><span>−${money(discount, false)}</span></div>` : ''}
           ${tip ? `<div class="r"><span class="mute">بقشيش</span><span>+${money(tip, false)}</span></div>` : ''}
-          <div class="r total"><span>المطلوب</span><span class="v">${money(due + tip)}</span></div>
+          ${splitCount > 1 ? `<div class="r"><span class="mute">المتبقي بعد الخصم</span><span>${money(due, false)}</span></div>` : ''}
+          <div class="r total"><span>${splitCount > 1 ? 'الحصة المحصّلة الآن' : 'المطلوب'}</span><span class="v">${money(payable)}</span></div>
         </div>
 
         <label class="label">وسيلة الدفع</label>
@@ -525,9 +531,9 @@ function openPayment({ session = null, orders = [], amount, label, bill = null, 
 
         ${method === 'cash' ? `
           <label class="label">المبلغ المستلم</label>
-          <input class="field num mb2" id="given" inputmode="decimal" placeholder="${moneyPlain(due + tip)}" value="${given ? moneyPlain(given) : ''}">
+          <input class="field num mb2" id="given" inputmode="decimal" placeholder="${moneyPlain(payable)}" value="${given ? moneyPlain(given) : ''}">
           <div class="row wrap-x mb4" style="gap:6px">
-            ${[due + tip, 5000, 10000, 20000, 50000].map((v) => `
+            ${[payable, 5000, 10000, 20000, 50000].map((v) => `
               <button class="btn btn-sm btn-ghost num" data-quick="${v}">${moneyPlain(v)}</button>`).join('')}
           </div>
           ${given ? `<div class="glass pad mb4 between"><b>الباقي</b><b class="num txt-ok">${money(change)}</b></div>` : ''}` : ''}
@@ -548,9 +554,9 @@ function openPayment({ session = null, orders = [], amount, label, bill = null, 
           ${[1, 2, 3, 4, 5, 6].map((n) => `
             <button class="btn btn-sm ${splitCount === n ? 'btn-gold' : 'btn-ghost'}" data-split="${n}">${n === 1 ? 'بدون' : `${n} أشخاص`}</button>`).join('')}
         </div>
-        ${splitCount > 1 ? `<p class="t-sm txt-gold mb4">${icon('users')} حصة كل شخص: <b class="num">${money(perHead)}</b></p>` : '<div class="mb4"></div>'}
+        ${splitCount > 1 ? `<p class="t-sm txt-gold mb4">${icon('users')} تُحصّل حصة واحدة الآن: <b class="num">${money(perHead)}</b>، وتبقى بقية الحصص مفتوحة.</p>` : '<div class="mb4"></div>'}
 
-        <button class="btn btn-gold btn-lg btn-block" id="confirm">${icon('check')} تأكيد التحصيل ${money(due + tip)}</button>
+        <button class="btn btn-gold btn-lg btn-block" id="confirm">${icon('check')} تأكيد التحصيل ${money(payable)}</button>
         <button class="btn btn-ghost btn-block mt2" id="printb">${icon('print')} طباعة الفاتورة</button>
       </div>`;
 
@@ -577,7 +583,7 @@ function openPayment({ session = null, orders = [], amount, label, bill = null, 
       printReceipt(bill || { lines: orders.flatMap((o) => o.lines), ...(orders[0] || {}), title: label }));
 
     sheet.querySelector('#confirm').addEventListener('click', async () => {
-      if (method === 'cash' && given && given < due + tip) {
+      if (method === 'cash' && given && given < payable) {
         notify.toast('المبلغ المستلم أقل من المطلوب', { tone: 'warn', sound: 'error' });
         fx.shake(sheet.querySelector('#given'));
         return;
@@ -585,13 +591,13 @@ function openPayment({ session = null, orders = [], amount, label, bill = null, 
       store.pay({
         sessionId: session?.id || null,
         orderIds: orders.map((o) => o.id),
-        method, amount: due, tip, discount, actor: actor(),
+        method, amount: perHead, tip, discount, actor: actor(),
         splitOf: splitCount > 1 ? splitCount : null,
         payerName,
       });
       notify.play('cash');
       fx.burst(window.innerWidth / 2, window.innerHeight / 3, 42);
-      notify.toast(`تم التحصيل · ${money(due + tip)}`, {
+      notify.toast(`تم التحصيل · ${money(payable)}`, {
         body: method === 'cash' && given ? `الباقي ${money(change)}` : '', tone: 'gold', sound: null,
       });
       if (session) {

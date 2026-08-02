@@ -7,15 +7,16 @@ import { icon, esc, moneyPlain, since, clockTime, dateLabel, sum, clean, groupBy
 import * as store from '../core/store.js';
 import * as fx from '../core/fx.js';
 import * as notify from '../core/notify.js';
-import { boot, topbar, openSheet, watchNotifications, pinLogin } from '../core/shell.js';
+import { boot, topbar, openSheet, watchNotifications, pinLogin, staffGate } from '../core/shell.js';
 import { categories, STATIONS, MENU_STATS } from '../data/menu.js';
-import { startSimulator, stopSimulator, simulatorRunning, seed } from '../data/seed.js';
+import { startSimulator, stopSimulator, simulatorRunning, seed, seedClean } from '../data/seed.js';
 
 let tab = 'dash';
 let menuFilter = '';
 let menuCat = 'all';
 
 boot({ title: 'الإدارة — هيل كافيه' });
+await staffGate({ surface: 'admin', title: 'دخول الإدارة' });
 
 /* ── الشريط العلوي ───────────────────────────────────────────────────── */
 const whoBtn = document.createElement('button');
@@ -25,7 +26,7 @@ const paintWho = () => {
   whoBtn.innerHTML = `${icon('shield')}<span>${a ? esc(a.name) : 'دخول المدير'}</span>`;
 };
 whoBtn.addEventListener('click', async () => {
-  if (store.getActor()) { store.clearActor(); paintWho(); return; }
+  if (store.getActor()) { store.clearActor(); location.reload(); return; }
   const st = await pinLogin({ surface: 'admin', title: 'دخول الإدارة' });
   if (st) { paintWho(); notify.toast(`أهلاً ${st.name}`, { tone: 'ok' }); render(); }
 });
@@ -554,7 +555,7 @@ const views = {
             ${icon('copy')} استيراد نسخة
             <input type="file" id="import" accept="application/json" hidden>
           </label>
-          <button class="btn btn-ghost txt-bad" id="wipe">${icon('trash')} مسح كل البيانات</button>
+          <button class="btn btn-ghost txt-bad" id="wipe">${icon('trash')} تهيئة للتشغيل الفعلي</button>
         </div>
       </div>
 
@@ -807,12 +808,13 @@ const wire = {
     });
 
     app.querySelector('#wipe')?.addEventListener('click', async () => {
-      const ok = await notify.confirmBox('مسح كل البيانات؟', {
-        body: 'سيعود النظام فارغاً تماماً. لا يمكن التراجع.', okText: 'مسح نهائي', tone: 'bad',
+      const ok = await notify.confirmBox('تهيئة النظام للتشغيل الفعلي؟', {
+        body: 'ستُمسح الطلبات والجلسات والمدفوعات التجريبية، مع إبقاء الطاولات والطاقم والمخزون جاهزة للعمل. لا يمكن التراجع.', okText: 'تهيئة نهائية', tone: 'bad',
       });
       if (!ok) return;
-      store.resetAll();
-      notify.toast('مُسحت البيانات', { tone: 'info' });
+      seedClean();
+      store.clearActor();
+      notify.toast('النظام نظيف وجاهز للعمل', { tone: 'info' });
       location.reload();
     });
   },

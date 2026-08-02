@@ -162,12 +162,37 @@ export function commit(action, mutate, meta = {}) {
 
 /* ── هوية الشاشة الحالية ─────────────────────────────────────────────── */
 export function currentActor() {
-  const s = LS.get('hailos:actor', null);
+  const s = getActor();
   return s ? s.name : 'النظام';
 }
-export function setActor(staff) { LS.set('hailos:actor', staff); }
-export function getActor() { return LS.get('hailos:actor', null); }
-export function clearActor() { LS.del('hailos:actor'); }
+export function setActor(staff) {
+  try {
+    sessionStorage.setItem('hailos:actor', JSON.stringify(staff));
+    // هوية الموظف يجب أن تكون مستقلة لكل شاشة، لا مشتركة بين كل التبويبات.
+    LS.del('hailos:actor');
+  } catch {
+    LS.set('hailos:actor', staff);
+  }
+}
+export function getActor() {
+  try {
+    const current = sessionStorage.getItem('hailos:actor');
+    if (current) return JSON.parse(current);
+    // ترحيل آمن للجلسات القديمة ثم إزالة الهوية المشتركة.
+    const legacy = LS.get('hailos:actor', null);
+    if (legacy) {
+      sessionStorage.setItem('hailos:actor', JSON.stringify(legacy));
+      LS.del('hailos:actor');
+    }
+    return legacy;
+  } catch {
+    return LS.get('hailos:actor', null);
+  }
+}
+export function clearActor() {
+  try { sessionStorage.removeItem('hailos:actor'); }
+  finally { LS.del('hailos:actor'); }
+}
 
 /* ── المنيو مع تعديلات المدير ────────────────────────────────────────── */
 export function menu() {
@@ -271,6 +296,29 @@ export function sessionBill(sessionId) {
   };
 }
 
+function allocateProportionally(total, weights) {
+  const amounts = weights.map(() => 0);
+  if (total <= 0 || !weights.length) return amounts;
+  const safeWeights = weights.map((weight) => Math.max(0, Number(weight) || 0));
+  const weightTotal = sum(safeWeights);
+  if (!weightTotal) {
+    amounts[0] = total;
+    return amounts;
+  }
+
+  const ranked = safeWeights.map((weight, index) => {
+    const exact = (total * weight) / weightTotal;
+    amounts[index] = Math.floor(exact);
+    return { index, fraction: exact - amounts[index] };
+  }).sort((a, b) => b.fraction - a.fraction || a.index - b.index);
+
+  let remainder = total - sum(amounts);
+  for (let index = 0; remainder > 0; index += 1, remainder -= 1) {
+    amounts[ranked[index % ranked.length].index] += 1;
+  }
+  return amounts;
+}
+
 export function sessionPayerBills(sessionId) {
   const orders = sessionOrders(sessionId);
   const payments = state.payments.filter((p) => p.sessionId === sessionId);
@@ -282,10 +330,38 @@ export function sessionPayerBills(sessionId) {
     groups.get(payerName).push(order);
   }
 
-  const payerBills = [...groups.entries()].map(([name, payerOrders]) => {
+  const rows = [...groups.entries()].map(([name, payerOrders]) => {
     const orderIds = payerOrders.map((order) => order.id);
     const lines = payerOrders.flatMap((order) => order.lines);
-    const totals = totalsFor(lines, { type: 'dine-in' });
+    return {
+      name,
+      orders: payerOrders,
+      orderIds,
+      lines,
+      subtotal: sum(lines, priceOf),
+    };
+  });
+
+  /* توزيع الإجمالي المدوّر للطاولة يضمن أن مجموع حسابات الأسماء يساويه بالفلس. */
+  const tableTotals = totalsFor(orders.flatMap((order) => order.lines), { type: 'dine-in' });
+  const services = allocateProportionally(tableTotals.service, rows.map((row) => row.subtotal));
+  const taxes = allocateProportionally(
+    tableTotals.tax,
+    rows.map((row, index) => row.subtotal + services[index]),
+  );
+
+  const payerBills = rows.map((row, index) => {
+    const { name, orders: payerOrders, orderIds, lines, subtotal } = row;
+    const service = services[index];
+    const tax = taxes[index];
+    const totals = {
+      subtotal,
+      discount: 0,
+      service,
+      tax,
+      delivery: 0,
+      total: subtotal + service + tax,
+    };
     const payerPayments = payments.filter((payment) => {
       if (payment.payerName) return payment.payerName === name;
       const paidOrders = payment.orderIds || [];
@@ -321,6 +397,20 @@ export function sessionPayerBills(sessionId) {
     generalSettled -= applied;
   }
   return payerBills;
+}
+
+export function orderPayerLocked(orderId) {
+  const order = state.orders.find((entry) => entry.id === orderId);
+  if (!order) return false;
+  const currentName = String(order.customer?.name || '').trim();
+  return state.payments.some((payment) => {
+    if ((payment.orderIds || []).includes(orderId)) return true;
+    return Boolean(
+      currentName &&
+      payment.sessionId === order.sessionId &&
+      payment.payerName === currentName,
+    );
+  });
 }
 
 /* ── الطلبات ─────────────────────────────────────────────────────────── */
@@ -388,12 +478,14 @@ export function setOrderStatus(orderId, status, actor) {
 
 /** تعيين اسم صاحب الطلب — أساس تقسيم الفاتورة بالأسماء */
 export function setOrderPayerName(orderId, name, actor) {
+  if (orderPayerLocked(orderId)) return false;
   const cleaned = String(name || '').trim().replace(/\s+/g, ' ').slice(0, 60);
   return commit('order.payer', (s) => {
     const o = s.orders.find((x) => x.id === orderId);
-    if (!o) return;
+    if (!o) return false;
     if (!o.customer) o.customer = { name: '', phone: '', address: '' };
     o.customer.name = cleaned;
+    return true;
   }, {
     actor: actor || currentActor(),
     entity: 'order',
@@ -489,7 +581,25 @@ export function pay({ sessionId = null, orderIds = [], method = 'cash', amount, 
       at: Date.now(), by: actor || currentActor(), splitOf, payerName,
     };
     s.payments.unshift(created);
-    orderIds.forEach((oid) => { const o = s.orders.find((x) => x.id === oid); if (o) o.paid = true; });
+    const coveredOrders = s.orders.filter((order) => orderIds.includes(order.id));
+    if (sessionId) {
+      for (const bill of sessionPayerBills(sessionId)) {
+        if (bill.due <= 0) {
+          bill.orderIds.forEach((orderId) => {
+            const order = s.orders.find((entry) => entry.id === orderId);
+            if (order) order.paid = true;
+          });
+        }
+      }
+    } else {
+      const coveredTotal = totalsFor(
+        coveredOrders.flatMap((order) => order.lines),
+        { type: coveredOrders[0]?.type || 'takeaway' },
+      ).total;
+      if (amount + discount >= coveredTotal) {
+        coveredOrders.forEach((order) => { order.paid = true; });
+      }
+    }
   }, { actor, entity: 'payment', text: `تحصيل ${(amount / 1000).toFixed(2)} د.أ (${method})` });
   return created;
 }
@@ -594,7 +704,6 @@ export function replaceState(next) {
   state = { ...emptyState(), ...next, version: (state.version || 0) + 1 };
   persist(); emit('state.replace', {}); broadcast('state.replace');
 }
-export function resetAll() { replaceState(emptyState()); }
 export function exportState() { return JSON.stringify(state, null, 2); }
 export function importState(json) {
   const parsed = typeof json === 'string' ? JSON.parse(json) : json;

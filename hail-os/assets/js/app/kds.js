@@ -7,7 +7,7 @@ import { icon, esc, LS, sum, minutesSince } from '../core/util.js';
 import * as store from '../core/store.js';
 import * as fx from '../core/fx.js';
 import * as notify from '../core/notify.js';
-import { boot, topbar, watchNotifications, watchLateOrders, pinLogin } from '../core/shell.js';
+import { boot, topbar, watchNotifications, watchLateOrders, pinLogin, staffGate } from '../core/shell.js';
 import { STATIONS } from '../data/menu.js';
 
 const STATION_KEY = 'hailos:kds:stations';
@@ -15,6 +15,7 @@ let active = LS.get(STATION_KEY, null);     // null = كل المحطات
 let layout = LS.get('hailos:kds:layout', 'cols');
 
 boot({ title: 'المطبخ — هيل كافيه' });
+await staffGate({ surface: 'kds', title: 'دخول المطبخ' });
 
 /* ── الشريط العلوي ───────────────────────────────────────────────────── */
 const fsBtn = document.createElement('button');
@@ -45,7 +46,7 @@ const paintWho = () => {
   whoBtn.innerHTML = `${icon('chef')}<span>${a ? esc(a.name) : 'دخول الطاقم'}</span>`;
 };
 whoBtn.addEventListener('click', async () => {
-  if (store.getActor()) { store.clearActor(); paintWho(); notify.toast('تم تسجيل الخروج', { tone: 'info' }); return; }
+  if (store.getActor()) { store.clearActor(); location.reload(); return; }
   const st = await pinLogin({ surface: 'kds', title: 'دخول المطبخ' });
   if (st) { paintWho(); notify.toast(`أهلاً ${st.name}`, { tone: 'ok' }); }
 });

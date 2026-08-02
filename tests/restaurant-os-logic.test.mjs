@@ -1,0 +1,139 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+
+const memory = new Map();
+const storage = {
+  getItem(key) {
+    return memory.has(key) ? memory.get(key) : null;
+  },
+  setItem(key, value) {
+    memory.set(key, String(value));
+  },
+  removeItem(key) {
+    memory.delete(key);
+  },
+  clear() {
+    memory.clear();
+  },
+};
+
+globalThis.localStorage = storage;
+globalThis.sessionStorage = storage;
+globalThis.window = { addEventListener() {} };
+globalThis.BroadcastChannel = class {
+  postMessage() {}
+};
+
+const store = await import(
+  new URL("../hail-os/assets/js/core/store.js", import.meta.url)
+);
+const { seedClean } = await import(
+  new URL("../hail-os/assets/js/data/seed.js", import.meta.url)
+);
+
+function line(itemId, price, quantity = 1) {
+  return {
+    itemId,
+    ar: itemId,
+    en: itemId,
+    qty: quantity,
+    price,
+    station: "hot",
+    prep: 5,
+    options: [],
+    note: "",
+  };
+}
+
+test("clean handoff keeps the restaurant foundation without demo transactions", () => {
+  seedClean();
+  const state = store.get();
+
+  assert.equal(state.seeded, true);
+  assert.equal(state.settings.demoMode, false);
+  assert.equal(state.tables.length, 24);
+  assert.ok(state.staff.length >= 1);
+  assert.ok(state.inventory.length >= 1);
+  assert.deepEqual(state.orders, []);
+  assert.deepEqual(state.sessions, []);
+  assert.deepEqual(state.services, []);
+  assert.deepEqual(state.payments, []);
+});
+
+test("multiple diners and tables stay isolated and named bills settle exactly", () => {
+  seedClean();
+  const table3 = store.openSession({ tableNumber: 3, guests: 3, actor: "اختبار" });
+  const table8 = store.openSession({ tableNumber: 8, guests: 2, actor: "اختبار" });
+
+  const ahmad = store.placeOrder({
+    lines: [line("ahmad-main", 1001), line("ahmad-drink", 777)],
+    tableNumber: 3,
+    sessionId: table3.id,
+    customer: { name: "أحمد" },
+    actor: "أحمد",
+  });
+  const sara = store.placeOrder({
+    lines: [line("sara-main", 1333, 2)],
+    tableNumber: 3,
+    sessionId: table3.id,
+    customer: { name: "سارة" },
+    actor: "سارة",
+  });
+  const otherTable = store.placeOrder({
+    lines: [line("other-table", 2500)],
+    tableNumber: 8,
+    sessionId: table8.id,
+    customer: { name: "ليان" },
+    actor: "ليان",
+  });
+
+  const tableBill = store.sessionBill(table3.id);
+  let payerBills = store.sessionPayerBills(table3.id);
+  assert.equal(payerBills.length, 2);
+  assert.equal(
+    payerBills.reduce((total, bill) => total + bill.total, 0),
+    tableBill.total,
+    "per-person service and tax must add up to the table total to the fils",
+  );
+  assert.deepEqual(store.sessionOrders(table8.id).map((order) => order.id), [otherTable.id]);
+  assert.ok(!store.sessionOrders(table8.id).some((order) => [ahmad.id, sara.id].includes(order.id)));
+
+  const ahmadBill = payerBills.find((bill) => bill.name === "أحمد");
+  const firstShare = Math.ceil(ahmadBill.due / 2);
+  store.pay({
+    sessionId: table3.id,
+    orderIds: ahmadBill.orderIds,
+    amount: firstShare,
+    splitOf: 2,
+    payerName: "أحمد",
+    actor: "الكاشير",
+  });
+
+  payerBills = store.sessionPayerBills(table3.id);
+  const ahmadAfterShare = payerBills.find((bill) => bill.name === "أحمد");
+  assert.equal(ahmadAfterShare.due, ahmadBill.total - firstShare);
+  assert.equal(store.get().orders.find((order) => order.id === ahmad.id).paid, false);
+  assert.equal(store.orderPayerLocked(ahmad.id), true);
+  assert.equal(store.setOrderPayerName(ahmad.id, "اسم آخر", "الكاشير"), false);
+
+  store.pay({
+    sessionId: table3.id,
+    orderIds: ahmadAfterShare.orderIds,
+    amount: ahmadAfterShare.due,
+    payerName: "أحمد",
+    actor: "الكاشير",
+  });
+  const saraBill = store.sessionPayerBills(table3.id).find((bill) => bill.name === "سارة");
+  store.pay({
+    sessionId: table3.id,
+    orderIds: saraBill.orderIds,
+    amount: saraBill.due,
+    payerName: "سارة",
+    actor: "الكاشير",
+  });
+
+  assert.equal(store.sessionBill(table3.id).due, 0);
+  assert.equal(store.get().orders.find((order) => order.id === ahmad.id).paid, true);
+  assert.equal(store.get().orders.find((order) => order.id === sara.id).paid, true);
+  assert.ok(store.sessionBill(table8.id).due > 0, "paying table 3 must not affect table 8");
+});

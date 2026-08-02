@@ -16,15 +16,37 @@ const tableNumber = q.t || q.table ? clamp(Number(q.t || q.table), 1, 99) : null
 const CART_KEY = `hailos:cart:${tableNumber || 'go'}`;
 const PAYER_KEY = `hailos:payer:${tableNumber || 'go'}`;
 
-let cart = LS.get(CART_KEY, []);
+/*
+ * Each diner gets an independent cart and identity, even when several people
+ * test the same table from separate tabs in one browser. Restaurant state is
+ * still shared through the central store; only the in-progress personal draft
+ * belongs to the current tab. Takeaway keeps its familiar persistent cart.
+ */
+const personalStorage = tableNumber ? sessionStorage : localStorage;
+function readPersonal(key, fallback) {
+  try {
+    const raw = personalStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch {
+    return LS.get(key, fallback);
+  }
+}
+function writePersonal(key, value) {
+  try {
+    personalStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    LS.set(key, value);
+  }
+}
+
+let cart = readPersonal(CART_KEY, []);
 let tab = 'menu';
 let activeCat = 'all';
 let search = '';
 let session = null;
 let orderType = tableNumber ? 'dine-in' : 'takeaway';
 let customer = LS.get('hailos:customer', { name: '', phone: '', address: '' });
-let payerName = tableNumber ? LS.get(PAYER_KEY, '') : '';
-let ordersScope = 'mine'; // mine | table
+let payerName = tableNumber ? readPersonal(PAYER_KEY, '') : '';
 
 const SUGGESTED_NAMES = ['أحمد', 'سارة', 'ليان', 'محمود', 'رنيم', 'يوسف', 'نور', 'هدى'];
 
@@ -43,7 +65,7 @@ function tableGuests() {
 
 function setPayer(name, { greet = true } = {}) {
   payerName = clean(name, 60);
-  LS.set(PAYER_KEY, payerName);
+  writePersonal(PAYER_KEY, payerName);
   if (greet && payerName) {
     notify.toast(`أهلاً ${payerName}`, {
       body: `طلباتك على الطاولة ${tableNumber} تظهر باسمك`,
@@ -99,7 +121,7 @@ paintWho();
 
 watchNotifications('customer', {
   sessionId: session?.id,
-  onChange: (s, action) => {
+  onChange: () => {
     /* لا نُعد رسم المنيو كاملاً عند كل مزامنة — هذا يسبب ترميش opacity */
     if (tab === 'menu') {
       paintTabbar();
@@ -120,7 +142,7 @@ store.subscribe(() => {
 const keyFor = (itemId, options, note) =>
   `${itemId}|${options.map((o) => o.id).sort().join(',')}|${note}`;
 
-function saveCart() { LS.set(CART_KEY, cart); paintCartBar(); }
+function saveCart() { writePersonal(CART_KEY, cart); paintCartBar(); }
 
 function addToCart(itemId, qty, options, note, fromEl) {
   const key = keyFor(itemId, options, note);
@@ -410,6 +432,7 @@ const views = {
         <h3>الفاتورة فارغة</h3><p class="t-sm">لم تُسجَّل أي طلبات على هذه الجلسة بعد.</p></div>`;
     }
     const asked = store.get().services.some((s) => s.sessionId === session.id && s.type === 'bill' && s.status !== 'done');
+    const settled = b.due <= 0.0005;
     return `<div class="page-pad col" style="gap:var(--s4)">
       <div class="glass edge-gold pad">
         <p class="eyebrow mb2">الطاولة ${tableNumber}</p>
@@ -484,11 +507,11 @@ const views = {
         </div>
       </div>
 
-      <button class="btn ${asked ? 'btn-ok' : 'btn-gold'} btn-lg btn-block" data-ask-bill ${asked ? 'disabled' : ''} data-unassigned="${unassigned}">
-        ${icon(asked ? 'check' : 'receipt')} ${asked ? 'تم إرسال الفاتورة للكاشير' : (unassigned ? 'أرسل للكاشير (بعد التقسيم أو كحساب مشترك)' : 'أرسل الفاتورة المقسومة للكاشير')}
+      <button class="btn ${(asked || settled) ? 'btn-ok' : 'btn-gold'} btn-lg btn-block" data-ask-bill ${(asked || settled) ? 'disabled' : ''} data-unassigned="${unassigned}">
+        ${icon((asked || settled) ? 'check' : 'receipt')} ${settled ? 'الفاتورة مدفوعة بالكامل' : (asked ? 'تم إرسال الفاتورة للكاشير' : (unassigned ? 'أرسل للكاشير (بعد التقسيم أو كحساب مشترك)' : 'أرسل الفاتورة المقسومة للكاشير'))}
       </button>
       <p class="mute t-xs" style="text-align:center;line-height:1.55">
-        بعد الإرسال يظهر عند الكاشير كل اسم كحساب منفصل للتحصيل.
+        ${settled ? 'شكراً لزيارتكم — تم إغلاق الحساب بنجاح.' : 'بعد الإرسال يظهر عند الكاشير كل اسم كحساب منفصل للتحصيل.'}
       </p>
     </div>`;
   },
@@ -658,6 +681,7 @@ const wire = {
 
   bill(root) {
     root.querySelector('[data-ask-bill]')?.addEventListener('click', async () => {
+      if (store.sessionBill(session.id).due <= 0.0005) return;
       const unassigned = Number(root.querySelector('[data-ask-bill]')?.dataset.unassigned || 0);
       if (unassigned > 0) {
         const go = await notify.confirmBox('في طلبات بدون اسم', {
@@ -683,8 +707,11 @@ const wire = {
         const id = btn.dataset.saveBillName;
         const input = root.querySelector(`[data-bill-name="${id}"]`);
         const name = clean(input?.value, 60);
-        store.setOrderPayerName(id, name, payerName || 'الزبون');
-        notify.toast(name ? `طلب مثبت على حساب ${name}` : 'رجع لحساب الطاولة', { tone: 'ok', sound: 'success' });
+        const changed = store.setOrderPayerName(id, name, payerName || 'الزبون');
+        notify.toast(
+          changed === false ? 'لا يمكن تغيير اسم حساب بدأ تحصيله' : (name ? `طلب مثبت على حساب ${name}` : 'رجع لحساب الطاولة'),
+          changed === false ? { tone: 'warn', sound: 'error' } : { tone: 'ok', sound: 'success' },
+        );
         render();
       });
     });
@@ -692,9 +719,12 @@ const wire = {
       btn.addEventListener('click', () => {
         const id = btn.dataset.quickBillName;
         const name = btn.dataset.name || '';
-        store.setOrderPayerName(id, name, payerName || 'الزبون');
-        notify.play('tap');
-        notify.toast(`على حساب ${name}`, { tone: 'ok' });
+        const changed = store.setOrderPayerName(id, name, payerName || 'الزبون');
+        if (changed === false) notify.toast('لا يمكن تغيير اسم حساب بدأ تحصيله', { tone: 'warn', sound: 'error' });
+        else {
+          notify.play('tap');
+          notify.toast(`على حساب ${name}`, { tone: 'ok' });
+        }
         render();
       });
     });
@@ -900,14 +930,14 @@ function openCart() {
       const input = sheet.querySelector('#payername');
       payerName = b.dataset.payerChip || '';
       if (input) input.value = payerName;
-      LS.set(PAYER_KEY, payerName);
+      writePersonal(PAYER_KEY, payerName);
       paintWho();
       notify.play('tap');
       draw(sheet, close);
     }));
     sheet.querySelector('#payername')?.addEventListener('input', (e) => {
       payerName = clean(e.target.value, 60);
-      LS.set(PAYER_KEY, payerName);
+      writePersonal(PAYER_KEY, payerName);
       paintWho();
     });
     sheet.querySelector('#clear')?.addEventListener('click', async () => {
@@ -945,7 +975,7 @@ function placeOrder(sheet, close) {
     LS.set('hailos:customer', customer);
   } else {
     payerName = clean(sheet.querySelector('#payername')?.value, 60);
-    LS.set(PAYER_KEY, payerName);
+    writePersonal(PAYER_KEY, payerName);
     if (!payerName) {
       notify.toast('حط اسم صاحب الطلب', {
         body: 'عشان ينقسم الحساب بالأسماء عند الكاشير',

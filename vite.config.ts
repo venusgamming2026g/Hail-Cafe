@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import vinext from "vinext";
 import { defineConfig } from "vite";
-import { sites } from "./build/sites-vite-plugin.ts";
+import { sites } from "./build/sites-vite-plugin";
 
 let hostingConfig: { d1?: string; r2?: string } = { d1: "DB", r2: "ASSETS" };
 try {

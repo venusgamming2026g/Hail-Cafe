@@ -107,6 +107,41 @@ function basketFor(hour) {
 }
 
 /* ── البناء ──────────────────────────────────────────────────────────── */
+export function seedClean() {
+  const tables = buildTables();
+  const staff = STAFF.map((person) => ({ id: uid('st'), active: true, ...person }));
+  const inventory = INVENTORY.map((item) => ({ id: uid('inv'), ...item }));
+  const settings = { ...store.DEFAULT_SETTINGS, demoMode: false };
+  const events = [{
+    id: uid('ev'),
+    at: Date.now(),
+    action: 'system.clean',
+    actor: 'النظام',
+    text: 'تهيئة نظام تشغيل نظيف بلا طلبات أو جلسات تجريبية',
+    entity: 'system',
+    entityId: '',
+  }];
+
+  store.replaceState({
+    v: 1,
+    seeded: true,
+    settings,
+    tables,
+    sessions: [],
+    orders: [],
+    services: [],
+    payments: [],
+    staff,
+    inventory,
+    reservations: [],
+    menuOverrides: {},
+    events,
+    counters: { orderSeq: 1000 },
+    startedAt: Date.now(),
+  });
+  return true;
+}
+
 export function seed({ force = false } = {}) {
   const s = store.get();
   if (s.seeded && !force) return false;

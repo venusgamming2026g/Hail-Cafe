@@ -42,10 +42,13 @@ test("local restaurant system supports named split bills", async () => {
 
   assert.match(customer, /اسم صاحب الطلب/);
   assert.match(customer, /sessionPayerBills/);
+  assert.match(customer, /sessionStorage/);
   assert.match(cashier, /data-pay-person/);
   assert.match(cashier, /payerName/);
+  assert.match(cashier, /تُحصّل حصة واحدة الآن/);
   assert.match(store, /sessionPayerBills/);
   assert.match(store, /payerName/);
+  assert.match(store, /allocateProportionally/);
 });
 
 test("ships operations, persistence, idempotency, and offline support", async () => {

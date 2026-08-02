@@ -223,10 +223,26 @@ export function watchServiceSla(intervalMs = 30000) {
 
 /* ── حارس الأدوار ────────────────────────────────────────────────────── */
 export function requireRole(surface, onDenied) {
-  const actor = store.getActor();
-  if (actor && store.ROLES[actor.role]?.surfaces.includes(surface)) return actor;
+  const remembered = store.getActor();
+  const actor = remembered
+    ? store.get().staff.find((person) => person.id === remembered.id && person.active)
+    : null;
+  if (actor && store.ROLES[actor.role]?.surfaces.includes(surface)) {
+    store.setActor(actor);
+    return actor;
+  }
+  if (remembered) store.clearActor();
   if (onDenied) onDenied();
   return null;
+}
+
+export async function staffGate({ surface, title, returnTo = 'index.html' }) {
+  const remembered = requireRole(surface);
+  if (remembered) return remembered;
+  const signedIn = await pinLogin({ surface, title });
+  if (signedIn) return signedIn;
+  location.replace(returnTo);
+  return new Promise(() => {});
 }
 
 /* ── نافذة تسجيل الدخول بالرقم السري ─────────────────────────────────── */

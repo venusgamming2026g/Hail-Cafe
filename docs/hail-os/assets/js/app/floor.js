@@ -7,10 +7,11 @@ import { icon, esc, money, since, minutesSince, clockTime, sum, clean } from '..
 import * as store from '../core/store.js';
 import * as fx from '../core/fx.js';
 import * as notify from '../core/notify.js';
-import { boot, topbar, openSheet, watchNotifications, watchServiceSla, pinLogin } from '../core/shell.js';
+import { boot, topbar, openSheet, watchNotifications, watchServiceSla, pinLogin, staffGate } from '../core/shell.js';
 import { TABLE_ZONES } from '../data/seed.js';
 
 boot({ title: 'الصالة — هيل كافيه' });
+await staffGate({ surface: 'floor', title: 'دخول الصالة' });
 
 /* ── الشريط العلوي ───────────────────────────────────────────────────── */
 const whoBtn = document.createElement('button');
@@ -20,7 +21,7 @@ const paintWho = () => {
   whoBtn.innerHTML = `${icon('user')}<span>${a ? esc(a.name) : 'دخول الطاقم'}</span>`;
 };
 whoBtn.addEventListener('click', async () => {
-  if (store.getActor()) { store.clearActor(); paintWho(); return; }
+  if (store.getActor()) { store.clearActor(); location.reload(); return; }
   const st = await pinLogin({ surface: 'floor', title: 'دخول الصالة' });
   if (st) { paintWho(); notify.toast(`أهلاً ${st.name}`, { tone: 'ok' }); render(); }
 });
