@@ -137,3 +137,45 @@ test("multiple diners and tables stay isolated and named bills settle exactly", 
   assert.equal(store.get().orders.find((order) => order.id === sara.id).paid, true);
   assert.ok(store.sessionBill(table8.id).due > 0, "paying table 3 must not affect table 8");
 });
+
+test("a full-size state commit reaches the server instead of failing on keepalive", async () => {
+  /* fetch caps keepalive request bodies at 64 KB and rejects larger ones outright,
+     so a restaurant with a day of sales could not save anything. */
+  const requests = [];
+  const realFetch = globalThis.fetch;
+  const realSetInterval = globalThis.setInterval;
+  globalThis.setInterval = () => 0;            // the poller must not outlive the test
+  globalThis.fetch = async (url, init) => {
+    requests.push({ url: String(url), init });
+    const rows = String(url).includes("hail_os_state_get")
+      ? []                                     // no row yet, so the client bootstraps
+      : [{ applied: true, revision: 1, payload: JSON.parse(init.body).p_payload }];
+    return { ok: true, status: 200, json: async () => rows };
+  };
+
+  seedClean();
+  for (let i = 0; i < 60; i++) {
+    store.placeOrder({
+      lines: [line(`item-${i}`, 4500, 2), line(`extra-${i}`, 1750)],
+      type: "dine-in",
+      tableNumber: (i % 24) + 1,
+    });
+  }
+
+  await store.ready();
+  assert.equal(await store.flush(), true, "the queue must drain");
+
+  const commit = requests.find((r) => r.url.includes("hail_os_state_commit"));
+  assert.ok(commit, "the state must be committed to the server");
+  assert.ok(
+    commit.init.body.length > 20000,
+    `payload is ${commit.init.body.length} chars — the case that used to fail`,
+  );
+  assert.ok(!commit.init.keepalive, "keepalive must be dropped once the body is large");
+
+  const read = requests.find((r) => r.url.includes("hail_os_state_get"));
+  assert.equal(read.init.keepalive, true, "small requests keep surviving tab close");
+
+  globalThis.fetch = realFetch;
+  globalThis.setInterval = realSetInterval;
+});

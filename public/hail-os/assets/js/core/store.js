@@ -241,15 +241,22 @@ function applyPatch(base, patch) {
   return normalizeSharedState(next);
 }
 
+/* حالة الاتصال لا تُبثّ عبر قناة البيانات: الشاشات تعيد بناء واجهتها كاملةً عند كل
+   إشعار، فكان تذبذب الاتصال يسبّب ترميشاً مستمراً. تُقرأ الحالة عند الطلب من syncStatus(). */
 function setRemoteStatus(online, error = '') {
-  const changed = remote.online !== online || remote.lastError !== error;
   remote.online = online;
   remote.lastError = error;
   if (online) remote.lastSyncAt = Date.now();
-  if (changed) emit('remote.status', { remote: true, online, error });
 }
 
+/* المواصفة تحدّ جسم الطلب المرسل مع keepalive بـ 64 كيلوبايت، وما زاد يفشل بـ
+   "Failed to fetch" بلا استجابة. حالة المطعم تتجاوز الحدّ بعد أول يوم مبيعات،
+   لذا نقصر keepalive على الطلبات الصغيرة. الحدّ بالمحارف لأن الحرف العربي
+   يصل إلى ثلاث بايتات في UTF-8. */
+const KEEPALIVE_MAX_CHARS = 20000;
+
 async function rpc(name, body) {
+  const payload = JSON.stringify(body);
   const response = await fetch(`${BACKEND.url}/rest/v1/rpc/${name}`, {
     method: 'POST',
     headers: {
@@ -257,9 +264,9 @@ async function rpc(name, body) {
       Authorization: `Bearer ${BACKEND.publishableKey}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(body),
+    body: payload,
     cache: 'no-store',
-    keepalive: true,
+    ...(payload.length <= KEEPALIVE_MAX_CHARS ? { keepalive: true } : {}),
   });
   if (!response.ok) throw new Error(`sync-${response.status}`);
   return response.json();
