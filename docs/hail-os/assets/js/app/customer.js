@@ -24,6 +24,48 @@ let session = null;
 let orderType = tableNumber ? 'dine-in' : 'takeaway';
 let customer = LS.get('hailos:customer', { name: '', phone: '', address: '' });
 let payerName = tableNumber ? LS.get(PAYER_KEY, '') : '';
+let ordersScope = 'mine'; // mine | table
+
+const SUGGESTED_NAMES = ['أحمد', 'سارة', 'ليان', 'محمود', 'رنيم', 'يوسف', 'نور', 'هدى'];
+
+function tableGuests() {
+  if (!session) return [];
+  const names = [];
+  const seen = new Set();
+  for (const o of store.sessionOrders(session.id)) {
+    const n = String(o.customer?.name || '').trim();
+    if (!n || seen.has(n)) continue;
+    seen.add(n);
+    names.push(n);
+  }
+  return names;
+}
+
+function setPayer(name, { greet = true } = {}) {
+  payerName = clean(name, 60);
+  LS.set(PAYER_KEY, payerName);
+  if (greet && payerName) {
+    notify.toast(`أهلاً ${payerName}`, {
+      body: `طلباتك على الطاولة ${tableNumber} تظهر باسمك`,
+      tone: 'gold', sound: 'success',
+    });
+  }
+  paintWho();
+  render();
+}
+
+function paintWho() {
+  const who = document.getElementById('who-btn');
+  if (!who) return;
+  if (!tableNumber) {
+    who.hidden = true;
+    return;
+  }
+  who.hidden = false;
+  who.innerHTML = payerName
+    ? `${icon('user')}<span>${esc(payerName)}</span>`
+    : `${icon('user')}<span>مين يطلب؟</span>`;
+}
 
 /* ── الإقلاع ─────────────────────────────────────────────────────────── */
 boot({ title: tableNumber ? `هيل كافيه — طاولة ${tableNumber}` : 'هيل كافيه — المنيو' });
@@ -33,18 +75,27 @@ if (tableNumber) {
     || store.openSession({ tableNumber, guests: 2, actor: 'الزبون' });
 }
 
+const whoBtn = document.createElement('button');
+whoBtn.id = 'who-btn';
+whoBtn.className = 'btn btn-sm btn-ghost nowrap';
+whoBtn.type = 'button';
+whoBtn.addEventListener('click', () => {
+  if (!tableNumber) return;
+  openIdentitySheet();
+});
+
+const branchBtn = document.createElement('button');
+branchBtn.className = 'btn btn-sm btn-ghost nowrap';
+branchBtn.innerHTML = `${icon('pin')}<span>الفرع</span>`;
+branchBtn.addEventListener('click', showBranch);
+
 document.getElementById('bar').replaceWith(topbar({
   title: 'هيل كافيه',
   subtitle: tableNumber ? `طاولة رقم ${tableNumber} · إربد سيتي سنتر` : 'إربد سيتي سنتر',
   live: false,
-  actions: [(() => {
-    const b = document.createElement('button');
-    b.className = 'btn btn-sm btn-ghost nowrap';
-    b.innerHTML = `${icon('pin')}<span>الفرع</span>`;
-    b.addEventListener('click', showBranch);
-    return b;
-  })()],
+  actions: [whoBtn, branchBtn],
 }));
+paintWho();
 
 watchNotifications('customer', { sessionId: session?.id, onChange: () => render() });
 store.subscribe(() => { if (tab !== 'menu') render(); });
@@ -183,16 +234,21 @@ const views = {
           <div class="grow" style="min-width:200px">
             <p class="eyebrow mb2">منيو رسمي · إربد سيتي سنتر</p>
             <h1 class="mb2">أهلاً بك في <span class="gold-text">هيل كافيه</span></h1>
-            <p class="soft t-sm" style="max-width:46ch">
+            <p class="soft t-sm" style="max-width:48ch">
               ${tableNumber
-                ? `أنت على <b>الطاولة رقم ${tableNumber}</b>. اختر ما يحلو لك وأرسل الطلب مباشرة إلى المطبخ.`
+                ? `طاولة <b>${tableNumber}</b> — كل شخص يطلب ويحط اسمه. أو اطلب للكل من جهاز واحد وقسّم الحساب من الفاتورة.`
                 : 'اختر أصنافك ثم حدّد استلاماً من الفرع أو توصيلاً إلى موقعك.'}
             </p>
+            ${tableNumber ? `
+            <div class="row wrap-x mt3" style="gap:8px">
+              <button type="button" class="chip chip-gold" data-open-who>${icon('user')} ${payerName ? esc(payerName) : 'حط اسمك'}</button>
+              <span class="chip">${icon('users')} تقسيم من الفاتورة متاح</span>
+            </div>` : `
             <div class="row wrap-x mt4" style="gap:8px">
               <span class="chip chip-gold">${icon('layers')} ${MENU_STATS.categories} قسماً</span>
               <span class="chip">${icon('list')} ${MENU_STATS.items} صنفاً</span>
               <span class="chip chip-ok">${icon('clock')} مفتوح حتى منتصف الليل</span>
-            </div>
+            </div>`}
           </div>
         </div>
         <div class="seam mt6"><i></i><span></span><i></i></div>
@@ -309,66 +365,73 @@ const views = {
     if (!session) return `<div class="empty"><div class="ic">${icon('wallet')}</div><h3>الفاتورة متاحة داخل الفرع</h3></div>`;
     const b = store.sessionBill(session.id);
     const payerBills = store.sessionPayerBills(session.id);
+    const orders = store.sessionOrders(session.id);
     const namedPayers = payerBills.filter((p) => p.name !== 'حساب الطاولة');
-    const onlyShared = payerBills.length === 1 && payerBills[0]?.name === 'حساب الطاولة';
     if (!b.orders.length) {
       return `<div class="empty"><div class="ic">${icon('wallet')}</div>
         <h3>الفاتورة فارغة</h3><p class="t-sm">لم تُسجَّل أي طلبات على هذه الجلسة بعد.</p></div>`;
     }
     const asked = store.get().services.some((s) => s.sessionId === session.id && s.type === 'bill' && s.status !== 'done');
     return `<div class="page-pad col" style="gap:var(--s4)">
-      <div class="glass pad">
-        <div class="between mb2">
-          <b class="t-sm">${icon('users')} تقسيم الفاتورة بالأسماء</b>
-          <span class="chip ${namedPayers.length ? 'chip-ok' : ''}">${namedPayers.length || 1} حساب</span>
-        </div>
-        ${onlyShared ? `
-          <p class="mute t-xs mb3">الحساب الآن <b>مشترك للطاولة</b> لأن الطلبات أُرسلت بدون اسم.</p>
-          <p class="t-sm mb3">لتقسيم الفاتورة: كل شخص يكتب <b>اسمه</b> في السلة قبل إرسال طلبه — فيظهر حساب منفصل عند الكاشير.</p>
-          <button class="btn btn-gold btn-sm" data-goto="menu">${icon('user')} اطلب باسمك الآن</button>
-        ` : `
-          <p class="mute t-xs mb4">كل شخص يدفع حسابه منفصلاً عند الكاشير.</p>
-          <div class="col" style="gap:8px">
-            ${payerBills.map((payer) => `
-              <div class="between dashed" style="padding:10px 12px">
-                <span>
-                  <b class="t-sm">${esc(payer.name)}</b>
-                  <small class="mute" style="display:block">${payer.orders.length} طلب · ${sum(payer.lines, (line) => line.qty)} صنف</small>
-                </span>
-                <span class="num ${payer.due > 0 ? 'txt-gold' : 'txt-ok'}">${payer.due > 0 ? money(payer.due) : 'مدفوع'}</span>
-              </div>`).join('')}
-          </div>
-        `}
-      </div>
       <div class="glass edge-gold pad">
-        <div class="between mb4">
+        <div class="between mb3">
           <div>
             <p class="eyebrow">فاتورة الطاولة ${tableNumber}</p>
-            <b>${b.orders.length} طلب · ${sum(b.lines, (l) => l.qty)} صنف</b>
+            <b>${namedPayers.length || 1} حساب · ${b.orders.length} طلب</b>
           </div>
           <span class="chip">${icon('clock')} ${since(session.openedAt)}</span>
         </div>
-
-        <div class="bill">
-          ${b.lines.map((l) => `
-            <div class="r">
-              <span>${esc(l.ar)} <span class="mute">×${l.qty}</span></span>
-              <span>${money(l.price * l.qty, false)}</span>
+        <div class="col" style="gap:8px">
+          ${payerBills.map((payer) => `
+            <div class="between dashed" style="padding:11px 12px;border-radius:14px;background:rgba(255,255,255,.03)">
+              <span>
+                <b class="t-sm">${esc(payer.name)}</b>
+                <small class="mute" style="display:block">${payer.orders.length} طلب · ${sum(payer.lines, (line) => line.qty)} صنف</small>
+              </span>
+              <span class="num ${payer.due > 0 ? 'txt-gold' : 'txt-ok'}">${payer.due > 0 ? money(payer.due) : 'مدفوع'}</span>
             </div>`).join('')}
-          <div class="divider" style="margin:10px 0"></div>
+        </div>
+        <div class="bill mt4">
           <div class="r"><span class="mute">المجموع</span><span>${money(b.subtotal, false)}</span></div>
-          ${b.service ? `<div class="r"><span class="mute">خدمة ${Math.round(store.get().settings.serviceRate * 100)}%</span><span>${money(b.service, false)}</span></div>` : ''}
-          <div class="r"><span class="mute">ضريبة ${Math.round(store.get().settings.taxRate * 100)}%</span><span>${money(b.tax, false)}</span></div>
-          ${b.discounted ? `<div class="r txt-ok"><span>خصم</span><span>−${money(b.discounted, false)}</span></div>` : ''}
-          ${b.paidAmount ? `<div class="r txt-ok"><span>مدفوع</span><span>−${money(b.paidAmount, false)}</span></div>` : ''}
+          ${b.service ? `<div class="r"><span class="mute">خدمة</span><span>${money(b.service, false)}</span></div>` : ''}
+          <div class="r"><span class="mute">ضريبة</span><span>${money(b.tax, false)}</span></div>
           <div class="r total"><span>المطلوب</span><span class="v">${money(b.due)}</span></div>
+        </div>
+      </div>
+
+      <div class="glass pad">
+        <div class="between mb2">
+          <b class="t-sm">${icon('split')} قسّم الطلبات بالأسماء</b>
+          <span class="chip">احتياط</span>
+        </div>
+        <p class="mute t-xs mb4">إذا حدا طلب للكل من جهاز واحد: عيّن اسم لكل طلب هنا قبل ما تروحوا على الكاشير.</p>
+        <div class="col" style="gap:10px">
+          ${orders.map((o) => `
+            <div class="dashed" style="padding:11px 12px;border-radius:14px">
+              <div class="between mb2">
+                <span>
+                  <b class="t-sm">${esc(o.code)}</b>
+                  <small class="mute" style="display:block">${o.lines.map((l) => `${l.ar}×${l.qty}`).slice(0, 3).map(esc).join(' · ')}${o.lines.length > 3 ? '…' : ''}</small>
+                </span>
+                <span class="num t-sm">${money(o.total)}</span>
+              </div>
+              <div class="row" style="gap:8px">
+                <input class="field grow" data-bill-name="${o.id}" maxlength="60"
+                  placeholder="اسم صاحب الطلب" value="${esc(o.customer?.name || '')}">
+                <button class="btn btn-sm btn-gold" data-save-bill-name="${o.id}">حفظ</button>
+              </div>
+              <div class="row wrap-x mt2" style="gap:6px">
+                ${[...new Set([...tableGuests(), ...SUGGESTED_NAMES])].slice(0, 8).map((n) =>
+                  `<button type="button" class="chip" data-quick-bill-name="${o.id}" data-name="${esc(n)}">${esc(n)}</button>`).join('')}
+              </div>
+            </div>`).join('')}
         </div>
       </div>
 
       <button class="btn ${asked ? 'btn-ok' : 'btn-gold'} btn-lg btn-block" data-ask-bill ${asked ? 'disabled' : ''}>
         ${icon(asked ? 'check' : 'receipt')} ${asked ? 'تم إبلاغ الكاشير — في الطريق إليك' : 'اطلب الفاتورة'}
       </button>
-      <p class="mute t-xs" style="text-align:center">الدفع يتم عند الكاشير أو عبر النادل. تُحتسب الضريبة تلقائياً.</p>
+      <p class="mute t-xs" style="text-align:center">الدفع عند الكاشير. كل اسم = حساب منفصل.</p>
     </div>`;
   },
 };
@@ -467,6 +530,7 @@ function orderCard(o) {
 /* ── الربط ───────────────────────────────────────────────────────────── */
 const wire = {
   menu(root) {
+    root.querySelector('[data-open-who]')?.addEventListener('click', () => openIdentitySheet());
     const input = root.querySelector('#q');
     if (input) {
       input.addEventListener('input', (e) => {
@@ -531,12 +595,33 @@ const wire = {
   },
 
   bill(root) {
-    root.querySelector('[data-goto="menu"]')?.addEventListener('click', () => { tab = 'menu'; render(); });
     root.querySelector('[data-ask-bill]')?.addEventListener('click', () => {
       store.callService({ sessionId: session.id, tableNumber, type: 'bill', actor: 'الزبون' });
       notify.toast('تم طلب الفاتورة', { body: 'الكاشير في طريقه إليك', tone: 'ok', sound: 'success' });
       fx.burst(window.innerWidth / 2, window.innerHeight * 0.4, 28);
       render();
+    });
+    root.querySelectorAll('[data-save-bill-name]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.saveBillName;
+        const input = root.querySelector(`[data-bill-name="${id}"]`);
+        const name = clean(input?.value, 60);
+        store.setOrderPayerName(id, name, payerName || 'الزبون');
+        notify.toast(name ? `صار الطلب على حساب ${name}` : 'رجع لحساب الطاولة', { tone: 'ok', sound: 'success' });
+        render();
+      });
+    });
+    root.querySelectorAll('[data-quick-bill-name]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.quickBillName;
+        const name = btn.dataset.name || '';
+        const input = root.querySelector(`[data-bill-name="${id}"]`);
+        if (input) input.value = name;
+        store.setOrderPayerName(id, name, payerName || 'الزبون');
+        notify.play('tap');
+        notify.toast(`صار الطلب على حساب ${name}`, { tone: 'ok' });
+        render();
+      });
     });
   },
 };
@@ -673,15 +758,18 @@ function openCart() {
             ${orderType === 'delivery' ? `<textarea class="field" id="caddr" rows="2" placeholder="العنوان بالتفصيل">${esc(customer.address)}</textarea>` : ''}
           </div>` : `
           <div class="chip chip-ok mb2">${icon('table')} الطاولة رقم ${tableNumber}${session ? ` · جولة ${session.round + 1}` : ''}</div>
-          <div class="glass edge-gold pad mb4" style="padding:12px">
-            <label class="label" for="payername">${icon('user')} اسم صاحب الطلب — لتقسيم الفاتورة</label>
+          <div class="glass edge-gold pad mb4" style="padding:14px">
+            <label class="label" for="payername">${icon('user')} اسم صاحب هذا الطلب</label>
             <input class="field" id="payername" maxlength="60" autocomplete="name"
-              placeholder="مثال: أحمد" value="${esc(payerName)}" required>
-            <div class="row wrap-x mt2" style="gap:7px" id="payerchips">
-              ${['أحمد', 'سارة', 'ليان', 'محمود', 'رنيم', 'يوسف'].map((n) =>
+              placeholder="مثال: أحمد" value="${esc(payerName)}">
+            <div class="row wrap-x mt2" style="gap:7px">
+              ${[...new Set([...tableGuests(), ...SUGGESTED_NAMES])].slice(0, 8).map((n) =>
                 `<button type="button" class="chip ${payerName === n ? 'chip-gold' : ''}" data-payer-chip="${esc(n)}">${esc(n)}</button>`).join('')}
             </div>
-            <p class="mute t-xs mt2">اكتب اسمك ليظهر حسابك منفصلاً عند الكاشير. بدون اسم يُضاف الطلب لحساب الطاولة المشترك.</p>
+            <p class="mute t-xs mt3" style="line-height:1.55">
+              <b>الطريقة العادية:</b> كل شخص يطلب من تلفونه ويحط اسمه.<br>
+              <b>إذا بطلب للكل من جهاز واحد:</b> غيّر الاسم مع كل طلب، أو اتركه وقسّم لاحقاً من تبويب الفاتورة.
+            </p>
           </div>`}
 
         ${lines.length ? `
@@ -738,12 +826,14 @@ function openCart() {
       payerName = b.dataset.payerChip || '';
       if (input) input.value = payerName;
       LS.set(PAYER_KEY, payerName);
+      paintWho();
       notify.play('tap');
       draw(sheet, close);
     }));
     sheet.querySelector('#payername')?.addEventListener('input', (e) => {
       payerName = clean(e.target.value, 60);
       LS.set(PAYER_KEY, payerName);
+      paintWho();
     });
     sheet.querySelector('#clear')?.addEventListener('click', async () => {
       const ok = await notify.confirmBox('إفراغ السلة؟', { okText: 'إفراغ', tone: 'bad' });
@@ -781,6 +871,15 @@ function placeOrder(sheet, close) {
   } else {
     payerName = clean(sheet.querySelector('#payername')?.value, 60);
     LS.set(PAYER_KEY, payerName);
+    if (!payerName) {
+      notify.toast('حط اسم صاحب الطلب', {
+        body: 'عشان ينقسم الحساب بالأسماء عند الكاشير',
+        tone: 'warn', sound: 'error',
+      });
+      fx.shake(sheet.querySelector('#payername'));
+      return;
+    }
+    paintWho();
   }
 
   const note = clean(sheet.querySelector('#onote')?.value, 200);
@@ -805,11 +904,58 @@ function placeOrder(sheet, close) {
   notify.play('success');
   notify.buzz([30, 50, 30, 50, 60]);
   fx.burst(window.innerWidth / 2, window.innerHeight * 0.42, 56);
-  notify.toast(`تم إرسال طلبك · ${order.code}`, {
-    body: 'وصل الطلب إلى المطبخ — تابع حالته من "طلباتي"', tone: 'gold', life: 6000,
+  notify.toast(`تم إرسال طلب ${payerName || ''} · ${order.code}`.trim(), {
+    body: tableNumber
+      ? 'ظهر على حساب الاسم في الفاتورة — تابع حالته من "طلباتي"'
+      : 'وصل الطلب إلى المطبخ — تابع حالته من "طلباتي"',
+    tone: 'gold', life: 6000,
   });
   tab = 'orders';
   render();
+}
+
+/* ── تبديل / إدخال اسم الطالب على الطاولة ─────────────────────────────── */
+function openIdentitySheet() {
+  const guests = tableGuests();
+  openSheet('', {
+    onMount(sheet, close) {
+      sheet.querySelector('.scroll-y').innerHTML = `
+        <div class="pad">
+          <p class="eyebrow mb2">الطاولة ${tableNumber}</p>
+          <h2 class="mb2">مين يطلب هلق؟</h2>
+          <p class="mute t-sm mb4">الاسم يظهر على الفاتورة كحساب منفصل عند الكاشير.</p>
+          <label class="label" for="who-name">اسمك</label>
+          <input class="field mb3" id="who-name" maxlength="60" placeholder="مثال: أحمد" value="${esc(payerName)}">
+          ${guests.length ? `
+            <p class="label mb2">على الطاولة الآن</p>
+            <div class="row wrap-x mb3" style="gap:7px">
+              ${guests.map((n) => `<button type="button" class="chip ${payerName === n ? 'chip-gold' : ''}" data-pick="${esc(n)}">${esc(n)}</button>`).join('')}
+            </div>` : ''}
+          <p class="label mb2">اقتراحات سريعة</p>
+          <div class="row wrap-x mb4" style="gap:7px">
+            ${SUGGESTED_NAMES.map((n) => `<button type="button" class="chip" data-pick="${esc(n)}">${esc(n)}</button>`).join('')}
+          </div>
+          <button class="btn btn-gold btn-lg btn-block" id="who-save">${icon('check')} تأكيد والطلب</button>
+          <p class="mute t-xs mt3" style="text-align:center;line-height:1.5">
+            بطلب للكل من جهاز واحد؟ ثبّت اسماً مع كل طلب، أو قسّم لاحقاً من تبويب الفاتورة.
+          </p>
+        </div>`;
+      sheet.querySelectorAll('[data-pick]').forEach((b) => b.addEventListener('click', () => {
+        sheet.querySelector('#who-name').value = b.dataset.pick;
+        notify.play('tap');
+      }));
+      sheet.querySelector('#who-save')?.addEventListener('click', () => {
+        const name = clean(sheet.querySelector('#who-name')?.value, 60);
+        if (!name) {
+          fx.shake(sheet.querySelector('#who-name'));
+          notify.toast('اكتب الاسم', { tone: 'warn', sound: 'error' });
+          return;
+        }
+        setPayer(name);
+        close();
+      });
+    },
+  });
 }
 
 /* ── معلومات الفرع ───────────────────────────────────────────────────── */
