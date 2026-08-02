@@ -293,7 +293,6 @@ const views = {
       if (!norm) return true;
       return normalizeAr(it.ar).includes(norm) || normalizeAr(it.en).includes(norm);
     });
-    const featured = all.filter((it) => it.featured && it.available);
     const byCat = {};
     for (const it of filtered) (byCat[it.categoryId] ||= []).push(it);
 
@@ -332,10 +331,6 @@ const views = {
         </div>
       </div>
 
-      ${!search && activeCat === 'all' && featured.length ? `
-        <div class="sec-head"><h2>${icon('sparkle')} مختارات هيل</h2><span class="line"></span></div>
-        <div class="feat">${featured.map((it) => card(it, true)).join('')}</div>` : ''}
-
       <div class="catrail-wrap">
         <div class="scroll-x catrail">
           <button data-cat="all" aria-selected="${activeCat === 'all'}">${icon('grid')}<span>الكل</span></button>
@@ -354,12 +349,8 @@ const views = {
         Object.entries(byCat).map(([catId, list]) => {
           const c = categories.find((x) => x.id === catId);
           return `
-            <div class="sec-head">
-              <h2>${c?.ar || catId}</h2>
-              <span class="chip">${list.length}</span>
-              <span class="line"></span>
-            </div>
-            <div class="grid auto-220 page-pad">${list.map((it) => card(it)).join('')}</div>`;
+            ${sectionHead(c, list)}
+            <div class="lux-grid page-pad">${list.map((it) => card(it)).join('')}</div>`;
         }).join('')}
 
       <div class="page-pad mt6">
@@ -531,36 +522,40 @@ const views = {
 };
 
 /* ── قوالب ───────────────────────────────────────────────────────────── */
-function card(it, wide = false) {
-  const marks = [];
-  if (it.featured) marks.push(`<span class="chip chip-gold">${icon('star')} مختارة</span>`);
-  if (!it.available) marks.push(`<span class="chip chip-bad">غير متوفر</span>`);
-  it.tags.slice(0, 1).forEach((t) => marks.push(`<span class="chip">${esc(t)}</span>`));
-
+/* بطاقة صفّية بطابع فاخر: الاسم بالعربية والإنجليزية يمين، والسعر يسار.
+   صورة الصنف وخياراته تظهر في ورقة التفاصيل عند الضغط. */
+function card(it) {
   return `
-    <article class="card mcard card-interactive ${it.available ? '' : 'out'}" data-item="${it.id}"
+    <article class="lux-card ${it.available ? '' : 'out'}" data-item="${it.id}"
       role="button" tabindex="0" aria-label="${esc(it.available ? `فتح ${it.ar}` : `${it.ar} غير متوفر`)}"
-      aria-disabled="${it.available ? 'false' : 'true'}" ${wide ? 'data-tilt' : ''}>
-      <div class="shot">
-        <img src="${it.image}" alt="${esc(it.ar)}" loading="lazy" decoding="async">
-        <div class="marks">${marks.join('')}</div>
-        <div class="shot-meta">
-          <span class="chip" style="background:rgba(6,8,10,.6);backdrop-filter:blur(6px)">${icon('timer')} ${it.prep} د</span>
-        </div>
+      aria-disabled="${it.available ? 'false' : 'true'}">
+      <div class="nm grow">
+        <h4>${esc(it.ar)}${it.featured ? `<span class="lux-badge">توقيع هيل</span>` : ''}</h4>
+        ${it.en ? `<span class="en">${esc(it.en)}</span>` : ''}
+        ${it.available ? '' : `<span class="chip chip-bad">نفد اليوم</span>`}
       </div>
-      <div class="body">
-        <div class="grow">
-          <h4>${esc(it.ar)}</h4>
-          ${it.en ? `<span class="en">${esc(it.en)}</span>` : ''}
-        </div>
-        <div class="between">
-          <span class="price num">${money(it.price)}</span>
-          ${it.available
-            ? `<span class="btn btn-sm btn-gold" aria-hidden="true">${icon('plus')}</span>`
-            : `<span class="chip chip-bad">نفد</span>`}
-        </div>
+      <div class="lux-price num">
+        <b>${money(it.price, false)}</b>
+        <span>د.أ</span>
       </div>
     </article>`;
+}
+
+/* ترويسة القسم: صور دائرية من أطباقه، اسم مذهّب، الاسم الإنجليزي، وفاصل زخرفي */
+function sectionHead(c, list) {
+  const photos = [...new Set(list.filter((x) => x.hasOwnPhoto).map((x) => x.image))].slice(0, 3);
+  if (!photos.length && list[0]?.image) photos.push(list[0].image);
+  return `
+    <div class="lux-sec">
+      ${photos.length ? `
+      <div class="lux-trio">
+        ${photos.map((src) => `<img src="${src}" alt="" loading="lazy" decoding="async" width="108" height="108">`).join('')}
+      </div>` : ''}
+      <div class="sec-ic">${icon(c?.icon || 'grid')}</div>
+      <h2>${esc(c?.ar || '')}</h2>
+      ${c?.en ? `<span class="sec-en">${esc(c.en)}</span>` : ''}
+      <div class="lux-div">${icon('sparkle')}</div>
+    </div>`;
 }
 
 function orderCard(o) {

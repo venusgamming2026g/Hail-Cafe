@@ -17,298 +17,210 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
-    
     <style>
         :root {
-            --clay-50: #fdf0ea; --clay-100: #fadbcf; --clay-300: #ff8163;
-            --clay-500: #d1502f; --clay-600: #c0462a; --clay-700: #9d3722;
-            --olive-50: #eef1e2; --olive-100: #dde3c8; --olive-300: #a6b27e;
-            --olive-500: #7c8a55; --olive-600: #6c7a49; --olive-700: #55613a;
-            --camel-50: #f6ecdc; --camel-100: #ecdcc4; --camel-500: #c9a47c;
-            --camel-600: #a68766; --camel-700: #7a6247;
-            --sand-0: #fffdf8; --sand-50: #faf3e7; --sand-100: #f3e9d8;
-            --bg-color: #f8efdf;
-            --ink-900: #16120d;
+            --bg: #f8efdf; --bg-2: #fffdf8;
+            --card: #fffdf8; --line: rgba(34, 29, 22, .1);
+            --ink: #16120d; --mute: #5f5545; --faint: #9a8f7d;
+            --gold: #8a6a1f; --gold-2: #a67c2e; --gold-line: rgba(138, 106, 31, .4);
+            --shadow: 0 10px 26px rgba(34, 29, 22, .08);
         }
-
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0d0b09; --bg-2: #14110d;
+                --card: rgba(255, 255, 255, .035); --line: rgba(255, 255, 255, .085);
+                --ink: #f4ede0; --mute: #b5a98f; --faint: #857c69;
+                --gold: #d9b25f; --gold-2: #b98a2f; --gold-line: rgba(217, 178, 95, .35);
+                --shadow: 0 14px 34px rgba(0, 0, 0, .4);
+            }
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { scroll-behavior: smooth; }
         body {
-            font-family: 'IBM Plex Sans Arabic', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--ink-900);
-            line-height: 1.6;
+            font-family: 'IBM Plex Sans Arabic', sans-serif; background: var(--bg); color: var(--ink);
+            line-height: 1.6; min-height: 100vh;
+        }
+        @media (prefers-color-scheme: dark) {
+            body { background: radial-gradient(130% 90% at 50% -10%, #191512, var(--bg) 58%); }
         }
         h1, h2, h3, .display-font { font-family: 'Alexandria', sans-serif; }
         a { text-decoration: none; color: inherit; }
-        
-        /* Header */
+
         header {
             position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-            background: rgba(248, 239, 223, 0.85); backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05); transition: all 0.3s ease;
+            background: color-mix(in srgb, var(--bg) 88%, transparent);
+            backdrop-filter: blur(12px); border-bottom: 1px solid var(--line);
         }
-        .nav-container {
-            max-width: 1200px; margin: 0 auto; padding: 1rem 2rem;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .logo img { height: 58px; width: 58px; object-fit: contain; background: transparent; filter: drop-shadow(0 2px 6px rgba(34,29,22,0.12)); }
-        nav ul { display: flex; gap: 2rem; list-style: none; }
-        nav a { font-weight: 500; transition: color 0.2s ease; }
-        nav a:hover { color: var(--clay-600); }
+        .nav-container { max-width: 1200px; margin: 0 auto; padding: .9rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo img { height: 54px; width: 54px; object-fit: contain; }
+        nav ul { display: flex; gap: 1.8rem; list-style: none; }
+        nav a { font-weight: 500; transition: color .2s; }
+        nav a:hover { color: var(--gold); }
         .btn {
-            display: inline-block; padding: 0.75rem 1.5rem; border-radius: 20px;
-            font-family: 'Alexandria', sans-serif; font-weight: 700;
-            cursor: pointer; transition: all 0.3s ease; text-align: center;
+            display: inline-block; padding: .7rem 1.5rem; border-radius: 20px;
+            font-family: 'Alexandria', sans-serif; font-weight: 700; cursor: pointer;
+            transition: all .3s ease; text-align: center; border: none;
         }
-        .btn-primary { background-color: var(--clay-600); color: #fff; border: none; }
-        .btn-primary:hover { background-color: var(--clay-700); transform: translateY(-2px); }
+        .btn-gold { background: linear-gradient(135deg, var(--gold), var(--gold-2)); color: #221a06; }
+        .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 8px 22px color-mix(in srgb, var(--gold) 30%, transparent); }
 
-        /* Hero */
-        .hero {
-            position: relative; height: 50vh; min-height: 400px;
-            display: flex; align-items: center; justify-content: center;
-            text-align: center; overflow: hidden; margin-bottom: 2rem;
-        }
-        .hero-bg {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url('./hail-gallery/menu-hero.jpeg'); background-size: cover; background-position: center;
-            z-index: -2; border-bottom-left-radius: 50% 10%; border-bottom-right-radius: 50% 10%;
-        }
-        .hero-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to bottom, rgba(22, 18, 13, 0.5), rgba(22, 18, 13, 0.8));
-            z-index: -1; border-bottom-left-radius: 50% 10%; border-bottom-right-radius: 50% 10%;
-        }
-        .hero-content { color: #fff; padding: 0 2rem; animation: fadeIn 1s ease-out; margin-top: 4rem;}
-        .hero h1 { font-size: 3rem; font-weight: 800; margin-bottom: 1rem; }
-        .hero p { font-size: 1.25rem; opacity: 0.9; }
+        .hero { padding: 9.5rem 1.5rem 2rem; text-align: center; }
+        .hero h1 { font-size: clamp(1.7rem, 5vw, 2.6rem); color: var(--gold); }
+        .hero p { color: var(--mute); margin-top: .5rem; }
 
-        /* Service Strip */
-        .service-strip {
-            display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap;
-            margin: -3rem auto 3rem; position: relative; z-index: 10;
-            background: #fff; padding: 1.5rem 2rem; border-radius: 20px;
-            max-width: 800px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            width: 90%;
-        }
-        .service-step {
-            display: flex; align-items: center; gap: 0.75rem; font-weight: 600; color: var(--camel-700);
-        }
-        .step-num {
-            background: var(--camel-100); color: var(--camel-700);
-            width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
-            border-radius: 50%; font-weight: 700;
-        }
-
-        /* Menu Section */
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem 6rem; }
-        
-        .tabs-container {
-            position: sticky; top: 80px; z-index: 90;
-            background: var(--bg-color); padding: 1rem 0; margin-bottom: 2rem;
-        }
-        .tabs-scroll {
-            display: flex; gap: 0.75rem; overflow-x: auto; padding-bottom: 1rem;
-            scrollbar-width: thin; scrollbar-color: var(--camel-500) transparent;
-        }
-        .tabs-scroll::-webkit-scrollbar { height: 6px; }
-        .tabs-scroll::-webkit-scrollbar-thumb { background: var(--camel-500); border-radius: 10px; }
-        
+        .tabs-container { position: sticky; top: 76px; z-index: 900; padding: .8rem 0; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(10px); }
+        .tabs-scroll { display: flex; gap: .5rem; overflow-x: auto; padding: .2rem 1.5rem; max-width: 1200px; margin: 0 auto; scrollbar-width: none; }
+        .tabs-scroll::-webkit-scrollbar { display: none; }
         .tab-btn {
-            background: #fff; border: 1px solid var(--camel-100);
-            padding: 0.75rem 1.5rem; border-radius: 30px; white-space: nowrap;
-            font-family: inherit; font-weight: 600; color: var(--ink-700);
-            cursor: pointer; transition: all 0.2s ease;
+            flex: none; padding: .5rem 1.1rem; border-radius: 99px; border: 1px solid var(--line);
+            background: transparent; color: var(--mute); font-family: inherit; font-size: .86rem;
+            font-weight: 600; cursor: pointer; transition: all .25s ease;
         }
-        .tab-btn:hover { background: var(--camel-50); }
-        .tab-btn.active {
-            background: var(--clay-600); color: #fff; border-color: var(--clay-600);
-        }
+        .tab-btn:hover { border-color: var(--gold-line); color: var(--ink); }
+        .tab-btn.active { background: linear-gradient(135deg, var(--gold), var(--gold-2)); border-color: transparent; color: #221a06; }
 
-        .menu-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 1.5rem;
-        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 4rem; }
 
+        .lux-sec { text-align: center; padding: 3.2rem 0 1.4rem; }
+        .lux-trio { display: flex; justify-content: center; gap: 1.1rem; margin-bottom: 1.4rem; }
+        .lux-trio img {
+            width: 118px; height: 118px; border-radius: 50%; object-fit: cover;
+            border: 2px solid var(--gold-line); box-shadow: var(--shadow);
+        }
+        .lux-sec h2 {
+            font-size: clamp(1.5rem, 4vw, 2.1rem); color: var(--gold); font-weight: 800;
+            text-shadow: 0 1px 16px color-mix(in srgb, var(--gold) 24%, transparent);
+        }
+        .lux-sec .sec-en { display: block; margin-top: .35rem; font-size: .7rem; letter-spacing: .34em; color: var(--mute); text-transform: uppercase; padding-inline-start: .34em; }
+        .lux-div { display: flex; align-items: center; gap: 12px; max-width: 430px; margin: 1.1rem auto 0; color: var(--gold); }
+        .lux-div::before { content: ''; flex: 1; height: 1px; background: linear-gradient(-90deg, var(--gold-line), transparent); }
+        .lux-div::after  { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--gold-line), transparent); }
+
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: .9rem; }
         .menu-item {
-            background: #fff; border-radius: 20px; overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: all 0.3s ease;
-            display: flex; flex-direction: column; animation: fadeIn 0.5s ease-out;
+            display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+            padding: 1rem 1.2rem; border-radius: 14px; border: 1px solid var(--line);
+            background: var(--card); transition: border-color .25s, transform .25s, box-shadow .25s;
         }
-        .menu-item:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
-        
-        .item-img { width: 100%; height: 200px; object-fit: cover; }
-        .item-content { padding: 1.5rem; display: flex; flex-direction: column; flex-grow: 1; }
-        .item-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; line-height: 1.4; }
-        .item-price {
-            margin-top: auto; color: var(--clay-600); font-weight: 700; font-size: 1.1rem;
-            display: inline-block; background: var(--clay-50); padding: 0.25rem 0.75rem; border-radius: 8px;
-            align-self: flex-start;
-        }
-
-        /* Footer */
-        footer { background-color: var(--clay-600); color: #fff; padding: 4rem 2rem 2rem; }
-        .footer-content {
-            max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between;
-            align-items: flex-start; flex-wrap: wrap; gap: 2rem;
-        }
-        .footer-logo img { height: 72px; width: 72px; object-fit: contain; background: transparent; margin-bottom: 1rem; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.25)); }
-        .footer-bottom {
-            text-align: center; margin-top: 4rem; padding-top: 2rem;
-            border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.9rem; opacity: 0.8;
+        .menu-item:hover { border-color: var(--gold-line); transform: translateY(-3px); box-shadow: var(--shadow); }
+        .item-title { font-size: 1rem; font-weight: 700; line-height: 1.45; }
+        .item-en { display: block; margin-top: 2px; font-size: .68rem; color: var(--faint); }
+        .item-price { flex: none; text-align: center; min-width: 54px; }
+        .item-price b { font-size: 1.1rem; font-family: 'Alexandria', sans-serif; }
+        .item-price span { display: block; font-size: .58rem; color: var(--faint); }
+        .lux-badge {
+            display: inline-block; margin-inline-start: 7px; vertical-align: 2px;
+            font-size: .6rem; font-weight: 700; color: #221a06; padding: 2.5px 9px; border-radius: 99px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-2));
         }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        @media (max-width: 768px) {
-            nav ul { display: none; }
-            .hero h1 { font-size: 2rem; }
-            .service-strip { gap: 1rem; padding: 1rem; }
-            .service-step { font-size: 0.9rem; }
-            .menu-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
-            .item-img { height: 140px; }
-            .item-content { padding: 1rem; }
-            .item-title { font-size: 1rem; }
+        footer { border-top: 1px solid var(--line); padding: 2.2rem 1.5rem; text-align: center; color: var(--mute); font-size: .85rem; }
+        footer img { height: 46px; margin-bottom: .6rem; }
+
+        @media (max-width: 640px) {
+            .nav-container { padding: .8rem 1rem; }
+            nav ul { gap: 1rem; font-size: .85rem; }
+            .lux-trio img { width: 92px; height: 92px; }
+            .hero { padding-top: 8rem; }
         }
     </style>
 </head>
 <body>
-
     <header>
         <div class="nav-container">
             <a href="index.html" class="logo">
-                <img src="./hail-logo.png" alt="Hail Cafe Logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'40\'><text y=\'20\' font-family=\'sans-serif\'>Hail Cafe</text></svg>'">
+                <img src="./hail-logo.png" alt="Hail Cafe Logo">
             </a>
             <nav>
                 <ul>
                     <li><a href="index.html">الرئيسية</a></li>
                     <li><a href="index.html#reserve">احجز</a></li>
-                    <li><a href="index.html#about">قصتنا</a></li>
                     <li><a href="index.html#visit">الموقع</a></li>
                 </ul>
             </nav>
-            <a href="index.html#order" class="btn btn-primary">اطلب الآن</a>
+            <a href="index.html#order" class="btn btn-gold">اطلب الآن</a>
         </div>
     </header>
 
     <main>
         <section class="hero">
-            <div class="hero-bg"></div>
-            <div class="hero-overlay"></div>
-            <div class="hero-content">
-                <h1>المنيو على مزاجك، والطلب أسهل.</h1>
-                <p>كل أطباق هيل بمكان واحد.</p>
-            </div>
+            <h1>منيو هيل كافيه</h1>
+            <p>كل أطباق هيل بمكان واحد — الأسعار بالدينار الأردني</p>
         </section>
 
-        <div class="service-strip">
-            <div class="service-step"><span class="step-num">1</span>اختر</div>
-            <div class="service-step"><span class="step-num">2</span>يُحضّر</div>
-            <div class="service-step"><span class="step-num">3</span>جاهز</div>
-            <div class="service-step"><span class="step-num">4</span>يُقدّم</div>
+        <div class="tabs-container">
+            <div class="tabs-scroll" id="tabs-container">
+                <button class="tab-btn active" data-category="all">الكل</button>
+            </div>
         </div>
 
-        <section class="container">
-            <div class="tabs-container">
-                <div class="tabs-scroll" id="tabs-container">
-                    <button class="tab-btn active" data-category="all">الكل</button>
-                    <!-- Tabs injected via JS -->
-                </div>
-            </div>
-
-            <div class="menu-grid" id="menu-grid">
-                <!-- Items injected via JS -->
-            </div>
-        </section>
+        <div class="container" id="menu-root"></div>
     </main>
 
     <footer>
-        <div class="footer-content">
-            <div class="footer-info">
-                <div class="footer-logo">
-                    <img src="./hail-logo.png" alt="Hail Cafe Logo" onerror="this.src='./favicon.svg'">
-                </div>
-                <p>كل لحظة إلها طعم، والضحكة غير.<br>إربد سيتي سنتر، الأردن</p>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2026 هيل كافيه. جميع الحقوق محفوظة.</p>
-        </div>
+        <img src="./hail-logo.png" alt="Hail Cafe">
+        <p>كل لحظة إلها طعم، والضحكة غير. — إربد سيتي سنتر، الأردن</p>
+        <p>&copy; 2026 هيل كافيه. جميع الحقوق محفوظة.</p>
     </footer>
 
     <script>
-        /* مولّد آلياً من hail-os/assets/js/data/menu.js — لا تعدّل الأصناف هنا.
-           لإعادة التوليد بعد تعديل المنيو: node gen-public-menu.mjs <repo-root> */
-        const CATEGORIES = [{"id":"breakfast","ar":"الفطور"},{"id":"salads","ar":"السلطات"},{"id":"cold-appetizers","ar":"المقبلات الباردة"},{"id":"hot-appetizers","ar":"المقبلات الساخنة"},{"id":"pasta","ar":"الباستا"},{"id":"pasta-addons","ar":"إضافات الباستا"},{"id":"pizza","ar":"البيتزا"},{"id":"sandwiches","ar":"الساندوش"},{"id":"burgers","ar":"البرغر"},{"id":"fatta","ar":"الفتة"},{"id":"soups","ar":"الشوربات"},{"id":"mains","ar":"الأطباق الرئيسية"},{"id":"juices","ar":"العصائر"},{"id":"smoothies","ar":"السموثي"},{"id":"milkshakes","ar":"الميلك شيك"},{"id":"mojito","ar":"الموهيتو"},{"id":"iced-coffee","ar":"القهوة الباردة"},{"id":"frappe","ar":"الفرابيه"},{"id":"iced-tea","ar":"الشاي المثلج"},{"id":"cocktails","ar":"الكوكتيل"},{"id":"hot-drinks","ar":"المشروبات الساخنة"},{"id":"special-coffee","ar":"القهوة المختصة"},{"id":"herbs","ar":"الأعشاب"},{"id":"sweets","ar":"الحلويات"},{"id":"hookah","ar":"المعسل"},{"id":"soft-drinks","ar":"المشروبات الغازية والمياه"}];
-        const ITEMS = [{"c":"breakfast","n":"فول","p":"2.000","i":"./menu/foul.webp"},{"c":"breakfast","n":"قلّاية بندورة","p":"2.500","i":"./menu/foul.webp"},{"c":"breakfast","n":"حمص","p":"2.000","i":"./menu/foul.webp"},{"c":"breakfast","n":"لبنة مع زعتر وفرافيش","p":"2.750","i":"./menu/labneh-zaatar.webp"},{"c":"breakfast","n":"فتة حمص","p":"2.250","i":"./menu/foul.webp"},{"c":"breakfast","n":"حلّوم","p":"2.950","i":"./menu/foul.webp"},{"c":"breakfast","n":"أومليت","p":"2.750","i":"./menu/omelette.webp"},{"c":"breakfast","n":"بيض عيون","p":"2.000","i":"./menu/foul.webp"},{"c":"breakfast","n":"تاكو فلافل","p":"2.750","i":"./menu/foul.webp"},{"c":"breakfast","n":"شكشوكة على طريقة هيل","p":"2.250","i":"./menu/foul.webp"},{"c":"breakfast","n":"بطاطا","p":"2.000","i":"./menu/foul.webp"},{"c":"breakfast","n":"كيش تيركي","p":"3.000","i":"./menu/foul.webp"},{"c":"breakfast","n":"صوصج مع البيض","p":"3.100","i":"./menu/foul.webp"},{"c":"breakfast","n":"روست بيف مع كشكوان","p":"2.900","i":"./menu/foul.webp"},{"c":"breakfast","n":"فلافل مع الخضار","p":"2.250","i":"./menu/foul.webp"},{"c":"breakfast","n":"تيركي مع شدر","p":"2.900","i":"./menu/foul.webp"},{"c":"breakfast","n":"لبنة","p":"2.250","i":"./menu/foul.webp"},{"c":"breakfast","n":"مكس أجبان","p":"2.750","i":"./menu/foul.webp"},{"c":"breakfast","n":"محمرة مع مكس أجبان","p":"2.750","i":"./menu/foul.webp"},{"c":"breakfast","n":"حلّوم مع الجرجير","p":"2.750","i":"./menu/foul.webp"},{"c":"breakfast","n":"زيت وزعتر","p":"2.000","i":"./menu/foul.webp"},{"c":"breakfast","n":"لوتس ونوتيلا","p":"3.250","i":"./menu/foul.webp"},{"c":"salads","n":"فتوش وخلطة على طريقة هيل","p":"4.000","i":"./menu/hail-salad.webp"},{"c":"salads","n":"تبولة هيل","p":"4.500","i":"./menu/hail-salad.webp"},{"c":"salads","n":"يونانية سلط","p":"3.950","i":"./menu/hail-salad.webp"},{"c":"salads","n":"هيل سلط","p":"4.750","i":"./menu/hail-salad.webp"},{"c":"salads","n":"شنكليش سلط","p":"4.500","i":"./menu/hail-salad.webp"},{"c":"salads","n":"سيزر سلط","p":"4.250","i":"./menu/hail-salad.webp"},{"c":"salads","n":"مكس سي فود سلط","p":"8.500","i":"./menu/seafood-salad.webp"},{"c":"cold-appetizers","n":"ورق عنب","p":"2.250","i":"./menu/labneh-zaatar.webp"},{"c":"cold-appetizers","n":"شنكليش","p":"2.750","i":"./menu/labneh-zaatar.webp"},{"c":"cold-appetizers","n":"محمرة","p":"2.250","i":"./menu/labneh-zaatar.webp"},{"c":"cold-appetizers","n":"لبنة فراقيش","p":"2.500","i":"./menu/labneh-zaatar.webp"},{"c":"cold-appetizers","n":"هيل حمص","p":"2.750","i":"./menu/labneh-zaatar.webp"},{"c":"hot-appetizers","n":"مسخن كب","p":"3.750","i":"./menu/combo-platter.webp"},{"c":"hot-appetizers","n":"كريب لحم","p":"4.950","i":"./menu/combo-platter.webp"},{"c":"hot-appetizers","n":"ناتشوز","p":"5.250","i":"./menu/nachos.webp"},{"c":"hot-appetizers","n":"فطر محشي","p":"4.750","i":"./menu/combo-platter.webp"},{"c":"hot-appetizers","n":"شرم جاكيت","p":"5.750","i":"./menu/combo-platter.webp"},{"c":"hot-appetizers","n":"دجاج داينمايت","p":"3.750","i":"./menu/dynamite-chicken.webp"},{"c":"hot-appetizers","n":"روبيتو بولز","p":"4.750","i":"./menu/combo-platter.webp"},{"c":"hot-appetizers","n":"شريمب داينمايت","p":"6.500","i":"./menu/combo-platter.webp"},{"c":"hot-appetizers","n":"بطاطا حارة","p":"2.500","i":"./menu/combo-platter.webp"},{"c":"hot-appetizers","n":"سجق أرمني","p":"4.250","i":"./menu/combo-platter.webp"},{"c":"hot-appetizers","n":"دجاج كشميري","p":"5.250","i":"./menu/kashmiri-chicken.webp"},{"c":"hot-appetizers","n":"فلافل سيجار","p":"2.500","i":"./menu/combo-platter.webp"},{"c":"hot-appetizers","n":"كومبو بلاتر","p":"9.950","i":"./menu/combo-platter.webp"},{"c":"pasta","n":"بينا بيستو","p":"5.000","i":"./menu/pesto-pasta.webp"},{"c":"pasta","n":"بولونيز","p":"4.500","i":"./menu/pesto-pasta.webp"},{"c":"pasta","n":"بينا أرابياتا","p":"4.500","i":"./menu/pesto-pasta.webp"},{"c":"pasta","n":"فوتوتشيني ألفريدو","p":"4.500","i":"./menu/pesto-pasta.webp"},{"c":"pasta","n":"هيل فوتوتشيني سبيشل","p":"7.150","i":"./menu/pasta-special.webp"},{"c":"pasta-addons","n":"إضافة دجاج","p":"1.500","i":"./menu/pesto-pasta.webp"},{"c":"pasta-addons","n":"إضافة شريمب","p":"3.000","i":"./menu/pesto-pasta.webp"},{"c":"pizza","n":"بيتزا هيل","p":"5.250","i":"./menu/hail-pizza.webp"},{"c":"pizza","n":"بيتزا ألفريدو","p":"5.500","i":"./menu/hail-pizza.webp"},{"c":"pizza","n":"بيروني بيتزا","p":"4.500","i":"./menu/pepperoni-pizza.webp"},{"c":"pizza","n":"بيتزا خضار","p":"4.500","i":"./menu/vegetable-pizza.webp"},{"c":"pizza","n":"مارجاريتا بيتزا","p":"3.950","i":"./menu/hail-pizza.webp"},{"c":"pizza","n":"صنف بيتزا (الاسم غير ظاهر في المنيو)","p":"4.950","i":"./menu/hail-pizza.webp"},{"c":"sandwiches","n":"ساندوش مكس شيز تيركي","p":"5.250","i":"./menu/caesar-sandwich.webp"},{"c":"sandwiches","n":"ساندوش شيش طاووق راب","p":"4.750","i":"./menu/caesar-sandwich.webp"},{"c":"sandwiches","n":"ساندوش كريما دجاج","p":"5.500","i":"./menu/caesar-sandwich.webp"},{"c":"sandwiches","n":"حلّوم ساندوش","p":"4.950","i":"./menu/halloumi-sandwich.webp"},{"c":"sandwiches","n":"سيزر ساندوش","p":"5.250","i":"./menu/caesar-sandwich.webp"},{"c":"sandwiches","n":"كلب لوف","p":"5.250","i":"./menu/caesar-sandwich.webp"},{"c":"burgers","n":"كريسبي تشكن برغر","p":"4.750","i":"./menu/classic-burger.webp"},{"c":"burgers","n":"سلايدر برغر","p":"5.250","i":"./menu/slider-burger.webp"},{"c":"burgers","n":"مشروم برغر","p":"5.500","i":"./menu/classic-burger.webp"},{"c":"burgers","n":"كلاسيك برغر","p":"5.000","i":"./menu/classic-burger.webp"},{"c":"burgers","n":"جريل تشكن برغر","p":"4.500","i":"./menu/classic-burger.webp"},{"c":"fatta","n":"فتة العرايس","p":"2.950","i":"./menu/chicken-cream-pot.webp"},{"c":"fatta","n":"فتة مسخن","p":"2.750","i":"./menu/chicken-cream-pot.webp"},{"c":"soups","n":"شوربة عدس","p":"2.500","i":"./menu/chicken-cream-pot.webp"},{"c":"soups","n":"شوربة فطر","p":"3.000","i":"./menu/chicken-cream-pot.webp"},{"c":"mains","n":"بيف ستيك","p":"12.500","i":"./menu/beef-steak.webp"},{"c":"mains","n":"كلاسيك مكس سي فود","p":"13.900","i":"./menu/seafood-main.webp"},{"c":"mains","n":"دجاج جريل","p":"7.750","i":"./menu/grilled-chicken.webp"},{"c":"mains","n":"دجاج رول محشي فستق حلبي","p":"7.750","i":"./menu/beef-steak.webp"},{"c":"mains","n":"فيش أند شيبس","p":"7.000","i":"./menu/beef-steak.webp"},{"c":"mains","n":"بيف بلاك بيبر","p":"8.500","i":"./menu/black-pepper-beef.webp"},{"c":"mains","n":"فخارة شرحات لحم","p":"7.950","i":"./menu/beef-steak.webp"},{"c":"mains","n":"بتر تشكن","p":"7.750","i":"./menu/beef-steak.webp"},{"c":"mains","n":"فخارة دجاج بالكريمة","p":"7.750","i":"./menu/chicken-cream-pot.webp"},{"c":"mains","n":"فخارة فريكة بالدجاج والكريمة","p":"7.750","i":"./menu/beef-steak.webp"},{"c":"juices","n":"عصير ليمون","p":"3.500","i":"./menu/mango-juice.webp"},{"c":"juices","n":"عصير أناناس","p":"3.500","i":"./menu/mango-juice.webp"},{"c":"juices","n":"عصير فراولة","p":"3.500","i":"./menu/strawberry-juice.webp"},{"c":"juices","n":"عصير مانجا","p":"3.500","i":"./menu/mango-juice.webp"},{"c":"juices","n":"عصير كيوي","p":"3.500","i":"./menu/mango-juice.webp"},{"c":"juices","n":"عصير أناناس ونعنع","p":"3.500","i":"./menu/mango-juice.webp"},{"c":"juices","n":"عصير جوافة","p":"3.500","i":"./menu/mango-juice.webp"},{"c":"juices","n":"عصير ليمون ونعنع","p":"3.500","i":"./menu/mango-juice.webp"},{"c":"juices","n":"عصير برتقال","p":"3.500","i":"./menu/mango-juice.webp"},{"c":"juices","n":"عصير فراولة وباشن","p":"3.500","i":"./menu/mango-juice.webp"},{"c":"smoothies","n":"خوخ سموثي","p":"3.750","i":"./menu/strawberry-smoothie.webp"},{"c":"smoothies","n":"باشن سموثي","p":"3.750","i":"./menu/strawberry-smoothie.webp"},{"c":"smoothies","n":"فراولة سموثي","p":"3.250","i":"./menu/strawberry-smoothie.webp"},{"c":"smoothies","n":"شمام وهيل","p":"3.750","i":"./menu/strawberry-smoothie.webp"},{"c":"smoothies","n":"مكس بيري سموثي","p":"3.500","i":"./menu/strawberry-smoothie.webp"},{"c":"smoothies","n":"مانجا سموثي","p":"3.250","i":"./menu/strawberry-smoothie.webp"},{"c":"smoothies","n":"ليمون ونعنع سموثي","p":"3.250","i":"./menu/strawberry-smoothie.webp"},{"c":"smoothies","n":"ليمون وكيوي سموثي","p":"3.250","i":"./menu/strawberry-smoothie.webp"},{"c":"smoothies","n":"بطيخ ليمونيد","p":"3.500","i":"./menu/strawberry-smoothie.webp"},{"c":"smoothies","n":"ليمون سموثي","p":"3.250","i":"./menu/strawberry-smoothie.webp"},{"c":"milkshakes","n":"ميلك شيك لوتس","p":"3.250","i":"./menu/milkshake.webp"},{"c":"milkshakes","n":"ميلك شيك فراولة","p":"3.250","i":"./menu/milkshake.webp"},{"c":"milkshakes","n":"ميلك شيك شوكليت","p":"3.250","i":"./menu/milkshake.webp"},{"c":"milkshakes","n":"ميلك شيك فانيلا","p":"3.250","i":"./menu/milkshake.webp"},{"c":"milkshakes","n":"ميلك شيك تشيز كيك","p":"3.250","i":"./menu/milkshake.webp"},{"c":"milkshakes","n":"ميلك شيك بيناكولادا","p":"3.250","i":"./menu/milkshake.webp"},{"c":"milkshakes","n":"ميلك شيك هيل","p":"3.250","i":"./menu/milkshake.webp"},{"c":"milkshakes","n":"ميلك شيك أوريو","p":"3.250","i":"./menu/milkshake.webp"},{"c":"milkshakes","n":"ميلك شيك سنكرز","p":"3.250","i":"./menu/milkshake.webp"},{"c":"milkshakes","n":"ميلك شيك كروكان","p":"3.250","i":"./menu/milkshake.webp"},{"c":"milkshakes","n":"ميلك شيك عربية","p":"3.250","i":"./menu/milkshake.webp"},{"c":"milkshakes","n":"ميلك شيك موز وتوت","p":"3.250","i":"./menu/milkshake.webp"},{"c":"milkshakes","n":"ميلك شيك فيريرو","p":"3.250","i":"./menu/milkshake.webp"},{"c":"mojito","n":"موهيتو كاندي","p":"3.250","i":"./menu/mojito.webp"},{"c":"mojito","n":"موهيتو ليتشي أناناس","p":"3.250","i":"./menu/mojito.webp"},{"c":"mojito","n":"موهيتو هيل","p":"3.750","i":"./menu/mojito.webp"},{"c":"mojito","n":"موهيتو خيار وريحان","p":"3.250","i":"./menu/mojito.webp"},{"c":"mojito","n":"موهيتو بلو باشن","p":"4.250","i":"./menu/mojito.webp"},{"c":"mojito","n":"موهيتو مانجا بيتش","p":"3.250","i":"./menu/mojito.webp"},{"c":"mojito","n":"موهيتو بلو أوشن","p":"3.750","i":"./menu/mojito.webp"},{"c":"iced-coffee","n":"موكا آيس كوفي","p":"3.500","i":"./menu/iced-coffee.webp"},{"c":"iced-coffee","n":"هيزل آيس كوفي","p":"3.500","i":"./menu/iced-coffee.webp"},{"c":"iced-coffee","n":"كريم بروليه آيس شيكن","p":"3.750","i":"./menu/iced-coffee.webp"},{"c":"iced-coffee","n":"آيس أمريكانو","p":"3.000","i":"./menu/iced-coffee.webp"},{"c":"iced-coffee","n":"منت تشوكلت لاتيه","p":"3.750","i":"./menu/iced-coffee.webp"},{"c":"iced-coffee","n":"لاتيه آيس كوفي","p":"3.250","i":"./menu/iced-coffee.webp"},{"c":"frappe","n":"كراميل فراب","p":"4.250","i":"./menu/caramel-frappe.webp"},{"c":"frappe","n":"أوريو فراب","p":"3.750","i":"./menu/caramel-frappe.webp"},{"c":"frappe","n":"فروت فليكس فراب","p":"3.750","i":"./menu/caramel-frappe.webp"},{"c":"frappe","n":"فانيلا فراب","p":"3.750","i":"./menu/caramel-frappe.webp"},{"c":"frappe","n":"شوكليت فراب","p":"3.750","i":"./menu/caramel-frappe.webp"},{"c":"frappe","n":"ويفر فراب","p":"3.750","i":"./menu/caramel-frappe.webp"},{"c":"frappe","n":"برتزل فراب","p":"3.750","i":"./menu/caramel-frappe.webp"},{"c":"iced-tea","n":"ليمون آيس تي","p":"3.500","i":"./menu/mojito.webp"},{"c":"iced-tea","n":"رازبيري آيس تي","p":"3.500","i":"./menu/mojito.webp"},{"c":"iced-tea","n":"خوخ آيس تي","p":"3.500","i":"./menu/mojito.webp"},{"c":"cocktails","n":"روكا بانانا","p":"3.500","i":"./menu/hail-cocktail.webp"},{"c":"cocktails","n":"موز وحليب","p":"3.500","i":"./menu/hail-cocktail.webp"},{"c":"cocktails","n":"فراولة وموز","p":"3.500","i":"./menu/hail-cocktail.webp"},{"c":"cocktails","n":"بنانا بيري","p":"4.000","i":"./menu/hail-cocktail.webp"},{"c":"cocktails","n":"هيل كوكتيل","p":"4.000","i":"./menu/hail-cocktail.webp"},{"c":"cocktails","n":"أفوكادو","p":"4.000","i":"./menu/hail-cocktail.webp"},{"c":"cocktails","n":"بيتش كولادا","p":"3.750","i":"./menu/hail-cocktail.webp"},{"c":"cocktails","n":"جوافة غرين أبل","p":"3.500","i":"./menu/hail-cocktail.webp"},{"c":"cocktails","n":"مانجا باشن","p":"3.750","i":"./menu/hail-cocktail.webp"},{"c":"hot-drinks","n":"كابتشينو","p":"2.750","i":"./menu/hot-coffee.webp"},{"c":"hot-drinks","n":"موكا","p":"2.750","i":"./menu/hot-coffee.webp"},{"c":"hot-drinks","n":"بينك لاتيه","p":"2.750","i":"./menu/hot-coffee.webp"},{"c":"hot-drinks","n":"إسبريسو أفوكاتو","p":"2.750","i":"./menu/hot-coffee.webp"},{"c":"hot-drinks","n":"نسكافيه","p":"2.500","i":"./menu/hot-coffee.webp"},{"c":"hot-drinks","n":"أوريو كوفي","p":"3.250","i":"./menu/hot-coffee.webp"},{"c":"hot-drinks","n":"سنكرز كوفي","p":"3.250","i":"./menu/hot-coffee.webp"},{"c":"hot-drinks","n":"فرنش كوفي","p":"3.250","i":"./menu/hot-coffee.webp"},{"c":"hot-drinks","n":"سبانش لاتيه","p":"3.750","i":"./menu/hot-coffee.webp"},{"c":"hot-drinks","n":"أمريكانو","p":"2.750","i":"./menu/hot-coffee.webp"},{"c":"hot-drinks","n":"كورتادو","p":"2.750","i":"./menu/hot-coffee.webp"},{"c":"hot-drinks","n":"دبل إسبريسو","p":"2.750","i":"./menu/hot-coffee.webp"},{"c":"hot-drinks","n":"سنجل إسبريسو","p":"2.250","i":"./menu/hot-coffee.webp"},{"c":"hot-drinks","n":"هوت شوكلت","p":"3.250","i":"./menu/hot-chocolate.webp"},{"c":"hot-drinks","n":"هيل هوت شوكلت","p":"3.250","i":"./menu/hot-coffee.webp"},{"c":"hot-drinks","n":"قهوة تركية سنجل","p":"2.250","i":"./menu/hot-coffee.webp"},{"c":"hot-drinks","n":"قهوة تركية دبل","p":"2.750","i":"./menu/hot-coffee.webp"},{"c":"hot-drinks","n":"مكياتو","p":"2.750","i":"./menu/hot-coffee.webp"},{"c":"special-coffee","n":"V60","p":"3.500","i":"./menu/hot-coffee.webp"},{"c":"special-coffee","n":"فرنش بريس","p":"2.750","i":"./menu/hot-coffee.webp"},{"c":"special-coffee","n":"سايفون","p":"3.750","i":"./menu/hot-coffee.webp"},{"c":"herbs","n":"يانسون","p":"1.750","i":"./menu/hot-coffee.webp"},{"c":"herbs","n":"أعشاب مشكلة","p":"1.750","i":"./menu/hot-coffee.webp"},{"c":"herbs","n":"شاي أخضر","p":"1.750","i":"./menu/hot-coffee.webp"},{"c":"herbs","n":"ميرمية","p":"1.750","i":"./menu/hot-coffee.webp"},{"c":"herbs","n":"بابونج","p":"1.750","i":"./menu/hot-coffee.webp"},{"c":"herbs","n":"شاي","p":"1.750","i":"./menu/hot-coffee.webp"},{"c":"herbs","n":"زنجبيل وليمون وعسل","p":"2.750","i":"./menu/hot-coffee.webp"},{"c":"herbs","n":"زنجبيل وحليب وعسل","p":"2.750","i":"./menu/hot-coffee.webp"},{"c":"herbs","n":"شاي كرك","p":"2.500","i":"./menu/hot-coffee.webp"},{"c":"sweets","n":"تارت فراولة","p":"4.500","i":"./menu/caramel-frappe.webp"},{"c":"sweets","n":"تيراميسو","p":"4.500","i":"./menu/caramel-frappe.webp"},{"c":"sweets","n":"سان سيباستيان","p":"4.500","i":"./menu/caramel-frappe.webp"},{"c":"sweets","n":"موس شوكولاتة","p":"4.500","i":"./menu/caramel-frappe.webp"},{"c":"sweets","n":"تشيزكيك توت العليق","p":"4.500","i":"./menu/caramel-frappe.webp"},{"c":"sweets","n":"براونيز","p":"4.500","i":"./menu/caramel-frappe.webp"},{"c":"sweets","n":"تشيزكيك أوريو","p":"4.500","i":"./menu/caramel-frappe.webp"},{"c":"hookah","n":"تفاحتين نخلة","p":"5.000","i":"./menu/mojito.webp"},{"c":"hookah","n":"تفاحتين مزايا","p":"4.200","i":"./menu/mojito.webp"},{"c":"hookah","n":"ليمون ونعنع","p":"4.200","i":"./menu/mojito.webp"},{"c":"hookah","n":"بطيخ ونعنع","p":"4.200","i":"./menu/mojito.webp"},{"c":"hookah","n":"توت بلو بيري","p":"4.200","i":"./menu/mojito.webp"},{"c":"hookah","n":"عنب","p":"4.200","i":"./menu/mojito.webp"},{"c":"hookah","n":"توت ونعنع","p":"4.200","i":"./menu/mojito.webp"},{"c":"hookah","n":"كرز ونعنع","p":"4.200","i":"./menu/mojito.webp"},{"c":"hookah","n":"مسكة","p":"4.200","i":"./menu/mojito.webp"},{"c":"hookah","n":"علكة وقرفة","p":"4.200","i":"./menu/mojito.webp"},{"c":"hookah","n":"علكة ونعنع","p":"4.200","i":"./menu/mojito.webp"},{"c":"hookah","n":"تفاح ونعنع","p":"4.200","i":"./menu/mojito.webp"},{"c":"hookah","n":"كاندي دروبس","p":"4.200","i":"./menu/mojito.webp"},{"c":"hookah","n":"خلطة هيل","p":"4.200","i":"./menu/mojito.webp"},{"c":"hookah","n":"لفلي","p":"4.200","i":"./menu/mojito.webp"},{"c":"hookah","n":"آيس سويت","p":"4.200","i":"./menu/mojito.webp"},{"c":"hookah","n":"برتقال ونعنع","p":"4.200","i":"./menu/mojito.webp"},{"c":"soft-drinks","n":"بوم بوم","p":"2.500","i":"./menu/red-bull.webp"},{"c":"soft-drinks","n":"ريد بول","p":"3.000","i":"./menu/red-bull.webp"},{"c":"soft-drinks","n":"كود ريد","p":"2.500","i":"./menu/red-bull.webp"},{"c":"soft-drinks","n":"مياه بيريه","p":"2.250","i":"./menu/red-bull.webp"},{"c":"soft-drinks","n":"ماء","p":"0.600","i":"./menu/water.webp"}];
+        /* مولّد آلياً من hail-os/assets/js/data/menu.js — لا تعدّل الأصناف هنا. */
+        const CATEGORIES = [{"id":"breakfast","ar":"الفطور","en":"Breakfast"},{"id":"salads","ar":"السلطات","en":"Salads"},{"id":"cold-appetizers","ar":"المقبلات الباردة","en":"Cold appetizers"},{"id":"hot-appetizers","ar":"المقبلات الساخنة","en":"Hot appetizers"},{"id":"pasta","ar":"الباستا","en":"Pasta"},{"id":"pasta-addons","ar":"إضافات الباستا","en":"Pasta add-ons"},{"id":"pizza","ar":"البيتزا","en":"Pizza"},{"id":"sandwiches","ar":"الساندوش","en":"Sandwiches"},{"id":"burgers","ar":"البرغر","en":"Burgers"},{"id":"fatta","ar":"الفتة","en":"Fatta"},{"id":"soups","ar":"الشوربات","en":"Soups"},{"id":"mains","ar":"الأطباق الرئيسية","en":"Main dishes"},{"id":"juices","ar":"العصائر","en":"Juices"},{"id":"smoothies","ar":"السموثي","en":"Smoothies"},{"id":"milkshakes","ar":"الميلك شيك","en":"Milkshakes"},{"id":"mojito","ar":"الموهيتو","en":"Mojito"},{"id":"iced-coffee","ar":"القهوة الباردة","en":"Iced coffee"},{"id":"frappe","ar":"الفرابيه","en":"Frappe"},{"id":"iced-tea","ar":"الشاي المثلج","en":"Iced tea"},{"id":"cocktails","ar":"الكوكتيل","en":"Cocktails"},{"id":"hot-drinks","ar":"المشروبات الساخنة","en":"Hot drinks"},{"id":"special-coffee","ar":"القهوة المختصة","en":"Specialty coffee"},{"id":"herbs","ar":"الأعشاب","en":"Herbal infusions"},{"id":"sweets","ar":"الحلويات","en":"Desserts"},{"id":"hookah","ar":"المعسل","en":"Hookah"},{"id":"soft-drinks","ar":"المشروبات الغازية والمياه","en":"Soft drinks & water"}];
+        const ITEMS = [{"c":"breakfast","n":"فول","e":"Foul","p":"2.000","i":"./menu/foul.webp","o":1,"f":1},{"c":"breakfast","n":"قلّاية بندورة","e":"Tomato qalayet","p":"2.500","i":"./menu/foul.webp","o":0,"f":0},{"c":"breakfast","n":"حمص","e":"Hummus","p":"2.000","i":"./menu/foul.webp","o":0,"f":0},{"c":"breakfast","n":"لبنة مع زعتر وفرافيش","e":"Labneh with zaatar","p":"2.750","i":"./menu/labneh-zaatar.webp","o":1,"f":0},{"c":"breakfast","n":"فتة حمص","e":"Fattet hummus","p":"2.250","i":"./menu/foul.webp","o":0,"f":0},{"c":"breakfast","n":"حلّوم","e":"Halloumi","p":"2.950","i":"./menu/foul.webp","o":0,"f":0},{"c":"breakfast","n":"أومليت","e":"Omelette","p":"2.750","i":"./menu/omelette.webp","o":1,"f":0},{"c":"breakfast","n":"بيض عيون","e":"Fried eggs","p":"2.000","i":"./menu/foul.webp","o":0,"f":0},{"c":"breakfast","n":"تاكو فلافل","e":"Falafel taco","p":"2.750","i":"./menu/foul.webp","o":0,"f":0},{"c":"breakfast","n":"شكشوكة على طريقة هيل","e":"Hail shakshuka","p":"2.250","i":"./menu/foul.webp","o":0,"f":0},{"c":"breakfast","n":"بطاطا","e":"Potatoes","p":"2.000","i":"./menu/foul.webp","o":0,"f":0},{"c":"breakfast","n":"كيش تيركي","e":"Turkey quiche","p":"3.000","i":"./menu/foul.webp","o":0,"f":0},{"c":"breakfast","n":"صوصج مع البيض","e":"Sausage with eggs","p":"3.100","i":"./menu/foul.webp","o":0,"f":0},{"c":"breakfast","n":"روست بيف مع كشكوان","e":"Roast beef with kashkawan","p":"2.900","i":"./menu/foul.webp","o":0,"f":0},{"c":"breakfast","n":"فلافل مع الخضار","e":"Falafel with vegetables","p":"2.250","i":"./menu/foul.webp","o":0,"f":0},{"c":"breakfast","n":"تيركي مع شدر","e":"Turkey with cheddar","p":"2.900","i":"./menu/foul.webp","o":0,"f":0},{"c":"breakfast","n":"لبنة","e":"Labneh","p":"2.250","i":"./menu/foul.webp","o":0,"f":0},{"c":"breakfast","n":"مكس أجبان","e":"Cheese mix","p":"2.750","i":"./menu/foul.webp","o":0,"f":0},{"c":"breakfast","n":"محمرة مع مكس أجبان","e":"Muhammara with cheese mix","p":"2.750","i":"./menu/foul.webp","o":0,"f":0},{"c":"breakfast","n":"حلّوم مع الجرجير","e":"Halloumi with rocket","p":"2.750","i":"./menu/foul.webp","o":0,"f":0},{"c":"breakfast","n":"زيت وزعتر","e":"Oil and zaatar","p":"2.000","i":"./menu/foul.webp","o":0,"f":0},{"c":"breakfast","n":"لوتس ونوتيلا","e":"Lotus and Nutella","p":"3.250","i":"./menu/foul.webp","o":0,"f":0},{"c":"salads","n":"فتوش وخلطة على طريقة هيل","e":"Hail fattoush","p":"4.000","i":"./menu/hail-salad.webp","o":0,"f":0},{"c":"salads","n":"تبولة هيل","e":"Hail tabbouleh","p":"4.500","i":"./menu/hail-salad.webp","o":0,"f":0},{"c":"salads","n":"يونانية سلط","e":"Greek salad","p":"3.950","i":"./menu/hail-salad.webp","o":0,"f":0},{"c":"salads","n":"هيل سلط","e":"Hail salad","p":"4.750","i":"./menu/hail-salad.webp","o":1,"f":1},{"c":"salads","n":"شنكليش سلط","e":"Shanklish salad","p":"4.500","i":"./menu/hail-salad.webp","o":0,"f":0},{"c":"salads","n":"سيزر سلط","e":"Caesar salad","p":"4.250","i":"./menu/hail-salad.webp","o":0,"f":0},{"c":"salads","n":"مكس سي فود سلط","e":"Mixed seafood salad","p":"8.500","i":"./menu/seafood-salad.webp","o":1,"f":0},{"c":"cold-appetizers","n":"ورق عنب","e":"Grape leaves","p":"2.250","i":"./menu/labneh-zaatar.webp","o":0,"f":0},{"c":"cold-appetizers","n":"شنكليش","e":"Shanklish","p":"2.750","i":"./menu/labneh-zaatar.webp","o":0,"f":0},{"c":"cold-appetizers","n":"محمرة","e":"Muhammara","p":"2.250","i":"./menu/labneh-zaatar.webp","o":0,"f":0},{"c":"cold-appetizers","n":"لبنة فراقيش","e":"Labneh with crisps","p":"2.500","i":"./menu/labneh-zaatar.webp","o":0,"f":0},{"c":"cold-appetizers","n":"هيل حمص","e":"Hail hummus","p":"2.750","i":"./menu/labneh-zaatar.webp","o":0,"f":0},{"c":"hot-appetizers","n":"مسخن كب","e":"Musakhan cups","p":"3.750","i":"./menu/combo-platter.webp","o":0,"f":0},{"c":"hot-appetizers","n":"كريب لحم","e":"Meat crepe","p":"4.950","i":"./menu/combo-platter.webp","o":0,"f":0},{"c":"hot-appetizers","n":"ناتشوز","e":"Nachos","p":"5.250","i":"./menu/nachos.webp","o":1,"f":0},{"c":"hot-appetizers","n":"فطر محشي","e":"Stuffed mushroom","p":"4.750","i":"./menu/combo-platter.webp","o":0,"f":0},{"c":"hot-appetizers","n":"شرم جاكيت","e":"Shrimp jacket","p":"5.750","i":"./menu/combo-platter.webp","o":0,"f":0},{"c":"hot-appetizers","n":"دجاج داينمايت","e":"Dynamite chicken","p":"3.750","i":"./menu/dynamite-chicken.webp","o":1,"f":0},{"c":"hot-appetizers","n":"روبيتو بولز","e":"Robito balls","p":"4.750","i":"./menu/combo-platter.webp","o":0,"f":0},{"c":"hot-appetizers","n":"شريمب داينمايت","e":"Dynamite shrimp","p":"6.500","i":"./menu/combo-platter.webp","o":0,"f":0},{"c":"hot-appetizers","n":"بطاطا حارة","e":"Spicy potatoes","p":"2.500","i":"./menu/combo-platter.webp","o":0,"f":0},{"c":"hot-appetizers","n":"سجق أرمني","e":"Armenian sujuk","p":"4.250","i":"./menu/combo-platter.webp","o":0,"f":0},{"c":"hot-appetizers","n":"دجاج كشميري","e":"Kashmiri chicken","p":"5.250","i":"./menu/kashmiri-chicken.webp","o":1,"f":0},{"c":"hot-appetizers","n":"فلافل سيجار","e":"Falafel cigar","p":"2.500","i":"./menu/combo-platter.webp","o":0,"f":0},{"c":"hot-appetizers","n":"كومبو بلاتر","e":"Combo platter","p":"9.950","i":"./menu/combo-platter.webp","o":1,"f":1},{"c":"pasta","n":"بينا بيستو","e":"Penne pesto","p":"5.000","i":"./menu/pesto-pasta.webp","o":1,"f":0},{"c":"pasta","n":"بولونيز","e":"Bolognese","p":"4.500","i":"./menu/pesto-pasta.webp","o":0,"f":0},{"c":"pasta","n":"بينا أرابياتا","e":"Penne arrabbiata","p":"4.500","i":"./menu/pesto-pasta.webp","o":0,"f":0},{"c":"pasta","n":"فوتوتشيني ألفريدو","e":"Fettuccine alfredo","p":"4.500","i":"./menu/pesto-pasta.webp","o":0,"f":0},{"c":"pasta","n":"هيل فوتوتشيني سبيشل","e":"Hail fettuccine special","p":"7.150","i":"./menu/pasta-special.webp","o":1,"f":1},{"c":"pasta-addons","n":"إضافة دجاج","e":"Chicken add-on","p":"1.500","i":"./menu/pesto-pasta.webp","o":0,"f":0},{"c":"pasta-addons","n":"إضافة شريمب","e":"Shrimp add-on","p":"3.000","i":"./menu/pesto-pasta.webp","o":0,"f":0},{"c":"pizza","n":"بيتزا هيل","e":"Hail pizza","p":"5.250","i":"./menu/hail-pizza.webp","o":1,"f":1},{"c":"pizza","n":"بيتزا ألفريدو","e":"Alfredo pizza","p":"5.500","i":"./menu/hail-pizza.webp","o":0,"f":0},{"c":"pizza","n":"بيروني بيتزا","e":"Pepperoni pizza","p":"4.500","i":"./menu/pepperoni-pizza.webp","o":1,"f":0},{"c":"pizza","n":"بيتزا خضار","e":"Vegetable pizza","p":"4.500","i":"./menu/vegetable-pizza.webp","o":1,"f":0},{"c":"pizza","n":"مارجاريتا بيتزا","e":"Margherita pizza","p":"3.950","i":"./menu/hail-pizza.webp","o":0,"f":0},{"c":"pizza","n":"صنف بيتزا (الاسم غير ظاهر في المنيو)","e":"Pizza item (name not legible)","p":"4.950","i":"./menu/hail-pizza.webp","o":0,"f":0},{"c":"sandwiches","n":"ساندوش مكس شيز تيركي","e":"Turkey cheese mix sandwich","p":"5.250","i":"./menu/caesar-sandwich.webp","o":0,"f":0},{"c":"sandwiches","n":"ساندوش شيش طاووق راب","e":"Shish tawook wrap","p":"4.750","i":"./menu/caesar-sandwich.webp","o":0,"f":0},{"c":"sandwiches","n":"ساندوش كريما دجاج","e":"Creamy chicken sandwich","p":"5.500","i":"./menu/caesar-sandwich.webp","o":0,"f":0},{"c":"sandwiches","n":"حلّوم ساندوش","e":"Halloumi sandwich","p":"4.950","i":"./menu/halloumi-sandwich.webp","o":1,"f":0},{"c":"sandwiches","n":"سيزر ساندوش","e":"Caesar sandwich","p":"5.250","i":"./menu/caesar-sandwich.webp","o":1,"f":0},{"c":"sandwiches","n":"كلب لوف","e":"Club loaf","p":"5.250","i":"./menu/caesar-sandwich.webp","o":0,"f":0},{"c":"burgers","n":"كريسبي تشكن برغر","e":"Crispy chicken burger","p":"4.750","i":"./menu/classic-burger.webp","o":0,"f":0},{"c":"burgers","n":"سلايدر برغر","e":"Slider burger","p":"5.250","i":"./menu/slider-burger.webp","o":1,"f":0},{"c":"burgers","n":"مشروم برغر","e":"Mushroom burger","p":"5.500","i":"./menu/classic-burger.webp","o":0,"f":0},{"c":"burgers","n":"كلاسيك برغر","e":"Classic burger","p":"5.000","i":"./menu/classic-burger.webp","o":1,"f":1},{"c":"burgers","n":"جريل تشكن برغر","e":"Grilled chicken burger","p":"4.500","i":"./menu/classic-burger.webp","o":0,"f":0},{"c":"fatta","n":"فتة العرايس","e":"Arayes fatta","p":"2.950","i":"./menu/chicken-cream-pot.webp","o":0,"f":0},{"c":"fatta","n":"فتة مسخن","e":"Musakhan fatta","p":"2.750","i":"./menu/chicken-cream-pot.webp","o":0,"f":0},{"c":"soups","n":"شوربة عدس","e":"Lentil soup","p":"2.500","i":"./menu/chicken-cream-pot.webp","o":0,"f":0},{"c":"soups","n":"شوربة فطر","e":"Mushroom soup","p":"3.000","i":"./menu/chicken-cream-pot.webp","o":0,"f":0},{"c":"mains","n":"بيف ستيك","e":"Beef steak","p":"12.500","i":"./menu/beef-steak.webp","o":1,"f":1},{"c":"mains","n":"كلاسيك مكس سي فود","e":"Classic mixed seafood","p":"13.900","i":"./menu/seafood-main.webp","o":1,"f":0},{"c":"mains","n":"دجاج جريل","e":"Grilled chicken","p":"7.750","i":"./menu/grilled-chicken.webp","o":1,"f":0},{"c":"mains","n":"دجاج رول محشي فستق حلبي","e":"Chicken roll with pistachio","p":"7.750","i":"./menu/beef-steak.webp","o":0,"f":0},{"c":"mains","n":"فيش أند شيبس","e":"Fish and chips","p":"7.000","i":"./menu/beef-steak.webp","o":0,"f":0},{"c":"mains","n":"بيف بلاك بيبر","e":"Black pepper beef","p":"8.500","i":"./menu/black-pepper-beef.webp","o":1,"f":0},{"c":"mains","n":"فخارة شرحات لحم","e":"Beef clay pot","p":"7.950","i":"./menu/beef-steak.webp","o":0,"f":0},{"c":"mains","n":"بتر تشكن","e":"Butter chicken","p":"7.750","i":"./menu/beef-steak.webp","o":0,"f":0},{"c":"mains","n":"فخارة دجاج بالكريمة","e":"Creamy chicken clay pot","p":"7.750","i":"./menu/chicken-cream-pot.webp","o":1,"f":0},{"c":"mains","n":"فخارة فريكة بالدجاج والكريمة","e":"Freekeh chicken clay pot","p":"7.750","i":"./menu/beef-steak.webp","o":0,"f":0},{"c":"juices","n":"عصير ليمون","e":"Lemon juice","p":"3.500","i":"./menu/mango-juice.webp","o":0,"f":0},{"c":"juices","n":"عصير أناناس","e":"Pineapple juice","p":"3.500","i":"./menu/mango-juice.webp","o":0,"f":0},{"c":"juices","n":"عصير فراولة","e":"Strawberry juice","p":"3.500","i":"./menu/strawberry-juice.webp","o":1,"f":0},{"c":"juices","n":"عصير مانجا","e":"Mango juice","p":"3.500","i":"./menu/mango-juice.webp","o":1,"f":1},{"c":"juices","n":"عصير كيوي","e":"Kiwi juice","p":"3.500","i":"./menu/mango-juice.webp","o":0,"f":0},{"c":"juices","n":"عصير أناناس ونعنع","e":"Pineapple and mint","p":"3.500","i":"./menu/mango-juice.webp","o":0,"f":0},{"c":"juices","n":"عصير جوافة","e":"Guava juice","p":"3.500","i":"./menu/mango-juice.webp","o":0,"f":0},{"c":"juices","n":"عصير ليمون ونعنع","e":"Lemon and mint","p":"3.500","i":"./menu/mango-juice.webp","o":0,"f":0},{"c":"juices","n":"عصير برتقال","e":"Orange juice","p":"3.500","i":"./menu/mango-juice.webp","o":0,"f":0},{"c":"juices","n":"عصير فراولة وباشن","e":"Strawberry and passion","p":"3.500","i":"./menu/mango-juice.webp","o":0,"f":0},{"c":"smoothies","n":"خوخ سموثي","e":"Peach smoothie","p":"3.750","i":"./menu/strawberry-smoothie.webp","o":0,"f":0},{"c":"smoothies","n":"باشن سموثي","e":"Passion smoothie","p":"3.750","i":"./menu/strawberry-smoothie.webp","o":0,"f":0},{"c":"smoothies","n":"فراولة سموثي","e":"Strawberry smoothie","p":"3.250","i":"./menu/strawberry-smoothie.webp","o":1,"f":0},{"c":"smoothies","n":"شمام وهيل","e":"Muskmelon and cardamom","p":"3.750","i":"./menu/strawberry-smoothie.webp","o":0,"f":0},{"c":"smoothies","n":"مكس بيري سموثي","e":"Mixed berry smoothie","p":"3.500","i":"./menu/strawberry-smoothie.webp","o":0,"f":0},{"c":"smoothies","n":"مانجا سموثي","e":"Mango smoothie","p":"3.250","i":"./menu/strawberry-smoothie.webp","o":0,"f":0},{"c":"smoothies","n":"ليمون ونعنع سموثي","e":"Lemon and mint smoothie","p":"3.250","i":"./menu/strawberry-smoothie.webp","o":0,"f":0},{"c":"smoothies","n":"ليمون وكيوي سموثي","e":"Lemon and kiwi smoothie","p":"3.250","i":"./menu/strawberry-smoothie.webp","o":0,"f":0},{"c":"smoothies","n":"بطيخ ليمونيد","e":"Watermelon lemonade","p":"3.500","i":"./menu/strawberry-smoothie.webp","o":0,"f":0},{"c":"smoothies","n":"ليمون سموثي","e":"Lemon smoothie","p":"3.250","i":"./menu/strawberry-smoothie.webp","o":0,"f":0},{"c":"milkshakes","n":"ميلك شيك لوتس","e":"Lotus milkshake","p":"3.250","i":"./menu/milkshake.webp","o":1,"f":1},{"c":"milkshakes","n":"ميلك شيك فراولة","e":"Strawberry milkshake","p":"3.250","i":"./menu/milkshake.webp","o":0,"f":0},{"c":"milkshakes","n":"ميلك شيك شوكليت","e":"Chocolate milkshake","p":"3.250","i":"./menu/milkshake.webp","o":0,"f":0},{"c":"milkshakes","n":"ميلك شيك فانيلا","e":"Vanilla milkshake","p":"3.250","i":"./menu/milkshake.webp","o":0,"f":0},{"c":"milkshakes","n":"ميلك شيك تشيز كيك","e":"Cheesecake milkshake","p":"3.250","i":"./menu/milkshake.webp","o":0,"f":0},{"c":"milkshakes","n":"ميلك شيك بيناكولادا","e":"Piña colada milkshake","p":"3.250","i":"./menu/milkshake.webp","o":0,"f":0},{"c":"milkshakes","n":"ميلك شيك هيل","e":"Hail milkshake","p":"3.250","i":"./menu/milkshake.webp","o":0,"f":0},{"c":"milkshakes","n":"ميلك شيك أوريو","e":"Oreo milkshake","p":"3.250","i":"./menu/milkshake.webp","o":0,"f":0},{"c":"milkshakes","n":"ميلك شيك سنكرز","e":"Snickers milkshake","p":"3.250","i":"./menu/milkshake.webp","o":0,"f":0},{"c":"milkshakes","n":"ميلك شيك كروكان","e":"Crocant milkshake","p":"3.250","i":"./menu/milkshake.webp","o":0,"f":0},{"c":"milkshakes","n":"ميلك شيك عربية","e":"Arabian milkshake","p":"3.250","i":"./menu/milkshake.webp","o":0,"f":0},{"c":"milkshakes","n":"ميلك شيك موز وتوت","e":"Banana and berry milkshake","p":"3.250","i":"./menu/milkshake.webp","o":0,"f":0},{"c":"milkshakes","n":"ميلك شيك فيريرو","e":"Ferrero milkshake","p":"3.250","i":"./menu/milkshake.webp","o":0,"f":0},{"c":"mojito","n":"موهيتو كاندي","e":"Candy mojito","p":"3.250","i":"./menu/mojito.webp","o":1,"f":0},{"c":"mojito","n":"موهيتو ليتشي أناناس","e":"Pineapple lychee mojito","p":"3.250","i":"./menu/mojito.webp","o":0,"f":0},{"c":"mojito","n":"موهيتو هيل","e":"Hail mojito","p":"3.750","i":"./menu/mojito.webp","o":0,"f":1},{"c":"mojito","n":"موهيتو خيار وريحان","e":"Cucumber and basil mojito","p":"3.250","i":"./menu/mojito.webp","o":0,"f":0},{"c":"mojito","n":"موهيتو بلو باشن","e":"Blue passion mojito","p":"4.250","i":"./menu/mojito.webp","o":0,"f":0},{"c":"mojito","n":"موهيتو مانجا بيتش","e":"Mango peach mojito","p":"3.250","i":"./menu/mojito.webp","o":0,"f":0},{"c":"mojito","n":"موهيتو بلو أوشن","e":"Blue ocean mojito","p":"3.750","i":"./menu/mojito.webp","o":0,"f":0},{"c":"iced-coffee","n":"موكا آيس كوفي","e":"Mocha iced coffee","p":"3.500","i":"./menu/iced-coffee.webp","o":1,"f":0},{"c":"iced-coffee","n":"هيزل آيس كوفي","e":"Hazelnut iced coffee","p":"3.500","i":"./menu/iced-coffee.webp","o":0,"f":0},{"c":"iced-coffee","n":"كريم بروليه آيس شيكن","e":"Crème brûlée iced shaken","p":"3.750","i":"./menu/iced-coffee.webp","o":0,"f":0},{"c":"iced-coffee","n":"آيس أمريكانو","e":"Iced Americano","p":"3.000","i":"./menu/iced-coffee.webp","o":0,"f":0},{"c":"iced-coffee","n":"منت تشوكلت لاتيه","e":"Mint chocolate latte","p":"3.750","i":"./menu/iced-coffee.webp","o":0,"f":0},{"c":"iced-coffee","n":"لاتيه آيس كوفي","e":"Iced latte","p":"3.250","i":"./menu/iced-coffee.webp","o":0,"f":0},{"c":"frappe","n":"كراميل فراب","e":"Caramel frappe","p":"4.250","i":"./menu/caramel-frappe.webp","o":1,"f":1},{"c":"frappe","n":"أوريو فراب","e":"Oreo frappe","p":"3.750","i":"./menu/caramel-frappe.webp","o":0,"f":0},{"c":"frappe","n":"فروت فليكس فراب","e":"Fruit flakes frappe","p":"3.750","i":"./menu/caramel-frappe.webp","o":0,"f":0},{"c":"frappe","n":"فانيلا فراب","e":"Vanilla frappe","p":"3.750","i":"./menu/caramel-frappe.webp","o":0,"f":0},{"c":"frappe","n":"شوكليت فراب","e":"Chocolate frappe","p":"3.750","i":"./menu/caramel-frappe.webp","o":0,"f":0},{"c":"frappe","n":"ويفر فراب","e":"Wafer frappe","p":"3.750","i":"./menu/caramel-frappe.webp","o":0,"f":0},{"c":"frappe","n":"برتزل فراب","e":"Pretzel frappe","p":"3.750","i":"./menu/caramel-frappe.webp","o":0,"f":0},{"c":"iced-tea","n":"ليمون آيس تي","e":"Lemon iced tea","p":"3.500","i":"./menu/mojito.webp","o":0,"f":0},{"c":"iced-tea","n":"رازبيري آيس تي","e":"Raspberry iced tea","p":"3.500","i":"./menu/mojito.webp","o":0,"f":0},{"c":"iced-tea","n":"خوخ آيس تي","e":"Peach iced tea","p":"3.500","i":"./menu/mojito.webp","o":0,"f":0},{"c":"cocktails","n":"روكا بانانا","e":"Banana arugula","p":"3.500","i":"./menu/hail-cocktail.webp","o":0,"f":0},{"c":"cocktails","n":"موز وحليب","e":"Banana and milk","p":"3.500","i":"./menu/hail-cocktail.webp","o":0,"f":0},{"c":"cocktails","n":"فراولة وموز","e":"Strawberry and banana","p":"3.500","i":"./menu/hail-cocktail.webp","o":0,"f":0},{"c":"cocktails","n":"بنانا بيري","e":"Berry and banana","p":"4.000","i":"./menu/hail-cocktail.webp","o":0,"f":0},{"c":"cocktails","n":"هيل كوكتيل","e":"Hail cocktail","p":"4.000","i":"./menu/hail-cocktail.webp","o":1,"f":1},{"c":"cocktails","n":"أفوكادو","e":"Avocado","p":"4.000","i":"./menu/hail-cocktail.webp","o":0,"f":0},{"c":"cocktails","n":"بيتش كولادا","e":"Peach colada","p":"3.750","i":"./menu/hail-cocktail.webp","o":0,"f":0},{"c":"cocktails","n":"جوافة غرين أبل","e":"Guava and green apple","p":"3.500","i":"./menu/hail-cocktail.webp","o":0,"f":0},{"c":"cocktails","n":"مانجا باشن","e":"Mango passion","p":"3.750","i":"./menu/hail-cocktail.webp","o":0,"f":0},{"c":"hot-drinks","n":"كابتشينو","e":"Cappuccino","p":"2.750","i":"./menu/hot-coffee.webp","o":1,"f":0},{"c":"hot-drinks","n":"موكا","e":"Caffè mocha","p":"2.750","i":"./menu/hot-coffee.webp","o":0,"f":0},{"c":"hot-drinks","n":"بينك لاتيه","e":"Pink latte","p":"2.750","i":"./menu/hot-coffee.webp","o":0,"f":0},{"c":"hot-drinks","n":"إسبريسو أفوكاتو","e":"Affogato espresso","p":"2.750","i":"./menu/hot-coffee.webp","o":0,"f":0},{"c":"hot-drinks","n":"نسكافيه","e":"Nescafé","p":"2.500","i":"./menu/hot-coffee.webp","o":0,"f":0},{"c":"hot-drinks","n":"أوريو كوفي","e":"Oreo coffee","p":"3.250","i":"./menu/hot-coffee.webp","o":0,"f":0},{"c":"hot-drinks","n":"سنكرز كوفي","e":"Snickers coffee","p":"3.250","i":"./menu/hot-coffee.webp","o":0,"f":0},{"c":"hot-drinks","n":"فرنش كوفي","e":"French coffee","p":"3.250","i":"./menu/hot-coffee.webp","o":0,"f":0},{"c":"hot-drinks","n":"سبانش لاتيه","e":"Spanish latte","p":"3.750","i":"./menu/hot-coffee.webp","o":0,"f":1},{"c":"hot-drinks","n":"أمريكانو","e":"Americano","p":"2.750","i":"./menu/hot-coffee.webp","o":0,"f":0},{"c":"hot-drinks","n":"كورتادو","e":"Cortado","p":"2.750","i":"./menu/hot-coffee.webp","o":0,"f":0},{"c":"hot-drinks","n":"دبل إسبريسو","e":"Double espresso","p":"2.750","i":"./menu/hot-coffee.webp","o":0,"f":0},{"c":"hot-drinks","n":"سنجل إسبريسو","e":"Single espresso","p":"2.250","i":"./menu/hot-coffee.webp","o":0,"f":0},{"c":"hot-drinks","n":"هوت شوكلت","e":"Hot chocolate","p":"3.250","i":"./menu/hot-chocolate.webp","o":1,"f":0},{"c":"hot-drinks","n":"هيل هوت شوكلت","e":"Hail hot chocolate","p":"3.250","i":"./menu/hot-coffee.webp","o":0,"f":0},{"c":"hot-drinks","n":"قهوة تركية سنجل","e":"Turkish coffee single","p":"2.250","i":"./menu/hot-coffee.webp","o":0,"f":0},{"c":"hot-drinks","n":"قهوة تركية دبل","e":"Turkish coffee double","p":"2.750","i":"./menu/hot-coffee.webp","o":0,"f":0},{"c":"hot-drinks","n":"مكياتو","e":"Macchiato","p":"2.750","i":"./menu/hot-coffee.webp","o":0,"f":0},{"c":"special-coffee","n":"V60","e":"V60","p":"3.500","i":"./menu/hot-coffee.webp","o":0,"f":0},{"c":"special-coffee","n":"فرنش بريس","e":"French press","p":"2.750","i":"./menu/hot-coffee.webp","o":0,"f":0},{"c":"special-coffee","n":"سايفون","e":"Siphon","p":"3.750","i":"./menu/hot-coffee.webp","o":0,"f":0},{"c":"herbs","n":"يانسون","e":"Anise","p":"1.750","i":"./menu/hot-coffee.webp","o":0,"f":0},{"c":"herbs","n":"أعشاب مشكلة","e":"Mixed herbs","p":"1.750","i":"./menu/hot-coffee.webp","o":0,"f":0},{"c":"herbs","n":"شاي أخضر","e":"Green tea","p":"1.750","i":"./menu/hot-coffee.webp","o":0,"f":0},{"c":"herbs","n":"ميرمية","e":"Sage","p":"1.750","i":"./menu/hot-coffee.webp","o":0,"f":0},{"c":"herbs","n":"بابونج","e":"Chamomile","p":"1.750","i":"./menu/hot-coffee.webp","o":0,"f":0},{"c":"herbs","n":"شاي","e":"Tea","p":"1.750","i":"./menu/hot-coffee.webp","o":0,"f":0},{"c":"herbs","n":"زنجبيل وليمون وعسل","e":"Ginger, lemon and honey","p":"2.750","i":"./menu/hot-coffee.webp","o":0,"f":0},{"c":"herbs","n":"زنجبيل وحليب وعسل","e":"Ginger, milk and honey","p":"2.750","i":"./menu/hot-coffee.webp","o":0,"f":0},{"c":"herbs","n":"شاي كرك","e":"Karak tea","p":"2.500","i":"./menu/hot-coffee.webp","o":0,"f":1},{"c":"sweets","n":"تارت فراولة","e":"Strawberry tart","p":"4.500","i":"./menu/caramel-frappe.webp","o":0,"f":0},{"c":"sweets","n":"تيراميسو","e":"Tiramisu","p":"4.500","i":"./menu/caramel-frappe.webp","o":0,"f":1},{"c":"sweets","n":"سان سيباستيان","e":"San Sebastian","p":"4.500","i":"./menu/caramel-frappe.webp","o":0,"f":0},{"c":"sweets","n":"موس شوكولاتة","e":"Chocolate mousse","p":"4.500","i":"./menu/caramel-frappe.webp","o":0,"f":0},{"c":"sweets","n":"تشيزكيك توت العليق","e":"Raspberry cheesecake","p":"4.500","i":"./menu/caramel-frappe.webp","o":0,"f":0},{"c":"sweets","n":"براونيز","e":"Brownies","p":"4.500","i":"./menu/caramel-frappe.webp","o":0,"f":0},{"c":"sweets","n":"تشيزكيك أوريو","e":"Oreo cheesecake","p":"4.500","i":"./menu/caramel-frappe.webp","o":0,"f":0},{"c":"hookah","n":"تفاحتين نخلة","e":"Double apple (Nakhla)","p":"5.000","i":"./menu/mojito.webp","o":0,"f":1},{"c":"hookah","n":"تفاحتين مزايا","e":"Double apple (Mazaya)","p":"4.200","i":"./menu/mojito.webp","o":0,"f":0},{"c":"hookah","n":"ليمون ونعنع","e":"Lemon and mint","p":"4.200","i":"./menu/mojito.webp","o":0,"f":0},{"c":"hookah","n":"بطيخ ونعنع","e":"Watermelon and mint","p":"4.200","i":"./menu/mojito.webp","o":0,"f":0},{"c":"hookah","n":"توت بلو بيري","e":"Blueberry","p":"4.200","i":"./menu/mojito.webp","o":0,"f":0},{"c":"hookah","n":"عنب","e":"Grape","p":"4.200","i":"./menu/mojito.webp","o":0,"f":0},{"c":"hookah","n":"توت ونعنع","e":"Berry and mint","p":"4.200","i":"./menu/mojito.webp","o":0,"f":0},{"c":"hookah","n":"كرز ونعنع","e":"Cherry and mint","p":"4.200","i":"./menu/mojito.webp","o":0,"f":0},{"c":"hookah","n":"مسكة","e":"Mastic","p":"4.200","i":"./menu/mojito.webp","o":0,"f":0},{"c":"hookah","n":"علكة وقرفة","e":"Gum and cinnamon","p":"4.200","i":"./menu/mojito.webp","o":0,"f":0},{"c":"hookah","n":"علكة ونعنع","e":"Gum and mint","p":"4.200","i":"./menu/mojito.webp","o":0,"f":0},{"c":"hookah","n":"تفاح ونعنع","e":"Apple and mint","p":"4.200","i":"./menu/mojito.webp","o":0,"f":0},{"c":"hookah","n":"كاندي دروبس","e":"Candy drops","p":"4.200","i":"./menu/mojito.webp","o":0,"f":0},{"c":"hookah","n":"خلطة هيل","e":"Hail mix","p":"4.200","i":"./menu/mojito.webp","o":0,"f":1},{"c":"hookah","n":"لفلي","e":"Lovely","p":"4.200","i":"./menu/mojito.webp","o":0,"f":0},{"c":"hookah","n":"آيس سويت","e":"Ice sweet","p":"4.200","i":"./menu/mojito.webp","o":0,"f":0},{"c":"hookah","n":"برتقال ونعنع","e":"Orange and mint","p":"4.200","i":"./menu/mojito.webp","o":0,"f":0},{"c":"soft-drinks","n":"بوم بوم","e":"Boom Boom","p":"2.500","i":"./menu/red-bull.webp","o":0,"f":0},{"c":"soft-drinks","n":"ريد بول","e":"Red Bull","p":"3.000","i":"./menu/red-bull.webp","o":1,"f":0},{"c":"soft-drinks","n":"كود ريد","e":"Code Red","p":"2.500","i":"./menu/red-bull.webp","o":0,"f":0},{"c":"soft-drinks","n":"مياه بيريه","e":"Perrier","p":"2.250","i":"./menu/red-bull.webp","o":0,"f":0},{"c":"soft-drinks","n":"ماء","e":"Water","p":"0.600","i":"./menu/water.webp","o":1,"f":0}];
 
-        const tabsContainer = document.getElementById('tabs-container');
+        const tabs = document.getElementById('tabs-container');
         CATEGORIES.forEach(cat => {
-            const btn = document.createElement('button');
-            btn.className = 'tab-btn';
-            btn.dataset.category = cat.id;
-            btn.innerText = cat.ar;
-            tabsContainer.appendChild(btn);
+            const b = document.createElement('button');
+            b.className = 'tab-btn'; b.dataset.category = cat.id; b.innerText = cat.ar;
+            tabs.appendChild(b);
         });
 
-        const menuGrid = document.getElementById('menu-grid');
+        const root = document.getElementById('menu-root');
+        const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
-        function renderItems(category) {
-            menuGrid.innerHTML = '';
-            const list = category === 'all' ? ITEMS : ITEMS.filter(x => x.c === category);
-            list.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'menu-item';
-
-                const img = document.createElement('img');
-                img.className = 'item-img';
-                img.loading = 'lazy';
-                img.width = 400; img.height = 200;   /* يحجز مكانه قبل التحميل — لا قفزات */
-                img.src = item.i;
-                img.alt = item.n;
-                img.onerror = () => { img.src = './hail-logo.png'; };
-
-                const content = document.createElement('div');
-                content.className = 'item-content';
-
-                const title = document.createElement('h3');
-                title.className = 'item-title display-font';
-                title.innerText = item.n;
-
-                const price = document.createElement('div');
-                price.className = 'item-price';
-                price.innerText = item.p + ' د.أ';
-
-                content.appendChild(title);
-                content.appendChild(price);
-                card.appendChild(img);
-                card.appendChild(content);
-                menuGrid.appendChild(card);
-            });
+        function sectionFor(cat, list) {
+            const photos = [...new Set(list.filter(x => x.o && x.i).map(x => x.i))].slice(0, 3);
+            if (!photos.length && list[0] && list[0].i) photos.push(list[0].i);
+            return `
+              <div class="lux-sec">
+                ${photos.length ? `<div class="lux-trio">${photos.map(p => `<img src="${p}" alt="" loading="lazy" width="118" height="118">`).join('')}</div>` : ''}
+                <h2>${esc(cat.ar)}</h2>
+                ${cat.en ? `<span class="sec-en">${esc(cat.en)}</span>` : ''}
+                <div class="lux-div">✦</div>
+              </div>
+              <div class="menu-grid">
+                ${list.map(x => `
+                  <div class="menu-item">
+                    <div>
+                      <h3 class="item-title">${esc(x.n)}${x.f ? '<span class="lux-badge">توقيع هيل</span>' : ''}</h3>
+                      ${x.e ? `<span class="item-en">${esc(x.e)}</span>` : ''}
+                    </div>
+                    <div class="item-price"><b>${x.p}</b><span>د.أ</span></div>
+                  </div>`).join('')}
+              </div>`;
         }
 
-        document.querySelectorAll('.tabs-scroll').forEach(rail => rail.addEventListener('click', (e) => {
+        function render(category) {
+            const catsToShow = category === 'all' ? CATEGORIES : CATEGORIES.filter(c => c.id === category);
+            root.innerHTML = catsToShow.map(c => {
+                const list = ITEMS.filter(x => x.c === c.id);
+                return list.length ? sectionFor(c, list) : '';
+            }).join('');
+        }
+
+        tabs.addEventListener('click', (e) => {
             const btn = e.target.closest('.tab-btn');
             if (!btn) return;
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-            renderItems(btn.dataset.category);
-        }));
-
-        renderItems('all');
-
-        window.addEventListener('scroll', () => {
-            const header = document.querySelector('header');
-            if (window.scrollY > 50) {
-                header.style.background = 'rgba(248, 239, 223, 0.95)';
-                header.style.boxShadow = '0 2px 10px rgba(0,0,0,0.05)';
-            } else {
-                header.style.background = 'rgba(248, 239, 223, 0.85)';
-                header.style.boxShadow = 'none';
+            render(btn.dataset.category);
+            if (btn.dataset.category !== 'all') {
+                document.querySelector('.tabs-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         });
+
+        render('all');
     </script>
 </body>
 </html>

@@ -84,6 +84,70 @@
   .svc[data-sent='1'] svg { color: var(--ok-400); }
 
   @media (max-width: 560px) { .hatch { width: 96px; height: 96px; } }
+
+  /* ── الطابع الفاخر للمنيو — يتبع الثيم: ليلي أسود×ذهبي، نهاري رملي×ذهبي ── */
+  :root {
+    --lux-gold: #d9b25f;
+    --lux-gold-2: #b98a2f;
+    --lux-line: rgba(217, 178, 95, .34);
+  }
+  [data-theme='day'] {
+    --lux-gold: #8a6a1f;
+    --lux-gold-2: #a67c2e;
+    --lux-line: rgba(138, 106, 31, .38);
+  }
+
+  .lux-sec { text-align: center; padding: var(--s8) var(--s4) var(--s3); }
+  .lux-trio { display: flex; justify-content: center; gap: var(--s4); margin-bottom: var(--s5); }
+  .lux-trio img {
+    width: 108px; height: 108px; border-radius: 50%; object-fit: cover;
+    border: 2px solid var(--lux-line); box-shadow: 0 12px 34px rgba(0, 0, 0, .3);
+  }
+  .lux-sec .sec-ic { width: 26px; height: 26px; margin: 0 auto var(--s2); color: var(--lux-gold); }
+  .lux-sec .sec-ic svg { width: 100%; height: 100%; }
+  .lux-sec h2 {
+    font-size: clamp(1.5rem, 4.5vw, 2rem); color: var(--lux-gold); letter-spacing: .4px;
+    text-shadow: 0 1px 14px color-mix(in srgb, var(--lux-gold) 26%, transparent);
+  }
+  .lux-sec .sec-en {
+    display: block; margin-top: 5px; font-size: .7rem; letter-spacing: .34em;
+    color: var(--fg-mute); text-transform: uppercase; padding-inline-start: .34em;
+  }
+  .lux-div { display: flex; align-items: center; gap: 12px; max-width: 430px; margin: var(--s4) auto 0; color: var(--lux-gold); }
+  .lux-div::before { content: ''; flex: 1; height: 1px; background: linear-gradient(-90deg, var(--lux-line), transparent); }
+  .lux-div::after  { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--lux-line), transparent); }
+  .lux-div svg { width: 15px; height: 15px; }
+
+  .lux-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: var(--s3); }
+  .lux-card {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--s4);
+    padding: 15px 18px; border-radius: var(--r-lg); border: 1px solid var(--hairline);
+    background: var(--surface); cursor: pointer;
+    transition: border-color var(--t-base) var(--e-out), transform var(--t-base) var(--e-out), box-shadow var(--t-base) var(--e-out);
+  }
+  .lux-card:hover { border-color: var(--lux-line); transform: translateY(-2px); box-shadow: var(--sh-2); }
+  .lux-card:active { transform: scale(.985); }
+  .lux-card .nm h4 { font-size: .98rem; line-height: 1.45; }
+  .lux-card .nm .en { display: block; margin-top: 2px; font-size: .68rem; color: var(--fg-faint); }
+  .lux-card .nm .chip-bad { margin-top: 5px; }
+  .lux-price { flex: none; text-align: center; min-width: 52px; }
+  .lux-price b { font-size: 1.08rem; letter-spacing: .2px; }
+  .lux-price span { display: block; font-size: .58rem; color: var(--fg-faint); margin-top: 1px; }
+  .lux-badge {
+    display: inline-block; margin-inline-start: 7px; vertical-align: 2px;
+    font-size: .6rem; font-weight: 700; color: #221a06; padding: 2.5px 9px; border-radius: 99px;
+    background: linear-gradient(135deg, var(--lux-gold), var(--lux-gold-2));
+  }
+  .lux-card.out { opacity: .5; }
+  .lux-card.out:hover { transform: none; box-shadow: none; border-color: var(--hairline); }
+  @media (max-width: 560px) { .lux-trio img { width: 88px; height: 88px; } }
+
+  /* شريط الأقسام بلون الذهب في هذه الواجهة */
+  .catrail button[aria-selected='true'] {
+    background: linear-gradient(135deg, var(--lux-gold), var(--lux-gold-2));
+    border-color: transparent; color: #221a06;
+    box-shadow: 0 6px 18px color-mix(in srgb, var(--lux-gold) 28%, transparent);
+  }
 </style>
 </head>
 <body>
