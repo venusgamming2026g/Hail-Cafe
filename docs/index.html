@@ -74,13 +74,11 @@
         }
 
         .logo img {
-            height: 56px;
-            width: 56px;
+            height: 58px;
+            width: 58px;
             object-fit: contain;
-            border-radius: 14px;
-            background: #fff7ea;
-            padding: 4px;
-            box-shadow: 0 2px 8px rgba(34, 29, 22, 0.08);
+            background: transparent;
+            filter: drop-shadow(0 2px 6px rgba(34, 29, 22, 0.12));
         }
 
         nav ul {
@@ -174,14 +172,12 @@
         }
 
         .hero-logo {
-            width: 90px;
-            height: 90px;
+            width: 110px;
+            height: 110px;
             object-fit: contain;
-            border-radius: 22px;
-            background: #fff7ea;
-            padding: 6px;
+            background: transparent;
             margin-bottom: 1.2rem;
-            box-shadow: 0 8px 30px rgba(20, 14, 8, 0.25);
+            filter: drop-shadow(0 10px 28px rgba(20, 14, 8, 0.35));
         }
 
         .hero-kicker {
@@ -434,13 +430,69 @@
         }
 
         .footer-logo img {
-            height: 70px;
-            width: 70px;
+            height: 72px;
+            width: 72px;
             object-fit: contain;
-            border-radius: 16px;
-            background: #fff7ea;
-            padding: 5px;
+            background: transparent;
             margin-bottom: 1rem;
+            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.25));
+        }
+
+        /* System portal — presentation / staff entry */
+        .system-section {
+            padding: 5rem 2rem;
+            background: linear-gradient(165deg, #221d16 0%, #322b21 55%, #1a1611 100%);
+            color: var(--ink-fg);
+        }
+        .system-section .section-title {
+            color: #fff7ea;
+            margin-bottom: 0.75rem;
+        }
+        .system-lead {
+            text-align: center;
+            max-width: 42rem;
+            margin: 0 auto 2.5rem;
+            color: rgba(246, 238, 224, 0.78);
+            font-size: 1.05rem;
+        }
+        .system-grid {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+        }
+        .system-card {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            padding: 1.35rem 1.1rem;
+            border-radius: 18px;
+            background: rgba(255, 253, 248, 0.06);
+            border: 1px solid rgba(255, 247, 234, 0.12);
+            transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+            min-height: 120px;
+        }
+        .system-card:hover {
+            transform: translateY(-4px);
+            background: rgba(209, 80, 47, 0.18);
+            border-color: rgba(255, 129, 99, 0.45);
+        }
+        .system-card strong {
+            font-family: 'Alexandria', sans-serif;
+            font-size: 1.05rem;
+            color: #fff7ea;
+        }
+        .system-card span {
+            font-size: 0.88rem;
+            color: rgba(246, 238, 224, 0.65);
+            line-height: 1.45;
+        }
+        .system-card .sys-tag {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--clay-300);
+            letter-spacing: 0.04em;
         }
 
         .footer-social {
@@ -502,6 +554,7 @@
                     <li><a href="menu.html">قائمتنا</a></li>
                     <li><a href="#reserve">احجز</a></li>
                     <li><a href="#about">قصتنا</a></li>
+                    <li><a href="#system">النظام</a></li>
                     <li><a href="#visit">الموقع</a></li>
                 </ul>
             </nav>
@@ -604,6 +657,45 @@
             </div>
         </section>
 
+        </section>
+
+        <section id="system" class="system-section">
+            <h2 class="section-title">نظام تشغيل المطعم</h2>
+            <p class="system-lead">من مسح QR على الطاولة إلى المطبخ والصالة والكاشير والإدارة — كل الشاشات جاهزة للعرض.</p>
+            <div class="system-grid">
+                <a class="system-card" href="hail-os/">
+                    <span class="sys-tag">بوابة</span>
+                    <strong>مركز الإطلاق</strong>
+                    <span>كل الشاشات + مولّد QR والمحاكي</span>
+                </a>
+                <a class="system-card" href="hail-os/menu.html?t=3">
+                    <span class="sys-tag">زبون</span>
+                    <strong>طلب الطاولة</strong>
+                    <span>منيو كامل وتتبع حيّ للطلب</span>
+                </a>
+                <a class="system-card" href="hail-os/kds.html">
+                    <span class="sys-tag">مطبخ</span>
+                    <strong>شاشة المطبخ</strong>
+                    <span>محطات التحضير وحالة الأصناف</span>
+                </a>
+                <a class="system-card" href="hail-os/floor.html">
+                    <span class="sys-tag">صالة</span>
+                    <strong>إدارة الصالة</strong>
+                    <span>طاولات ونداءات وخدمة</span>
+                </a>
+                <a class="system-card" href="hail-os/cashier.html">
+                    <span class="sys-tag">كاشير</span>
+                    <strong>نقطة البيع</strong>
+                    <span>تحصيل وتقسيم فاتورة</span>
+                </a>
+                <a class="system-card" href="hail-os/admin.html">
+                    <span class="sys-tag">إدارة</span>
+                    <strong>لوحة المدير</strong>
+                    <span>مبيعات وتقارير ومخزون</span>
+                </a>
+            </div>
+        </section>
+
         <section id="visit" class="visit-section container">
             <h2 class="section-title">موقعنا</h2>
             <div class="contact-info">
@@ -649,6 +741,7 @@
                     <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem;">
                         <li><a href="index.html">الرئيسية</a></li>
                         <li><a href="menu.html">المنيو</a></li>
+                        <li><a href="hail-os/">نظام المطعم</a></li>
                         <li><a href="#about">قصتنا</a></li>
                     </ul>
                 </div>

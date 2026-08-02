@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="night">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#16120d">
+<title>الصالة — هيل كافيه</title>
+<link rel="icon" href="assets/img/favicon.svg">
+<link rel="stylesheet" href="assets/css/theme.css">
+<link rel="stylesheet" href="assets/css/app.css">
+<style>
+  .split { display: grid; grid-template-columns: 1.55fr 1fr; gap: var(--s5); align-items: start; }
+  @media (max-width: 1080px) { .split { grid-template-columns: 1fr; } }
+  .callcard {
+    display: flex; align-items: center; gap: var(--s3); padding: var(--s3) var(--s4);
+    border-radius: var(--r-md); border: 1px solid var(--hairline); background: var(--surface);
+    transition: all var(--t-base) var(--e-out);
+  }
+  .callcard.hot { border-color: rgba(223,76,64,.55); background: rgba(223,76,64,.08); }
+  .callcard .ic { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; flex: none;
+    background: rgba(192,70,42,.14); color: var(--clay-300); }
+  .callcard .ic svg { width: 19px; height: 19px; }
+  .zonehead { display: flex; align-items: center; gap: 10px; margin: var(--s5) 0 var(--s3); }
+  .zonehead .line { flex: 1; height: 1px; background: linear-gradient(90deg, var(--hairline-2), transparent); }
+  .legend { display: flex; gap: var(--s4); flex-wrap: wrap; font-size: .74rem; color: var(--fg-mute); }
+  .legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; margin-inline-end: 5px; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div id="bar"></div>
+  <main class="page wrap" id="app"></main>
+</div>
+<script type="module" src="assets/js/app/floor.js"></script>
+</body>
+</html>
